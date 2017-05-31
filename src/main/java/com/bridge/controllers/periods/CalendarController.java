@@ -12,7 +12,6 @@ import com.bridge.services.periods.CalendarService;
 import com.bridge.services.periods.PeriodTypeService;
 import java.io.Serializable;
 import java.util.List;
-import javafx.scene.control.TextField;
 import javax.ejb.EJB;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;

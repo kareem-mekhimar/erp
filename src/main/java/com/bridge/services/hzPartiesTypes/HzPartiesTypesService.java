@@ -6,10 +6,8 @@
 package com.bridge.services.hzPartiesTypes;
 
 import com.bridge.entities.hzPartiesTypes.HzPartiesTypes;
-import com.bridge.entities.po.PoHeader;
 import com.bridge.services.AbstractService;
 import java.util.List;
-import static javafx.scene.input.KeyCode.T;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;

@@ -1,0 +1,192 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="sysrole" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{systemRolesDetailsController.currentSystemRoleId}" />
+            <f:viewAction action="#{systemRolesDetailsController.loadSystemRole}" />
+            <f:event type="preRenderView"
+                     listener="#{permissionCheckerController.checkPermission('responsibilities:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Responsibility Details
+    </ui:define>
+
+    <ui:define name="main">
+
+        <h4 class="heading_a uk-margin-bottom">
+            #{systemRolesDetailsController.currentSystemRoleId == null ? 'New Responsibility' : systemRolesDetailsController.currentSystemRole.name }
+        </h4>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText class="md-input" id="name" 
+                                     required="true"
+                                     validator="#{systemRolesDetailsController.validateNameExist}" 
+                                     value="#{systemRolesDetailsController.currentSystemRole.name}"  >
+                            <p:ajax update="@this m1" />
+                        </p:inputText>
+                        <h:message for="name" id="m1" style="color:red;"  />
+
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc" 
+                                     value="#{systemRolesDetailsController.currentSystemRole.description}"  />
+                        <h:message for="desc" style="color:red;"  />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="dialogContent" oncomplete="modal.show();"
+                                           process="@this"
+                                           >
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                  
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Permissions
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="table" 
+                                         rowIndexVar="rowIndex"
+                                         var="line" 
+                                         value="#{systemRolesDetailsController.currentSystemRole.permissions}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                <p:column headerText="No." styleClass="uk-text-left uk-width-1-10">
+                                    #{rowIndex + 1}
+                                </p:column>
+
+                                <p:column headerText="Permission Name" styleClass="uk-text-center uk-width-5-10">
+                                    #{line.systemPermission.label}
+                                </p:column>
+
+                                <p:column headerText="#" styleClass="uk-text-center">
+                                    <p:commandLink value="X" process="@this" update="table"
+                                                   action="#{systemRolesDetailsController.onRemove(line)}"/>
+                                    <button type="button">Customize</button>
+                                </p:column>
+
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">Add Permission</h5>
+                </div>
+
+                <h:panelGroup layout="block" id="dialogContent">
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-1-1">
+                            <p:outputLabel value="System Domain" for="domain" class="uk-form-label" />
+                            <h:selectOneMenu id="domain" 
+                                             value="#{systemRolesDetailsController.selectedDomain}"
+                                             pt:data-md-selectize="true" 
+                                             required="true"
+                                             pt:data-placeholder="Domain">
+                                <f:selectItem noSelectionOption="true" itemLabel="Domain" itemValue="#{null}" />
+                                <f:selectItems  value="#{systemRolesDetailsController.domains}"
+                                                var="c" itemLabel="#{c}" itemValue="#{c}"  />
+                                <p:ajax  update="m3 perm" listener="#{systemRolesDetailsController.onDomainChange}"/>
+                            </h:selectOneMenu> 
+                            <h:message for="domain" id="m3" style="color:red;" />                            
+                        </div>
+                    </div>
+                    <div class="uk-grid">
+                        <h:panelGroup id="perm" layout="block" class="uk-width-medium-1-1">
+                            <p:outputLabel value="Permissions" for="permselect" class="uk-form-label" />
+                            <h:selectOneMenu id="permselect" 
+                                             value="#{systemRolesDetailsController.newSelectedPermission}"
+                                             pt:data-md-selectize="true" 
+                                             converter="#{systemPermissionConverter}"
+                                             required="true"
+                                             pt:data-placeholder="Permission">
+                                <f:selectItem noSelectionOption="true" itemLabel="Permission" itemValue="#{null}" />
+                                <f:selectItems  value="#{systemRolesDetailsController.permissionsByDomain}"
+                                                var="c" itemLabel="#{c.label}" itemValue="#{c}"  />
+                                <p:ajax  update="m3 perm"/>
+                            </h:selectOneMenu> 
+                            <h:message for="permselect" id="m4" style="color:red;" />      
+                        </h:panelGroup>
+                    </div>
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+                    <p:commandLink  class="md-btn md-btn-flat uk-modal-close" value="Cancel"
+                                    process="@this"
+                                    update="dialogContent"
+                                    action="#{systemRolesDetailsController.onCancel}"/>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent"
+                                   oncomplete="onDialogSubmit(xhr,status,args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{systemRolesDetailsController.addNewPermission}">OK</p:commandLink>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" update="@form" process="@this name" 
+                           action="#{systemRolesDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+            }
+        </script>
+    </ui:define>
+
+</ui:composition>

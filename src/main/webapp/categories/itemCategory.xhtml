@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+
+    <ui:param name="active" value="categi" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+
+            <f:viewParam name="id" value="#{mtlCategoryDetailsController.currentCategoryId}" />
+            <f:viewAction action="#{mtlCategoryDetailsController.loadCategory()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('item_categories:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Item Category Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{mtlCategoryDetailsController.category.categoryId == null ? 'New Category' : mtlCategoryDetailsController.category.categoryName }
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-1-4">
+                        <p:outputLabel for="code" value="Code" />
+                        <p:inputText class="md-input" id="code" value="#{mtlCategoryDetailsController.category.categoryCode}" 
+                                     required="true" >
+                            <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="name" style="color:red;"  />
+                    </div>
+
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText class="md-input" id="name" validator="#{mtlCategoryDetailsController.validateNameExist}" 
+                                     value="#{mtlCategoryDetailsController.category.categoryName}"  required="true">
+                            <f:validateRequired/>
+
+                        </p:inputText>
+                        <h:message for="name" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-1-4">
+                        <div class="uk-margin-small-top">
+                            <h:selectBooleanCheckbox  id="enabledFlagId" styleClass="data-md-icheck"
+                                                      value="#{mtlCategoryDetailsController.category.enabledFlagId}"/>
+                            <h:outputLabel for="enabledFlagId" value=" Enabled"/>          
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-1-4">
+                        <div class="uk-margin-small-top">
+                            <p:outputLabel for="pid" value="Parent Category" />
+                            <h:selectOneMenu id="pid" value="#{mtlCategoryDetailsController.category.parentCategoryId}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                             disabled="#{mtlCategoryDetailsController.parent}"
+                                             pt:data-placeholder="Parent Category">
+                                <f:selectItem  noSelectionOption="true" itemLabel="Parent Category" />
+                                <f:selectItems value="#{mtlCategoryDetailsController.parentCategories}"  var="cat"
+                                               itemLabel="#{cat.categoryName}" itemValue="#{cat.categoryId}"/>
+                            </h:selectOneMenu>
+                            <h:message for="pid" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-4">
+                        <p:outputLabel for="eda" value="End Date Active" />
+                        <h:inputText class="md-input" id="eda" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{mtlCategoryDetailsController.category.endDateActive}">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+                        </h:inputText>
+                        <h:message for="eda" style="color:red;"  />
+                    </div>
+
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc" value="#{mtlCategoryDetailsController.category.description}"  />
+                        <h:message for="desc" style="color:red;"  />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" update="@form" process="@form" action="#{mtlCategoryDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>
+

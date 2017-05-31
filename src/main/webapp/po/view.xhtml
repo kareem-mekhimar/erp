@@ -1,0 +1,134 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="createPo" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('po:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Purchase Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-5">
+                        <h:outputLabel value="Po No" for="pocode" />
+                        <h:inputText id="pocode" class="md-input" value="#{poController.currentpoCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-5">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="supplier" value="#{poController.currentSelectedClientId}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Supplier" itemValue="#{null}" />
+                                <f:selectItems var="cl" value="#{poController.clients}" 
+                                               itemLabel="#{cl.clientName}" itemValue="#{cl.clientId}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-5">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu value="#{poController.currentPoStatus}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItems var="st" value="#{poController.poStatus}" 
+                                               itemLabel="#{st}" itemValue="#{st}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-5 uk-text-center">
+                        <p:commandLink value="Filter" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{poController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="po" value="#{poController.poHeaders}" paginator="#{not empty poController.poHeaders}" rows="20"
+                                     paginatorPosition="bottom"  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     tableStyleClass="uk-table uk-table-hover" >
+                            <p:column headerText="Po No" styleClass="uk-width-1-10">
+                                #{po.poCode}
+                            </p:column>
+
+                            <p:column headerText="Supplier" styleClass="uk-width-3-10">
+                                #{po.client.clientName}
+                            </p:column>
+                            <p:column headerText="Site" styleClass="uk-width-2-10">
+                                #{po.clientSite.siteName}
+                            </p:column>
+
+                            <p:column headerText="Amount" styleClass="uk-width-2-10">
+                                <h:outputText value="#{po.totalAmount}">
+                                    <f:convertNumber pattern="###,###.##" currencySymbol="#{po.totalAmount}"  />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Approved" styleClass="uk-width-1-10" rendered="false">
+                                <ui:fragment rendered="#{po.poStatus == 'REJECTED' or po.poStatus == 'APPROVED'}">
+                                    <span class="uk-badge #{po.poStatus eq 'REJECTED' ? 'uk-badge-danger' : 'uk-badge-success'}">
+                                        #{po.poStatus eq 'REJECTED' ? 'Rejected' : 'Approved' }
+                                    </span>
+                                </ui:fragment>
+                            </p:column>
+
+                            <p:column headerText="Status" styleClass="uk-width-1-10">
+                                <span class="uk-badge  #{po.poStatus == 'INCOMPLETE' ? 'uk-badge-primary': po.poStatus == 'APPROVED' ? 'uk-badge-success'  : po.poStatus == 'CANCELED' ?  'uk-badge-warning': po.poStatus == 'PROCESSING' ? 'md-bg-teal-500' : 'uk-badge-danger' }">
+                                    #{po.poStatus}
+                                </span>
+
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <ui:fragment rendered="#{po.poStatus != 'REJECTED'}">
+                                    <h:link outcome="details?id=#{po.poHeaderId}"
+                                            rendered="#{currentUser.hasPermission('po:create')}">
+                                        <i class="material-icons md-24">#{po.poStatus == 'INCOMPLETE' ? 'mode_edit' : 'visibility'}</i>
+                                    </h:link>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{po.poStatus != 'PROCESSING'}">
+                                    <p:commandLink action="#{poController.cancelPo(po)}" update="table">
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{ po.poStatus == 'CANCELED'}">
+                                    <p:commandLink action="#{poController.reactivatePo(po)}" update="table">
+                                        <i class="material-icons md-24">check_circle</i>
+                                    </p:commandLink>
+                                </ui:fragment>
+
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="details" rendered="#{currentUser.hasPermission('po:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

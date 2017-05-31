@@ -1,0 +1,252 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="physical" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{physicalStructureDetailsController.currentPhysicalStructureId}" />
+            <f:viewAction action="#{physicalStructureDetailsController.loadStructure()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('physical_location:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Physical Structure Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{physicalStructureDetailsController.currentPhysicalStructureId == null ? 'New Structure' : physicalStructureDetailsController.currentPhysicalStructure.physicalStrName }
+        </h4>
+        <div class="md-card">
+            <h:panelGroup id="pageHeadead"  layout="block" class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-1-3">
+                        <p:outputLabel for="name" value="Structure Name" />
+                        <p:inputText class="md-input" id="name" value="#{physicalStructureDetailsController.currentPhysicalStructure.physicalStrName}" 
+                                     readonly="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}" required="true">
+                        </p:inputText>
+                        <h:message for="name" style="color:red;"  />
+
+                    </div>
+                    <div class="uk-width-medium-1-3">
+
+                    </div>
+                    <div class="uk-width-medium-1-3">
+                        <h:selectOneMenu id="phystat" value="#{physicalStructureDetailsController.currentPhysicalStructure.status}" 
+                                         disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}"
+                                         pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true"
+                                         pt:data-placeholder="Structure Status" readonly="false">
+                            <f:selectItems value="#{physicalStructureDetailsController.status}" 
+                                           var="st" itemValue="#{st}" itemLabel="#{st}" />
+
+                        </h:selectOneMenu>
+                        <h:message  for="phystat" style="color:red;" />
+
+                    </div>
+
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-3">
+                        <div class="uk-margin-small-top">
+
+                            <p:autoComplete id="business" value="#{physicalStructureDetailsController.currentPhysicalStructure.businessGroupId}"
+                                            disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}"
+                                            completeMethod="#{physicalStructureDetailsController.completeBusinessGroup}"  
+                                            emptyMessage="No Records.." converter="#{organizationUnitConverter}"
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="Business Group" 
+                                            forceSelection="true" required="true">
+                                <p:ajax event="itemSelect" process="@this"/>
+                            </p:autoComplete>
+                            <h:message id="m1" for="business" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-3">
+                        <div class="uk-margin-small-top">
+
+                            <p:autoComplete id="legal" value="#{physicalStructureDetailsController.currentPhysicalStructure.legalEntityId}" 
+                                            disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}"
+                                            completeMethod="#{physicalStructureDetailsController.completeLegalEntity}"  
+                                            emptyMessage="No Records.." converter="#{organizationUnitConverter}"
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="Legal Entities" 
+                                            forceSelection="true" required="true">
+                                <p:ajax event="itemSelect" process="@this"/>
+                            </p:autoComplete>
+                            <h:message id="m2" for="legal" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-3">
+                        <div class="uk-margin-small-top">
+
+
+                            <p:autoComplete id="operunit" value="#{physicalStructureDetailsController.currentPhysicalStructure.operatingUnitId}" 
+                                            disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}"
+                                            completeMethod="#{physicalStructureDetailsController.completeOperatingUnit}"  
+                                            emptyMessage="No Records.." converter="#{organizationUnitConverter}"
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="Operating Unit" 
+                                            forceSelection="true" required="true">
+
+                            </p:autoComplete>
+                            <h:message id="m3" for="operunit" style="color:red;"  />
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="dialogContent" oncomplete="modal.show();" process="@this"
+                                           action="#{physicalStructureDetailsController.loadModal(null)}"
+                                           disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                    
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Levels
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+
+                            <p:dataTable id="levelTable" rowIndexVar="rowIndex" var="line" 
+                                         value="#{physicalStructureDetailsController.currentPhysicalStructure.physicalLevels}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="Order" styleClass="uk-text-center">
+                                    <h:outputText id="levelOrder" value="#{line.levelOrder}" />
+                                </p:column>
+                                <p:column headerText="Level Name" styleClass="uk-text-left">
+                                    <h:outputText id="levelName" value="#{line.levelName}" />
+                                </p:column>
+                                <p:column headerText="Dependent" styleClass="uk-text-center">
+
+                                    <i class="material-icons">#{line.dependentTypeId==true?"done":"close"}</i>
+                                </p:column>
+                                <p:column headerText="Depend On Level" styleClass="uk-text-center">
+                                    <h:outputText value="#{line.dependOnLevelOrder}"/>
+                                </p:column>
+                                <p:column headerText="#" styleClass="uk-text-center">
+                                    <p:commandLink action="#{physicalStructureDetailsController.loadModal(line)}"
+                                                   update="dialogContent" process="@this" oncomplete="modal.show();"  
+                                                   disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='LOCKED'}">
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+                                    <p:commandLink process="@this" action="#{physicalStructureDetailsController.redirectToLevelDetails(rowIndex)}" 
+                                                   disabled="#{physicalStructureDetailsController.currentPhysicalStructure.status=='OPENED'}">
+                                        <i class="material-icons md-24">add_circle</i>
+                                    </p:commandLink>
+                                </p:column>
+                            </p:dataTable>
+
+                            <div class="uk-modal" id="dialog">
+
+                                <div class="uk-modal-dialog">
+                                    <div class="uk-modal-header">
+                                        <h5 class="uk-modal-title">Level</h5>
+                                    </div>
+                                    <h:panelGroup layout="block" id="dialogContent">
+
+
+
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-4-6">
+                                                <p:outputLabel for="levelName" value="Level Name" />
+                                                <p:inputText class="md-input" id="levelName" required="true" value="#{physicalStructureDetailsController.currentPhysicalLevel.levelName}" >
+
+                                                </p:inputText>
+                                                <h:message for="levelName" style="color:red;"  />
+
+                                            </div>
+
+
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-4-6">
+                                                <div class="uk-margin-small-top">
+
+                                                    <h:selectOneMenu id="dependentOnLevel"  value="#{physicalStructureDetailsController.currentPhysicalLevel.dependOnLevelOrder}"
+                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                     pt:data-placeholder="Dependent Level"  >
+                                                        <f:selectItem noSelectionOption="true" itemLabel="Dependent Level"/>
+                                                        <f:selectItems value="#{physicalStructureDetailsController.physicalLevels}" 
+                                                                       var="lev" itemValue="#{lev.levelOrder}" itemLabel="#{lev.levelName}" />
+
+                                                    </h:selectOneMenu>
+                                                    <h:message  for="dependentOnLevel" style="color:red;" />
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </h:panelGroup>
+                                    <div class="uk-modal-footer uk-text-right">
+                                        <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                                        <p:commandLink update="dialogContent levelTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                                       class="md-btn md-btn-flat md-btn-flat-primary"
+                                                       action="#{physicalStructureDetailsController.addLine()}">OK</p:commandLink>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <h:messages id="mm"/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit" update="pageHeadead levelTable" 
+                           process="@this pageHeadead levelTable" action="#{physicalStructureDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>
+
+

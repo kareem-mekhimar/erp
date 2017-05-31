@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="modules" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="operating" value="#{assetsController.currentOperatingUnitId}" />
+            <f:viewAction action="#{assetsController.loadModuleConfig()}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Assets
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{assetsController.currentModuleConfug.operatingUnit.orgUnitName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        Assets
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card uk-margin-medium-bottom">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="lines" class="md-card-content">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-1">
+                            <ul id="user_edit_tabs" class="uk-tab" 
+                                data-uk-tab="{connect:'#tab',animation: 'slide-horizontal'}">
+                                <li id="l1" class="uk-active"><a class="tab-btn" id="p1" href="#">Accounting</a></li>
+                            </ul>
+                            <ul id="tab" class="uk-switcher uk-margin-small-top">
+                                <li>
+                                    <h:panelGroup styleClass="tabContent" id="t1">
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="procdsOfSalGainAcc" value="Procds Of Sale - Gain" class="uk-form-label" />
+                                                <p:autoComplete id="procdsOfSalGainAcc" value="#{assetsController.currentModuleConfug.procdsOfSalGainAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="procdsOfSalGainAcc" style="color:red;"  />                                               
+                                            </div>     
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="procdsOfSalLossAcc" value="Procds Of Sale - Loss" class="uk-form-label" />
+                                                <p:autoComplete id="procdsOfSalLossAcc" value="#{assetsController.currentModuleConfug.procdsOfSalLossAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="procdsOfSalLossAcc" style="color:red;"  />                                               
+                                            </div>   
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="procdsOfSalClearingAcc" value="Procds Of Sale - Clearing" class="uk-form-label" />
+                                                <p:autoComplete id="procdsOfSalClearingAcc" value="#{assetsController.currentModuleConfug.procdsOfSalClearingAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="procdsOfSalClearingAcc" style="color:red;"  />                                               
+                                            </div> 
+                                        </div> 
+                                        <div class="uk-grid uk-margin-top">    
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="capitalGainsAcc" value="Capital Gains Acc" class="uk-form-label" />
+                                                <p:autoComplete id="capitalGainsAcc" value="#{assetsController.currentModuleConfug.capitalGainsAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="capitalGainsAcc" style="color:red;"  />                                               
+                                            </div>   
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="capitalLossesAcc" value="Capital Losses Acc" class="uk-form-label" />
+                                                <p:autoComplete id="capitalLossesAcc" value="#{assetsController.currentModuleConfug.capitalLossesAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="capitalLossesAcc" style="color:red;"  />                                               
+                                            </div> 
+                                        </div>
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="scrapLossAcc" value="Scrap Loss Acc" class="uk-form-label" />
+                                                <p:autoComplete id="scrapLossAcc" value="#{assetsController.currentModuleConfug.scrapLossAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="scrapLossAcc" style="color:red;"  />                                               
+                                            </div>     
+                                        </div>   
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="costOfRemovalLossAcc" value="Cost Of Removal Loss Acc" class="uk-form-label" />
+                                                <p:autoComplete id="costOfRemovalLossAcc" value="#{assetsController.currentModuleConfug.costOfRemovalLossAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="costOfRemovalLossAcc" style="color:red;"  />                                               
+                                            </div>     
+                                        </div>  
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="assetExpensesAcc" value="Asset Expenses Acc" class="uk-form-label" />
+                                                <p:autoComplete id="assetExpensesAcc" value="#{assetsController.currentModuleConfug.assetExpensesAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="assetExpensesAcc" style="color:red;"  />                                               
+                                            </div>     
+                                        </div>  
+
+                                    </h:panelGroup>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" process="@form"
+                           action="#{assetsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+
+</ui:composition>

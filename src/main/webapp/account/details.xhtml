@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:param name="active" value="account" />
+   
+    <ui:define name="title">
+        Account Details
+    </ui:define>
+    
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{accountsDetailsControllers.currentEmpId}" />
+            <f:viewAction action="#{accountsDetailsControllers.loadEmployee}" />
+             <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('accounts:create')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="main">
+        <h2 class="heading_a uk-margin-bottom">
+            #{accountsDetailsControllers.currentEmpId == null ? 'New Account' : accountsDetailsControllers.currentAccount.userName}
+        </h2>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <h:panelGroup id="group" class="uk-grid">
+                            <div class="uk-width-medium-1-1 uk-margin-small-top" >
+                                <p:outputLabel for="emp" value="Employee" />
+                                <p:autoComplete id="emp" readonly="#{not empty accountsDetailsControllers.currentEmpId}" 
+                                                value="#{accountsDetailsControllers.currentAccount.employee}"
+                                                var="emp" converter="#{peopleConverter}"
+                                                emptyMessage="No Records"
+                                                completeMethod="#{accountsDetailsControllers.completeEmployeeByName}"
+                                                inputStyleClass="md-input" forceSelection="true" required="true"
+                                                itemLabel="#{emp.fullName}" placeholder="Search Employee"
+                                                itemValue="#{emp}">
+                                </p:autoComplete>
+                            </div>
+                            <div class="uk-width-medium-1-1 uk-margin-large-top">
+                                <p:outputLabel for="name" value="User Name" />
+                                <p:inputText id="name" required="true" 
+                                             readonly="#{not empty accountsDetailsControllers.currentAccount.userName}"
+                                             autocomplete="off" 
+                                             value="#{accountsDetailsControllers.currentAccount.userName}" 
+                                             class="md-input"
+                                             validator="#{accountsDetailsControllers.validateNotExists}">
+                                    <p:ajax update="@this m2" />
+                                </p:inputText>
+                                <h:message id="m2" for="name" style="color:red;" />
+                            </div>
+                            <div class="uk-width-medium-1-1 uk-margin-large-top" >
+                                <p:outputLabel for="pass" value="Password" />
+                                <p:password match="confirm" id="pass" required="true" autocomplete="off"
+                                            value="#{accountsDetailsControllers.currentAccount.password}" 
+                                            class="md-input" />
+                                <h:message for="pass" style="color:red;" />
+                            </div>
+                            <div class="uk-width-medium-1-1 uk-margin-large-top" >
+                                <p:outputLabel for="confirm" value="Confirm" />
+                                <p:password id="confirm" required="true" autocomplete="off"
+                                            class="md-input" />
+                                <h:message for="confirm" style="color:red;" />
+                            </div>
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  update="group" process="@form" class="md-fab md-fab-primary"
+                            action="#{accountsDetailsControllers.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

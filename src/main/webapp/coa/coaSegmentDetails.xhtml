@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="structure" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{coaSegmentDetailsController.currentSegmentId}" />
+            <f:viewParam name="t" value="#{coaSegmentDetailsController.type}" />
+            <f:viewAction action="#{coaSegmentDetailsController.loadSegment}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('coa:create')}" />
+        </f:metadata>
+    </ui:define>    
+    <ui:define name="title">
+        Segment Details
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="heading_b uk-margin-medium-bottom">#{coaSegmentDetailsController.currentSegment.segmentName}</h2>
+
+        <div class="md-card">
+            <div class="md-card-toolbar">
+                <div class="md-card-toolbar-actions">
+                    <p:commandLink action="#{coaSegmentDetailsController.addLine}" update="table"
+                                   disabled="#{coaSegmentDetailsController.currentSegment.coaStructure.coaStatus!='LOCKED'}">
+                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                    </p:commandLink>
+                </div>
+
+            </div>
+            <div class="md-card-content">
+                <p:dataTable id="table" var="line" value="#{coaSegmentDetailsController.currentSegment.coaSegmentLineList}"
+                             tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                    <p:column headerText="Segment Code" styleClass="uk-text-left uk-width-1-10">
+                        <p:inputText id="code" value="#{line.segmentDetailCode}" readonly="#{line.usedInAccounts gt 0}" style="width: 120px"
+                                     required="true" validator="#{coaSegmentDetailsController.validateSegmentCode}" >
+                            <f:validateRegex pattern="[0-9a-zA-Z]*"/>
+                            <p:ajax update="@this tip" listener="#{coaSegmentDetailsController.onZeroPaddingOnChange(line)}"  />
+                        </p:inputText>
+                        <p:tooltip id="tip" for="code" position="right">
+                            <h:message for="code" />
+                        </p:tooltip>
+                    </p:column>
+                    <p:column headerText="Segment Name" styleClass="uk-text-left uk-width-2-10">
+                        <p:inputText id="name" value="#{line.segmentDetailName}" 
+                                     validator="#{coaSegmentDetailsController.validateSegmentDetailName}" required="true"/>
+                    </p:column>
+                    <p:column headerText="Depends On" styleClass="uk-text-left uk-width-2-10">
+
+                        <p:autoComplete id="dependsOnDetailId" value="#{line.dependsOnDetailId}"  disabled="#{line.segment.dependentOnSegmentSequence == null || line.usedInAccounts gt 0}"
+                                        completeMethod="#{coaSegmentDetailsController.completeDependsOnSegments}"  
+                                        emptyMessage="No Records.."  converter="#{segmentConverter}"
+                                        var="segment" inputStyleClass="uk-width-1-1"
+                                        itemLabel="#{segment.segmentDetailName}" 
+                                        itemValue="#{segment}"
+                                        placeholder="Depends On"
+                                        forceSelection="true" >
+                        </p:autoComplete>
+
+                    </p:column>
+                    <p:column headerText="Parent Code" styleClass="uk-text-left uk-width-2-10">
+
+                        <p:autoComplete id="parentAccountId" value="#{line.parentAccountId}" disabled="#{coaSegmentDetailsController.type lt 2}"
+                                        completeMethod="#{coaSegmentDetailsController.completeParentAccounts}"  
+                                        emptyMessage="No Records.."  converter="#{segmentConverter}"
+                                        var="segment" inputStyleClass="uk-width-1-1"  style="width: 120px"
+                                        itemLabel="#{segment.segmentDetailCode}" 
+                                        itemValue="#{segment}"
+                                        placeholder="Parent Code"
+                                        forceSelection="true" >
+                        </p:autoComplete>
+
+                    </p:column>
+                    <p:column headerText="Enabled" styleClass="uk-text-center uk-width-1-10">
+                        <p:selectBooleanCheckbox value="#{line.enabledFlag}" />
+                    </p:column>
+                    <p:column headerText="Parent" styleClass="uk-text-center uk-width-1-10">
+                        <p:selectBooleanCheckbox value="#{line.parentAccountFlag}" disabled="#{coaSegmentDetailsController.type lt 2}">
+                            <p:ajax process="@this table" update="table" listener="#{coaSegmentDetailsController.manageParent(line)}"/>
+                        </p:selectBooleanCheckbox>
+                    </p:column>
+
+                    <p:column headerText="Allow Post" styleClass="uk-text-center uk-width-1-10">
+                        <p:selectBooleanCheckbox value="#{line.allowPostFlag}" disabled="#{coaSegmentDetailsController.type lt 2 || line.parentAccountFlag==true}"/>
+                    </p:column>
+
+                    <p:column headerText="Reconcile" styleClass="uk-text-center uk-width-1-10">
+                        <p:selectBooleanCheckbox value="#{line.reconcile}" disabled="#{coaSegmentDetailsController.type lt 2 || line.parentAccountFlag==true}"/>
+                    </p:column>
+
+                </p:dataTable>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" 
+                           update="@form" process="@form" action="#{coaSegmentDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

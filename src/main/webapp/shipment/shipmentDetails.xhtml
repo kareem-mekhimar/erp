@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8' ?>  
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="shipment" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{shipmentDetailsController.currentShipmentId}" />
+            <f:viewAction action="#{shipmentDetailsController.loadShipment()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('so:deliver_shipments')}" />
+
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Deliver Shipment
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+
+            Deliver Shipment No : #{shipmentDetailsController.currentShipment.headerId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+
+
+                                <div class="uk-width-medium-1-4">
+                                    <h:outputLabel value="SalesOrder No." for="sales" />
+                                    <h:inputText id="sales" class="md-input" readonly="true" 
+                                                 value="#{shipmentDetailsController.currentShipment.salesOrderId}" />
+                                </div>
+                                <div class="uk-width-medium-1-4">
+                                    <h:outputLabel value="MoveOrder No." for="move" />
+                                    <h:inputText id="move" class="md-input" readonly="true" 
+                                                 value="#{shipmentDetailsController.currentShipment.moveOrderId}" />
+                                </div>
+                                <div class="uk-width-medium-1-4">
+                                    <h:outputLabel value="Status" for="status" />
+                                    <h:inputText id="status" class="md-input" readonly="true" 
+                                                 value="#{shipmentDetailsController.currentShipment.status}" />
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{shipmentDetailsController.currentShipment.shipmentLines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                <p:column headerText="No." styleClass="uk-text-center">
+                                    <h:outputText id="no" value="#{line.lineId}"/>
+                                </p:column>       
+                                <p:column headerText="Item" styleClass="uk-text-center">
+                                    <h:outputText id="description" value="#{line.itemId.description}"/>
+                                </p:column>       
+                                <p:column headerText="Shipped Qty" styleClass="uk-text-center">
+                                    <h:outputText  id="shippedQuantity" value="#{line.shippedQuantity}" />
+                                </p:column>                                                 
+                                <p:column headerText="Refused Qty" styleClass="uk-text-center">
+                                    <h:outputText  id="refusedQuantity" value="#{line.refusedQuantity}" />
+                                </p:column>                         
+                                <p:column headerText="Delivered  Quantity" styleClass="uk-text-center">
+                                    <p:inputText id="quantity" value="#{line.deliveredQuantity}"
+                                                 validator="#{shipmentDetailsController.vaildateQuantity}"
+                                                 disabled="#{line.status != 'NEW'}" >
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="quantity" />
+                                    <p:tooltip id="quantityTip" for="quantity" position="right">
+                                        <h:message for="quantity" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Date" styleClass="uk-text-center uk-width-1-10">
+
+                                    <p:calendar id="date" pattern="dd-MM-yyyy" readonlyInput="true" value="#{line.deliveredDate}" 
+                                                validator="#{shipmentDetailsController.vaildateDate}"
+                                                disabled="#{line.status != 'NEW'}" required="true" >
+                                    </p:calendar>
+                                    <p:tooltip for="date" id="dateTip" position="left">
+                                        <h:message for="date" />
+                                    </p:tooltip>
+
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  update="@form" process="@form" class="md-fab md-fab-primary" action="#{shipmentDetailsController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+</ui:composition>
+

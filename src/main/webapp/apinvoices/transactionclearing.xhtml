@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="supptxclear" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('supplier_inv_journals:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Transaction Clearing
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="header"  class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-5">
+
+                        <p:outputLabel class="uk-form-label" for="org" value="Operating unit" /> 
+                        <p:autoComplete completeMethod="#{supplierTxClearController.completeOperatingUnit}" 
+                                        forceSelection="true" id="org"
+                                        converter="#{organizationUnitConverter}"
+                                        emptyMessage="No Records Found..!" required="true"
+                                        value="#{supplierTxClearController.currentOperatingUnit}"
+                                        inputStyleClass="md-input" placeholder="Search Operating Unit" var="s" 
+                                        itemLabel="#{s.orgUnitName}" itemValue="#{s}">
+
+                            <p:ajax event="itemSelect" update="m1 @this bank m2" resetValues="true" 
+                                    listener="#{supplierTxClearController.onOperatingChange}" />
+                        </p:autoComplete>
+                        <h:message id="m1" style="color:red" for="org" />
+
+                    </div>
+                    <div class="uk-width-medium-2-5">
+                        <p:outputLabel class="uk-form-label" for="bank" value="Bank Account" /> 
+                        <p:autoComplete completeMethod="#{supplierTxClearController.completeBankAccounts}" 
+                                        forceSelection="true" id="bank"
+                                        converter="#{bankAccountConverter}"
+                                        emptyMessage="No Records Found..!" required="true"
+                                        value="#{supplierTxClearController.currentBankAccount}"
+                                        inputStyleClass="md-input" placeholder="Search Accounts" 
+                                        var="s" 
+                                        itemLabel="#{s.bankAccountName}" itemValue="#{s}">
+
+                            <p:ajax event="itemSelect" update="m2 @this" />
+                        </p:autoComplete>
+                        <h:message for="bank" id="m2" style="color:red;" />
+                    </div>
+
+                    <div class="uk-width-medium-1-5 uk-text-center">
+                        <p:commandLink value="Search" class="md-btn md-btn-primary uk-margin-small-top" process="header" 
+                                       update="table header" action="#{supplierTxClearController.filter}"/>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="tx" value="#{supplierTxClearController.transactions}" 
+                                     selection="#{supplierTxClearController.selectedTxs}" 
+                                     rowKey="#{tx.bankAccountId}" tableStyleClass="uk-table">
+
+                            <p:ajax event="toggleSelect" update=":fabBtns" />
+                            <p:ajax event="rowSelectCheckbox" update=":fabBtns" />
+                            <p:ajax event="rowUnselectCheckbox" update=":fabBtns" />
+
+                            <p:column selectionMode="multiple" styleClass="uk-width-1-10 uk-text-center" />
+
+                            <p:column headerText="Date" styleClass="uk-width-1-10 uk-text-center">
+                                <h:outputText value="#{tx.transactionDate}">
+                                    <f:convertDateTime pattern="dd-MM-yyyy" />
+                                </h:outputText>
+                            </p:column>
+                            <p:column headerText="Invoice No" styleClass="uk-width-2-10 uk-text-center">
+                                #{tx.invoiceId}
+                            </p:column>
+                            <p:column headerText="Check" styleClass="uk-width-4-10 uk-text-center">
+                                #{tx.checkNumber}
+                            </p:column>
+                            <p:column headerText="Amount" styleClass="uk-width-2-10 uk-text-center">
+                                #{tx.transactionAmount}
+                            </p:column>
+
+                            <p:column headerText="Currency" styleClass="uk-width-1-10 uk-text-center">
+                                #{tx.currency.currencyCode}
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup id="fabBtns" class="md-fab-wrapper" layout="block">
+            <p:commandLink class="md-fab md-fab-success" title="Clear" 
+                           update="table"
+                           process="@this"
+                           disabled="#{empty supplierTxClearController.selectedTxs}"
+                           action="#{supplierTxClearController.clearTransactions}">
+                <i class="material-icons">mode_edit</i>
+            </p:commandLink>
+        </h:panelGroup>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

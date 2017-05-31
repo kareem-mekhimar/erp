@@ -1,0 +1,153 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:param name="active" value="returnorder" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('returnorder:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Return Order
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h2 class="heading_b uk-margin-medium-bottom">Create Return Order</h2>
+
+                <h:panelGroup layout="block" class="uk-grid" pt:data-uk-grid-margin="true" id="input" >
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Dest Main Inventory" class="uk-form-label" for="destMain"/>
+
+                                    <p:autoComplete var="destMain" id="destMain" forceSelection="true"
+                                                    completeMethod="#{returnOrderController.completeMainInvByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Dest Main Inventory"
+                                                    value="#{returnOrderController.mainInventory}"
+                                                    converter="#{mainInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{destMain.organizationName}" 
+                                                    itemValue="#{destMain}" required="true" >
+                                        <p:ajax event="itemSelect" process="@this"/>
+                                    </p:autoComplete>
+                                    <h:message id="m1" for="destMain" style="color:red" />
+                                </div>
+
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Dest Secondary Inventory" class="uk-form-label"
+                                                   for="destSub"/>
+
+                                    <p:autoComplete var="destSub" id="destSub" forceSelection="true"
+                                                    completeMethod="#{returnOrderController.completeSecondaryByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Dest Sub Inventory"
+                                                    value="#{returnOrderController.secondaryInventory}" 
+                                                    converter="#{subInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{destSub.secondaryInventoryName}" 
+                                                    itemValue="#{destSub}" required="true" >
+                                    </p:autoComplete>
+
+                                    <h:message id="m2" for="destSub" style="color:red" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="linesTable" var="line" value="#{returnOrderController.orderLines}" 
+                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                            <p:column headerText="No." >
+                                #{line.lineNumber}
+                            </p:column>
+
+                            <p:column headerText="Product" styleClass="uk-text-center">
+                                <h:outputText value="#{line.inventoryItem.description}" />
+                            </p:column>
+                            <p:column headerText="UOM" styleClass="uk-text-center">
+                                <h:outputText id="uom" value="#{line.orderQuantityUom}"/>
+                            </p:column> 
+                            <p:column headerText="Primary Qty" styleClass="uk-text-center">
+                                <h:outputText id="primaryQty" value="#{line.orderedQuantity}"/>
+                            </p:column> 
+                            <p:column headerText="Delivered Qty" styleClass="uk-text-center">
+                                <h:outputText id="deliveredQuantity" value="#{line.deliveredQuantity}"/>
+                            </p:column> 
+                            <p:column headerText="Returned Qty" styleClass="uk-text-center">
+                                <h:outputText id="returnedQuantity" value="#{line.returnedQuantity}"/>
+                            </p:column> 
+                            <p:column headerText="Returned Qty" styleClass="uk-text-center uk-width-1-6">
+                                <h:panelGroup id="quantityGroup">
+                                    <p:inputText value="#{line.qtyToPick}" id="q" 
+                                                 validator="#{returnOrderController.validateQuantity}">
+
+                                    </p:inputText>
+                                    <p:keyFilter  for="q" mask="num" /> 
+                                    <p:tooltip for="q" id="tip1" position="left">
+                                        <h:message for="q" />
+                                    </p:tooltip>
+                                </h:panelGroup>
+                            </p:column>
+
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" 
+                           update="linesTable no input" process="@form" action="#{returnOrderController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="modal">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h3 class="uk-modal-title">Confirm</h3>
+                </div>
+                <h:panelGroup id="no">
+                    <h1 class="uk-text-success" style="font-size:18px;">  Move Order with No ( #{returnOrderController.newMoveOrderId} ) Created Successfully..!  </h1>
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+                    <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{returnOrderController.endConversation()}"
+                                   value="Ok" />
+                </div>
+            </div>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#modal', {keyboard: false, bgclose: false, center: true});
+        </script>
+    </ui:define>
+
+
+</ui:composition>

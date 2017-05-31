@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="batch" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('batch:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Batches
+    </ui:define> 
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-6">
+                        <p:outputLabel for="no" value="Batch No" />
+                        <p:inputText class="md-input" id="no" value="#{batchController.currentNo}" />   
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="name" value="Batch Name" />
+                        <p:inputText class="md-input" id="name" value="#{batchController.currentBatchName}" />   
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:selectOneMenu id="stat" value="#{batchController.currentStatus}" 
+                                         pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                            <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                            <f:selectItems itemLabel="#{s}" itemValue="#{s}" var="s" value="#{batchController.states}" />
+                        </h:selectOneMenu>                     
+                    </div>
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{batchController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="batch" value="#{batchController.batches}" 
+                                     paginator="true" paginatorAlwaysVisible="false" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="No." styleClass="uk-width-1-10 uk-text-left">
+                                #{batch.batchId}
+                            </p:column>
+                            <p:column headerText="Name" priority="4" styleClass="uk-width-3-10 uk-text-left">
+                                #{batch.batchName}
+                            </p:column>
+                            <p:column headerText="Operating Unit" priority="4" styleClass="uk-width-3-10 uk-text-left">
+                                #{batch.businessGroup.orgUnitName}
+                            </p:column>
+                            <p:column headerText="Status" priority="4" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{batch.batchStatus == 'PENDING' ? 'uk-badge-primary': batch.batchStatus == 'WIP' ? 'uk-badge-warning' : batch.batchStatus == 'CLOSED' ? 'uk-badge-danger' : 'uk-badge-success' }">
+                                    #{batch.batchStatus}
+                                </span>
+                            </p:column>  
+
+                            <p:column headerText="#" styleClass="uk-width-2-10 uk-text-center">
+                                <h:link outcome="batchDetails?id=#{batch.batchId}" 
+                                        rendered="#{currentUser.hasPermission('batch:create')}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:link class="md-fab md-fab-success" outcome="createbatch" 
+                     rendered="#{currentUser.hasPermission('batch:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </p:link>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

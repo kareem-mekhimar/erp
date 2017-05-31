@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="releaseasset" />
+
+    <ui:define name="title">
+        Release Asset
+    </ui:define>
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom">Release Asset</h3>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+
+                        <p:outputLabel value="Asset" class="uk-form-label" for="asset"/>
+                        <p:autoComplete id="asset" value="#{releaseAssetController.currentAsset}" 
+                                        completeMethod="#{releaseAssetController.completeAsset}"  
+                                        emptyMessage="No Records.."  required="true"
+                                        converter="#{assetConverter}"
+                                        var="fa" itemLabel="#{fa.assetName}" itemValue="#{fa}"
+                                        placeholder="Search Asset" inputStyleClass="md-input"
+                                        forceSelection="true" > 
+                            <p:ajax event="itemSelect" update="oldLocation oldCategory"/>
+                        </p:autoComplete>
+                        <h:message for="asset" id="assetm"  style="color:red" /> 
+
+                    </div>
+
+                </div>
+                <div class="uk-grid  uk-margin-medium-top" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="oldLocation" value="Location"/>
+                        <h:inputText class="md-input label-fixed" id="oldLocation" readonly="true"
+                                     value="#{releaseAssetController.currentAsset.assetLocation.locationDescription}">
+                        </h:inputText>
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="oldCategory" value="Category"/>
+                        <h:inputText class="md-input label-fixed" id="oldCategory" readonly="true"
+                                     value="#{releaseAssetController.currentAsset.assetCategory.categoryName}">
+                        </h:inputText>
+                    </div>
+                </div>
+
+                <div class="uk-grid  uk-margin-medium-top" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel value="Currency" for="currency" class="uk-form-label" />
+                        <h:selectOneMenu id="currency" 
+                                         value="#{releaseAssetController.type}"
+                                         pt:data-md-selectize="true" 
+                                         required="true"
+                                         pt:data-placeholder="Release Type">
+                            <f:selectItem noSelectionOption="true" itemLabel="Release Type"/>
+                            <f:selectItems  value="#{releaseAssetController.types}"
+                                            var="t" itemLabel="#{t}" itemValue="#{t}"  />
+                            <p:ajax  update="m5 costs"/>
+                        </h:selectOneMenu> 
+                        <h:message for="currency" id="m5" style="color:red;" />  
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="releaseDate" value="Release Date" />
+                        <h:inputText class="md-input" id="releaseDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true"
+                                     validator="#{releaseAssetController.validateDate}"
+                                     value="#{releaseAssetController.currentAsset.releaseDate}">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+                        </h:inputText>
+                        <h:message for="releaseDate" style="color:red;"  />
+                    </div>
+
+                </div>
+                <h:panelGroup id="costs" layout="block">
+                    <div class="uk-grid uk-margin-medium-top" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-2-6">
+                            <p:outputLabel for="cost" value="Release Cost"/>
+                            <h:inputText class="md-input" id="cost"  value="#{releaseAssetController.releaseCost}">
+                                <f:validateLongRange minimum="1" />
+                            </h:inputText>
+                            <p:keyFilter for="cost" mask="num" />
+                            <h:message for="cost" style="color:red;"  />
+                        </div>
+
+                        <div class="uk-width-medium-2-6">
+                            <p:outputLabel for="price" value="Asset Price" />
+                            <h:inputText class="md-input" id="price" required="#{releaseAssetController.type == 'SALE'}"  
+                                         value="#{releaseAssetController.assetPrice}">
+                                <f:validateLongRange minimum="1" />
+                            </h:inputText>
+                            <p:keyFilter for="price" mask="num" />
+                            <h:message for="price" style="color:red;"  />
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit"
+                           process="@form" update="@form" action="#{releaseAssetController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>
+
+

@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="appFormula" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('formula:approve')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Approve Formula
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+                            <h:outputLabel value="Formula No." for="fmcc" />
+                            <h:inputText id="fmcc" class="md-input" value="#{formulaApproveController.formulaNo}"  />
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-2-6">
+                        <div class="uk-margin-small-top">
+                            <h:outputLabel value="Formula Name" for="fmn" />
+                            <h:inputText id="fmn" class="md-input" value="#{formulaApproveController.formulaName}"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{formulaApproveController.formulaStatus}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItems var="s" value="#{formulaController.statuses}" 
+                                               itemLabel="#{s}" itemValue="#{s}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table appPanel" action="#{formulaApproveController.filter()}">
+                            <f:setPropertyActionListener target="#{formulaApproveController.selectedFormulas}" 
+                                                         value="#{null}" />
+                        </p:commandLink>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="line" value="#{formulaApproveController.formulaList}" 
+                                     selection="#{formulaApproveController.selectedFormulas}"
+                                     rowKey="#{line.formulaId}" tableStyleClass="uk-table">
+
+                            <p:column selectionMode="multiple" styleClass="uk-width-1-10 uk-text-center" />
+
+                            <p:ajax event="rowSelectCheckbox" update=":appPanel" />
+                            <p:ajax event="rowUnselectCheckbox" update=":appPanel" />
+                            <p:ajax event="toggleSelect" update=":appPanel" />
+
+                            <p:column headerText="No." styleClass="uk-width-1-10 uk-text-left">
+                                #{line.formulaId}
+                            </p:column>
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{line.formulaName}
+                            </p:column>
+                            <p:column headerText="Description" styleClass="uk-width-3-10 uk-text-left">
+                                #{line.formulaDescription}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{line.status == 'APPROVED' ? 'uk-badge-success':'uk-badge-primary' }">
+                                    #{line.status}
+                                </span>
+                            </p:column>  
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="formulaDetails?id=#{line.formulaId}&amp;ro=true">
+                                    <i class="material-icons md-24">visibility</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup id="appPanel" class="md-fab-wrapper" layout="block">
+            <p:commandLink class="md-fab md-fab-success" rendered="#{formulaApproveController.formulaStatus == 'NEW' ? true : false}" disabled="#{empty formulaApproveController.selectedFormulas}" 
+                           onclick="UIkit.modal.confirm('Fromula(s) be Approved Status ?', function () {
+                                       approve();});return false;">
+                <i class="material-icons">done</i></p:commandLink>
+
+            <p:commandLink class="md-fab md-fab-primary" rendered="#{formulaApproveController.formulaStatus == 'APPROVED' ? true : false}" disabled="#{empty formulaApproveController.selectedFormulas}" 
+                           onclick="UIkit.modal.confirm('Fromula(s) be New Status  ?', function () {
+                                       unApprove();});return false;">
+                <i class="material-icons">close</i></p:commandLink>
+        </h:panelGroup>
+
+        <p:remoteCommand update="table appPanel" action="#{formulaApproveController.approveSelectedFormulas}" name="approve"/>
+        <p:remoteCommand update="table appPanel" action="#{formulaApproveController.unApproveSelectedFormulas}" name="unApprove"/>
+    </ui:define>
+
+</ui:composition>

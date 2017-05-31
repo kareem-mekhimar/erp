@@ -1,0 +1,811 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+
+        <ui:insert name="metadata" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title><ui:insert name="title" /> </title>
+
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700|Roboto:400,300,500,700,400italic&amp;subset=latin,latin" rel="stylesheet" /> 
+
+        <h:outputStylesheet library="css" name="uikit/css/uikit.almost-flat.min.css" />
+        <h:outputStylesheet library="css" name="icons/flags/flags.min.css" />
+        <h:outputStylesheet library="css" name="main.min.css" />
+
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet" />
+        <h:outputStylesheet library="css" name="styles.css" />
+        <h:outputScript library="js" name="pace.min.js" />
+
+    </h:head>
+    <h:body class=" sidebar_main_open sidebar_main_swipe">
+        <!-- main header -->
+        <header id="header_main">
+            <div class="header_main_content" >
+                <nav class="uk-navbar">
+
+                    <!-- main sidebar switch -->
+                    <a href="#" id="sidebar_main_toggle" class="sSwitch sSwitch_left">
+                        <span class="sSwitchIcon"></span>
+                    </a>
+
+                    <!-- secondary sidebar switch -->
+                    <a href="#" id="sidebar_secondary_toggle" class="sSwitch sSwitch_right sidebar_secondary_check">
+                        <span class="sSwitchIcon"></span>
+                    </a>
+
+                    <div id="menu_top_dropdown" class="uk-float-left uk-hidden-small">
+                        <div class="uk-button-dropdown" data-uk-dropdown="{mode:'click'}">
+                            <a href="#" class="top_menu_toggle"><i class="material-icons md-24">&#xE8F0;</i></a>
+                            <div class="uk-dropdown uk-dropdown-width-3">
+                                <div class="uk-grid uk-dropdown-grid" data-uk-grid-margin="true">
+                                    <div class="uk-width-2-3">
+                                        <div class="uk-grid uk-grid-width-medium-1-3 uk-margin-top uk-margin-bottom uk-text-center" data-uk-grid-margin="true">
+                                            <a href="page_mailbox.html">
+                                                <i class="material-icons md-36">&#xE158;</i>
+                                                <span class="uk-text-muted uk-display-block">Mailbox</span>
+                                            </a>
+                                            <a href="page_invoices.html">
+                                                <i class="material-icons md-36">&#xE53E;</i>
+                                                <span class="uk-text-muted uk-display-block">Invoices</span>
+                                            </a>
+                                            <a href="page_chat.html">
+                                                <i class="material-icons md-36 md-color-red-600">&#xE0B9;</i>
+                                                <span class="uk-text-muted uk-display-block">Chat</span>
+                                            </a>
+                                            <a href="page_scrum_board.html">
+                                                <i class="material-icons md-36">&#xE85C;</i>
+                                                <span class="uk-text-muted uk-display-block">Scrum Board</span>
+                                            </a>
+                                            <a href="page_snippets.html">
+                                                <i class="material-icons md-36">&#xE86F;</i>
+                                                <span class="uk-text-muted uk-display-block">Snippets</span>
+                                            </a>
+                                            <a href="page_user_profile.html">
+                                                <i class="material-icons md-36">&#xE87C;</i>
+                                                <span class="uk-text-muted uk-display-block">User profile</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="uk-width-1-3">
+                                        <ul class="uk-nav uk-nav-dropdown uk-panel">
+                                            <li class="uk-nav-header">Components</li>
+                                            <li><a href="components_accordion.html">Accordions</a></li>
+                                            <li><a href="components_buttons.html">Buttons</a></li>
+                                            <li><a href="components_notifications.html">Notifications</a></li>
+                                            <li><a href="components_sortable.html">Sortable</a></li>
+                                            <li><a href="components_tabs.html">Tabs</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="uk-navbar-flip">
+                        <ul class="uk-navbar-nav user_actions">
+                            <li><a href="#" id="full_screen_toggle" class="user_action_icon uk-visible-large"><i class="material-icons md-24 md-light">&#xE5D0;</i></a></li>
+                            <li><a href="#" id="main_search_btn" class="user_action_icon"><i class="material-icons md-24 md-light">&#xE8B6;</i></a></li>
+                            <li data-uk-dropdown="{mode:'click',pos:'bottom-right'}">
+                                <a href="#" id="dropdownAnchor" class="user_action_icon">
+                                    <i class="material-icons md-24 md-light">&#xE7F4;</i>
+                                    <span class="uk-badge" id="notificationNo"></span>
+                                </a>
+                                <div class="uk-dropdown uk-dropdown-xlarge">
+                                    <div id="notificationDropDown" class="md-card-content">
+
+                                    </div>
+                                </div>
+                            </li>
+                            <li data-uk-dropdown="{mode:'click',pos:'bottom-right'}">
+                                <a href="#" class="user_action_image">
+                                    <ui:fragment rendered="#{empty currentUser.imageFileName}">
+                                        <h:graphicImage class="md-user-image md-list-addon-avatar" library="imgs" name="avatars/user.png" />
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{not empty currentUser.imageFileName}">
+                                        <h:graphicImage class="md-user-image md-list-addon-avatar" value="/images/#{currentUser.imageFileName}" />
+                                    </ui:fragment>
+                                </a>
+                                <div class="uk-dropdown uk-dropdown-small">
+                                    <h:form>
+                                        <ul class="uk-nav js-uk-prevent">
+                                            <li><a href="page_user_profile.html">My profile</a></li>
+                                            <li><a href="page_settings.html">Settings</a></li>
+                                            <li>
+                                                <p:commandLink action="#{currentUser.logout}" 
+                                                               value="Logout" 
+                                                               process="@this" /></li>
+                                        </ul>
+                                    </h:form>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <div class="header_main_search_form">
+                <i class="md-icon header_main_search_close material-icons">&#xE5CD;</i>
+                <form class="uk-form">
+                    <input type="text" class="header_main_search_input" />
+                    <button class="header_main_search_btn uk-button-link"><i class="md-icon material-icons">&#xE8B6;</i></button>
+                </form>
+            </div>
+        </header><!-- main header end -->
+        <!-- main sidebar -->
+        <aside id="sidebar_main" style="z-index: 1185;">
+
+            <div class="sidebar_main_header">
+                <div class="sidebar_logo">
+                    <a href="index.html" class="sSidebar_hide"><img src="#{resource['imgs:bridge-logo3.png']}" alt="" height="41" width="97"/></a>
+                    <a href="index.html" class="sSidebar_show"><img src="#{resource['imgs:logo_main_small.png']}" alt="" height="32" width="32"/></a>
+                </div>
+                <div class="sidebar_actions">
+                    <select id="lang_switcher" name="lang_switcher">
+                        <option value="gb" selected="true">English</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="menu_section">
+                <ul>
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="HR.png" style="width: 25px;height: 25px;"  /> </span>
+                            <span class="menu_title">Human Resource</span>
+                        </a>
+
+                        <ul>
+                            <li class="#{active == 'people' ? 'act_item' : ''}">
+                                <h:link
+                                    id="people"
+                                    rendered="#{currentUser.hasPermission('emp:read')}" 
+                                    outcome="/hr/peopleView" ><i class="material-icons">group_add</i>   Employees</h:link>
+                            </li>
+
+                            <li class="#{active == 'jo' ? 'act_item' : ''}">
+                                <h:link
+                                    id="job"
+                                    rendered="#{currentUser.hasPermission('job:read')}" 
+                                    outcome="/jobs/jobsView" ><i class="material-icons">work</i>   Jobs</h:link>
+                            </li>
+                            <li class="#{active == 'position' ? 'act_item' : ''}">
+
+                                <h:link
+                                    id="pos"
+                                    rendered="#{currentUser.hasPermission('positions:read')}" 
+                                    outcome="/hr/positionView" ><i class="material-icons">assistant</i>   Positions</h:link>
+                            </li>
+                            <li class="#{active == 'dep' ? 'act_item' : ''}">
+                                <h:link
+                                    id="dept"
+                                    rendered="#{currentUser.hasPermission('dept:read')}"
+                                    outcome="/departments/departmentsView" ><i class="material-icons">reorder</i>   Departments</h:link>
+                            </li>
+
+                        </ul>
+
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="Security.png" style="width: 25px;height: 25px;"   /> </span>
+                            <span class="menu_title">Security Setup</span>
+                        </a>
+                        <ul>
+
+                            <li class="#{active == 'account' ? 'act_item' : ''}">
+                                <h:link
+                                    id="accountLink"
+
+                                    rendered="#{currentUser.hasPermission('accounts:read')}"
+                                    outcome="/account/view" ><i class="material-icons">person</i>   Accounts</h:link>
+                            </li>
+
+                            <li class="#{active == 'sysrole' ? 'act_item' : ''}">
+                                <h:link
+                                    id="sysRoleLink"
+
+                                    rendered="#{currentUser.hasPermission('responsibilities:read')}"
+                                    outcome="/systemroles/systemRolesView" ><i class="material-icons">pan_tool</i>   Responsibilities</h:link>
+                            </li>     
+                            <li class="#{active == 'roleassign' ? 'act_item' : ''}">
+                                <h:link
+                                    id="roleAssignLink"
+
+
+                                    rendered="#{currentUser.hasPermission('responsibilities:assign')}"
+                                    outcome="/systemroles/roleassign" ><i class="material-icons">pan_tool</i>  Assignment</h:link>
+                            </li>  
+                        </ul>
+
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="organization_units.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Organization Units</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'business' ? 'act_item' : ''}">
+                                <h:link
+                                    id="businessLink"
+
+                                    rendered="#{currentUser.hasPermission('businessgroup:read')}"
+                                    outcome="/organizationUnits/businessGroupsView" ><i class="material-icons">group_work</i>   Business Group</h:link>
+                            </li>
+                            <li class="#{active == 'legal' ? 'act_item' : ''}">
+                                <h:link
+                                    id="legalLink"
+
+                                    rendered="#{currentUser.hasPermission('legalentity:read')}"
+                                    outcome="/organizationUnits/legalEntitiesView" ><i class="material-icons">gavel</i>   Legal Entity</h:link>
+                            </li>
+                            <li class="#{active == 'operating' ? 'act_item' : ''}">
+                                <h:link
+                                    id="operatingLink"
+
+                                    rendered="#{currentUser.hasPermission('operatingunit:read')}"
+                                    outcome="/organizationUnits/operatingUnitsView" ><i class="material-icons">bubble_chart</i>   Operating Unit</h:link>
+                            </li>
+                            <li class="#{active == 'physical' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('physical_location:read')}"
+                                    outcome="/physicalStructure/physicalStructureView" ><i class="material-icons">device_hub</i>   Physical Structure</h:link>
+                            </li>
+
+                        </ul>
+                    </li>
+
+
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="coa.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Accounting Setup</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'modules' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="moduleLink"
+                                    rendered="#{currentUser.hasPermission('payables:read') or currentUser.hasPermission('receivables:read') or currentUser.hasPermission('inventory_module:read') or currentUser.hasPermission('fixed_module:read')}"
+                                    outcome="/modules/modulesview" ><i class="material-icons">apps</i> App Modules</h:link>
+                            </li>
+                            <li class="#{active == 'structure' ? 'act_item' : ''}">
+                                <h:link outcome="/coa/coaStructureView"  
+                                        id="coaLink"
+
+                                        rendered="#{currentUser.hasPermission('coa:read')}">
+                                    <i class="material-icons">device_hub</i> COA Structure</h:link>
+                            </li>
+                            <li class="#{active == 'periodtype' ? 'act_item' : ''}">
+                                <h:link  
+                                    id="periodLink"
+                                    rendered="#{currentUser.hasPermission('period_types:read')}"
+                                    outcome="/periods/periodtypes" ><i class="material-icons">alarm</i> Period Types</h:link>
+                            </li>
+                            <li class="#{active == 'ledger' ? 'act_item' : ''}">
+                                <h:link
+                                    id="ledgerLink"
+
+                                    rendered="#{currentUser.hasPermission('ledgers:read')}"
+                                    outcome="/ledger/view" ><i class="material-icons">content_paste</i>   Ledgers</h:link>
+                            </li>
+                            <li class="#{active == 'jbatch' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="jbatchLink"
+                                    rendered="#{currentUser.hasPermission('journal_batches:read')}"
+                                    outcome="/journal/viewbatches" ><i class="material-icons">card_travel</i>   Batches</h:link>
+                            </li>  
+                            <li class="#{active == 'jentry' ? 'act_item' : ''}">
+                                <h:link 
+                                    rendered="#{currentUser.hasPermission('journal_entries:read')}"
+                                    outcome="/journal/viewjournalentries" ><i class="material-icons">receipt</i>Journal Entries</h:link>
+                            </li> 
+                            <li class="#{active == 'currency' ? 'act_item' : ''}">
+                                <h:link
+                                    id="currLink"
+
+                                    rendered="#{currentUser.hasPermission('currency:read')}"
+                                    outcome="/currency/currenciesView" ><i class="material-icons">&#xE926;</i> Currency</h:link>
+                            </li>
+                            <li class="#{active == 'currConv' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="currConvLink"
+
+                                    rendered="#{currentUser.hasPermission('currency_conversion:read')}"
+                                    outcome="/currency/currencyConversionView" ><i class="material-icons">autorenew</i> Currency Conversion</h:link>
+                            </li> 
+                            <li class="#{active == 'bank' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="bankLink"
+
+                                    rendered="#{currentUser.hasPermission('bank:read')}"
+                                    outcome="/bank/bankView" ><i class="material-icons">account_balance</i>Banks</h:link>
+                            </li>
+                            <li class="#{active == 'pettyclear' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="pettyLink"
+                                    rendered="#{currentUser.hasPermission('bank:read')}"
+                                    outcome="/pettyclear/pettyclear" ><i class="material-icons">account_balance</i>Petty Clear</h:link>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="clients.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Clients</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'clients' ? 'act_item' : ''}">
+                                <h:link rendered="#{currentUser.hasPermission('clients:read')}"
+
+                                        id="clientsLink"
+                                        outcome="/clients/clientsView" ><i class="material-icons">group</i>   Clients</h:link>
+                            </li>
+                            <li class="#{active == 'priceListsView' ? 'act_item' : ''}">
+                                <h:link
+
+                                    id="priceLink"
+                                    rendered="#{currentUser.hasPermission('pricelist:read')}"
+                                    outcome="/clients/priceListsView" ><i class="material-icons">content_paste</i>   Pricing Lists</h:link>
+                            </li>
+                            <li class="#{active == 'prepayment' ? 'act_item' : ''}">
+                                <h:link rendered="#{currentUser.hasPermission('clients:create')}"
+
+                                        id="clientsPreLink"
+                                        outcome="/clients/prepayments" ><i class="material-icons">group</i>   Pre Payments</h:link>
+                            </li>
+<!--                            <li class="#{active == 'chequesStatus' ? 'act_item' : ''}">
+                                <h:link rendered="#{currentUser.hasPermission('clients:create')}"
+                                        id="clientsChequesLink"
+                                        outcome="/clients/chequesStatus" ><i class="material-icons">group</i>   Cheques Status</h:link>
+                            </li>-->
+                        </ul>
+                    </li>
+
+
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="invoice.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Supplier Invoices</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'suppinvoiceview' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="suppInvoiceViewLink"
+                                    rendered="#{currentUser.hasPermission('supplier_invoices:read')}"
+                                    outcome="/apinvoices/view" ><i class="material-icons">assignment</i> View Invoices</h:link>
+                            </li>
+                            <li class="#{active == 'suppinvoicecreate' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('supplier_invoices:create')}"
+                                    outcome="/po/invoices" ><i class="material-icons">description</i>   Create Invoice</h:link>
+                            </li>
+                            <li class="#{active == 'suppmanualinvoice' ? 'act_item' : ''}">
+                                <h:link
+                                    id="suppManualInvoiceLink"
+                                    rendered="#{currentUser.hasPermission('supplier_invoices:create')}"
+                                    outcome="/apinvoices/manualinvoice" ><i class="material-icons">description</i>  Manual Invoices</h:link>
+                            </li>
+                            <li class="#{active == 'suppinvoiceaccount' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="suppJournalLink"
+
+                                    rendered="#{currentUser.hasPermission('supplier_inv_journals:create')}"
+                                    outcome="/apinvoices/supplierinvoicesjournals" ><i class="material-icons">description</i>   Supplier Accounts</h:link>
+                            </li>
+                            <li class="#{active == 'supptxclear' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="suppTxLink"
+
+                                    rendered="#{currentUser.hasPermission('supplier_inv_journals:create')}"
+                                    outcome="/apinvoices/transactionclearing" ><i class="material-icons">description</i>   Transaction Clearing</h:link>
+                            </li>
+                            <li class="#{active == 'supppayview' ? 'act_item' : ''}">
+                                <h:link
+                                    id="suppPayViewLink"
+
+                                    rendered="#{currentUser.hasPermission('supplier_payments:read')}"
+                                    outcome="/apinvoices/payment/view" ><i class="material-icons">assignment</i> View Payments</h:link>
+                            </li>
+                            <li class="#{active == 'suppinvoicepay' ? 'act_item' : ''}">
+                                <h:link
+                                    id="suppPayLink"
+
+                                    rendered="#{currentUser.hasPermission('supplier_payments:create')}"
+                                    outcome="/apinvoices/payment/viewtopay" ><i class="material-icons">assignment</i> Create Payment</h:link>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="invoice.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Customers Invoices</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'custinvoiceview' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="custInvoiceViewLink"
+                                    rendered="#{currentUser.hasPermission('customer_invoices:read')}"
+                                    outcome="/arinvoices/view" ><i class="material-icons">assignment</i> View Invoices</h:link>
+                            </li>
+                            <li class="#{active == 'custinvoice' ? 'act_item' : ''}">
+                                <h:link  
+                                    id="custInvoiceCreateLink"
+                                    rendered="#{currentUser.hasPermission('customer_invoices:create')}"
+                                    outcome="/salesorder/invoices" ><i class="material-icons">description</i>   Create Invoices</h:link>
+                            </li>
+                            <li class="#{active == 'custmanualinvoice' ? 'act_item' : ''}">
+                                <h:link
+                                    id="custManaalInvoiceLink"
+                                    rendered="#{currentUser.hasPermission('customer_invoices:create')}"
+                                    outcome="/arinvoices/manualinvoice" ><i class="material-icons">description</i>   Manual Invoice</h:link>
+                            </li>                            
+                            <li class="#{active == 'custinvoiceaccount' ? 'act_item' : ''}">
+                                <h:link
+
+                                    id="custJournalInvoiceLink"
+                                    rendered="#{currentUser.hasPermission('customer_inv_journals:create')}"
+                                    outcome="/arinvoices/customerinvoicejournals" ><i class="material-icons">description</i>   Customer Accounts</h:link>
+                            </li>
+                            <li class="#{active == 'custtxclear' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="custTxLink"
+
+                                    rendered="#{currentUser.hasPermission('customer_inv_journals:create')}"
+                                    outcome="/arinvoices/transactionclearing" ><i class="material-icons">description</i>   Transaction Clearing</h:link>
+                            </li>
+                            <li class="#{active == 'custpayview' ? 'act_item' : ''}">
+                                <h:link 
+
+                                    id="custPayInvoiceLink"
+                                    rendered="#{currentUser.hasPermission('customer_payments:read')}"
+                                    outcome="/arinvoices/payment/view" ><i class="material-icons">assignment</i> View Payments</h:link>
+                            </li>
+                            <li class="#{active == 'custinvoicepay' ? 'act_item' : ''}">
+                                <h:link
+
+                                    id="custPayLink"
+                                    rendered="#{currentUser.hasPermission('customer_payements:create')}"
+                                    outcome="/arinvoices/payment/viewtopay" ><i class="material-icons">assignment</i>  Create Payment</h:link>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="procurment.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Procurement</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'createPo' ? 'act_item' : ''}">
+                                <h:link
+                                    id="poCreateLink"
+
+                                    rendered="#{currentUser.hasPermission('po:read')}"
+                                    outcome="/po/view" ><i class="material-icons">shopping_cart</i>   Purchase Orders</h:link>
+                            </li>
+                            <li class="#{active == 'approvePo' ? 'act_item' : ''}">
+                                <h:link
+                                    id="approvePoLink"
+
+                                    rendered="#{currentUser.hasPermission('po:approve')}"
+                                    outcome="/po/approve" ><i class="material-icons">check_circle</i>   Approve</h:link>
+                            </li>
+                            <li class="#{active == 'receipt' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="poRecieveLink"
+                                    rendered="#{currentUser.hasPermission('po:recieve')}"
+                                    outcome="/po/receivePO" ><i class="material-icons">description</i>   Receive PO</h:link>
+                            </li>
+                            <li class="#{active == 'transfer' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="poTransferLink"
+                                    rendered="#{currentUser.hasPermission('po:transfer')}"
+                                    outcome="/po/transfer" ><i class="material-icons">send</i>   Transfer</h:link>
+                            </li>
+                            <li class="#{active == 'issue' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="issueLink"
+                                    rendered="#{currentUser.hasPermission('po:transfer')}"
+                                    outcome="/po/issue" ><i class="material-icons">error_outline</i>   Issue</h:link>
+                            </li>
+
+                        </ul>
+                    </li>
+
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="organization_units.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Assets</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'assetrec' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/assetReceipts" ><i class="material-icons">add</i>  Assets Addition</h:link>
+                            </li>
+                            <li class="#{active == 'assets' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/assetView" ><i class="material-icons">group_work</i>  View Assets</h:link>
+                            </li>
+
+                            <li class="#{active == 'adjustasset' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/adjustAsset" ><i class="material-icons">device_hub</i>   Adjust Asset</h:link>
+                            </li>
+                            <li class="#{active == 'releaseasset' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/releaseAsset" ><i class="material-icons">device_hub</i>   Release Asset</h:link>
+                            </li>
+                            <li class="#{active == 'maintainance' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/assetMaintainance" ><i class="material-icons">device_hub</i>   Asset Maintainance</h:link>
+                            </li>
+                            <li class="#{active == 'adjustcomponent' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/adjustComponent" ><i class="material-icons">device_hub</i>   Adjust Component</h:link>
+                            </li>
+                            <li class="#{active == 'assetjornal' ? 'act_item' : ''}">
+                                <h:link
+
+                                    rendered="#{currentUser.hasPermission('assets:read')}"
+                                    outcome="/assets/assetJornals" ><i class="material-icons">device_hub</i>   Assets Jornals</h:link>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="inventory.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Inventory Organization</span>
+                        </a>
+
+                        <ul>
+                            <li class="#{active == 'mainInv' ? 'act_item' : ''}">
+                                <h:link    
+                                    id="mainLink"
+                                    rendered="#{currentUser.hasPermission('maininv:read')}"
+                                    outcome="/inventoryOrganization/mainInventoryView" ><i class="material-icons">business</i>   Main Inventories</h:link>
+                            </li>
+                            <li class="#{active == 'subInv' ? 'act_item' : ''}">
+                                <h:link  
+                                    id="subLink"
+                                    rendered="#{currentUser.hasPermission('subinv:read')}"
+                                    outcome="/inventoryOrganization/subInventoryView" ><i class="material-icons">system_update_alt</i>   Sub Inventories</h:link>
+                            </li>
+                            <li class="#{active == 'catega' ? 'act_item' : ''}">
+
+                                <h:link  
+                                    rendered="#{currentUser.hasPermission('asset_categories:read')}"
+                                    outcome="/categories/assetCategoryView" ><i class="material-icons">view_list</i>   Asset Categories</h:link>
+                            </li>
+                            <li class="#{active == 'categi' ? 'act_item' : ''}">
+
+                                <h:link 
+                                    id="itemCatLink"
+                                    rendered="#{currentUser.hasPermission('item_categories:read')}"
+                                    outcome="/categories/itemCategoryView" ><i class="material-icons">view_list</i>   Item Categories</h:link>
+                            </li>
+
+                            <li class="#{active == 'uomclass' ? 'act_item' : ''}">
+
+                                <h:link 
+                                    id="uomLink"
+                                    rendered="#{currentUser.hasPermission('uom:read')}"
+                                    outcome="/inventories/uomClassView" ><i class="material-icons">straighten</i>   UOM Classes</h:link>
+                            </li>
+                            <li class="#{active == 'SysItemTemp' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="sysItemTempLink"
+                                    rendered="#{currentUser.hasPermission('item_templates:read')}"
+
+                                    outcome="/inventories/itemTemplateView" ><i class="material-icons">web</i>   Item Templates</h:link>
+                            </li> 
+                            <li class="#{active == 'SysItem' ? 'act_item' : ''}">
+                                <h:link
+                                    id="sysItemLink"
+
+                                    rendered="#{currentUser.hasPermission('systemitems:read')}"
+                                    outcome="/inventories/systemItemView" ><i class="material-icons">style</i>   System Items</h:link>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="batches.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Batches</span>
+                        </a>
+
+                        <ul>
+                            <li class="#{active == 'formc' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="fClassLink"
+                                    rendered="#{currentUser.hasPermission('formulaclass:read')}"
+                                    outcome="/batch/formulaClassView" ><i class="material-icons">view_module</i>   Formula Class</h:link>
+                            </li>
+                            <li class="#{active == 'formula' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="formulaLink"
+                                    rendered="#{currentUser.hasPermission('formula:read')}"
+                                    outcome="/batch/formulasView" ><i class="material-icons">list</i>   Formula</h:link>
+                            </li>
+                            <li class="#{active == 'appFormula' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="fApproveLink"
+                                    rendered="#{currentUser.hasPermission('formula:approve')}"
+                                    outcome="/batch/formulaApprove" ><i class="material-icons">check_circle</i>   Approve Formula</h:link>
+                            </li>                            
+                            <li class="#{active == 'batch' ? 'act_item' : ''}">
+                                <h:link  
+                                    id="batchLink"
+                                    rendered="#{currentUser.hasPermission('batch:read')}"
+                                    outcome="/batch/batchView" ><i class="material-icons">launch</i>   Batches</h:link>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="sales_order.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Sales Order</span>
+                        </a>
+
+                        <ul>
+                            <li class="#{active == 'so' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="soLink"
+
+                                    rendered="#{currentUser.hasPermission('so:read')}"
+                                    outcome="/salesorder/view" ><i class="material-icons">playlist_add</i>   Sales Orders</h:link>
+                            </li>
+                            <li class="#{active == 'sopick' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="soPickLink"
+                                    rendered="#{currentUser.hasPermission('so:pick')}"
+                                    outcome="/salesorder/pickView" ><i class="material-icons">playlist_add_check</i>   Pick Sales Order</h:link>
+                            </li>
+                            <li class="#{active == 'shipment' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="shipLink"
+                                    rendered="#{currentUser.hasPermission('so:read_shipments')}"
+                                    outcome="/shipment/shipmentView" ><i class="material-icons">person_pin</i>     Shipments</h:link>
+                            </li>
+                            <li class="#{active == 'returnorder' ? 'act_item' : ''}">
+                                <h:link 
+                                    id="returnLink"
+                                    rendered="#{currentUser.hasPermission('returnorder:create')}"
+                                    outcome="/salesorder/returnView" ><i class="material-icons">assignment_return</i>     Return Sales Order</h:link>
+                            </li>
+
+                            <li class="#{active == 'reservationorder' ? 'act_item' : ''}">
+                                <h:link
+                                    id="reservLink"
+                                    rendered="#{currentUser.hasPermission('reservationorder:read')}"
+                                    outcome="/personsales/reservationOrderView" ><i class="material-icons">person_pin</i>     Reservation Order</h:link>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+
+
+                    <li>
+                        <a href="#">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="move_order.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Move Orders</span>
+                        </a>
+                        <ul>
+                            <li class="#{active == 'mo' ? 'act_item' : ''}">
+                                <h:link
+
+                                    id="moLink"
+                                    rendered="#{currentUser.hasPermission('mo:read')}"
+                                    outcome="/moveorder/view" ><i class="material-icons">remove_shopping_cart</i>Move Orders</h:link>
+                            </li>
+                            <li class="#{active == 'motransfer' ? 'act_item' : ''}">
+                                <h:link
+                                    id="moTransferLink"
+                                    rendered="#{currentUser.hasPermission('mo:transfer')}"
+                                    outcome="/moveorder/search" ><i class="material-icons">trending_flat</i>Transfer</h:link>
+                            </li>
+                        </ul>
+                    </li>
+                    <!--                    </ui:fragment>-->
+                    <li class="#{active == 'reports' ? 'current_section' : ''}">
+                        <h:link id="repLink" outcome="/reports/view" rendered="#{currentUser.hasPermission('reports')}">
+                            <span class="menu_icon"><h:graphicImage library="imgs" name="reports.png" style="width: 25px;height: 25px;" /></span>
+                            <span class="menu_title">Reports</span>
+                        </h:link>
+                    </li>
+
+                </ul>
+            </div>
+        </aside><!-- main sidebar end -->
+
+        <div id="page_content">
+            <h:form prependId="false">
+                <ui:insert name="pageHeading" />
+                <div id="page_content_inner">
+                    <ui:insert name="main" />
+                </div>
+            </h:form>
+        </div>
+
+
+        <h:outputScript library="primefaces" name="jquery/jquery.js" />
+        <h:outputScript library="js" name="common.min.js" />
+        <h:outputScript library="js" name="uikit_custom.min.js" />
+        <h:outputScript library="js" name="altair_admin_common.min.js" />
+
+        <ui:insert name="pageJs" />
+
+        <div id="loader" style="position: absolute; top: 0;left: 0;width: 100%;height: 100%; z-index: 5000; display: none; ">
+            <div class="uk-text-center" style="position: relative; top: 50%;">
+                <div class="md-preloader"><svg height="48" width="48" viewbox="0 0 75 75"><circle cx="37.5" cy="37.5" r="33.5" stroke-width="8"/></svg></div>
+            </div>
+        </div>
+
+        <p:ajaxStatus onstart="$('#loader').css({display:'block'})" 
+                      oncomplete="$('#loader').css({display:'none'})" />
+        <!--        
+                <p:socket widgetVar="notification" channel="/notification/#{currentUser.id}" 
+                          onMessage="onNewNotification" />-->
+        <script>
+            $(function () {
+                altair_helpers.retina_images();
+                if (Modernizr.touch) {
+                    FastClick.attach(document.body);
+                }
+                Pace.options.ajax.trackWebSockets = false;
+            });
+
+            $("#dropdownAnchor").click(function () {
+                $("#notificationNo").text('');
+            });
+            function onNewNotification(data) {
+
+                $("#notificationNo").text($("#notificationNo").text() ? parseInt($("#notificationNo").text()) + 1 : '1');
+                $("#notificationDropDown").prepend("<div>" + data + "</div>");
+            }
+        </script>
+    </h:body>
+</html>
+

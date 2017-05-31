@@ -1,0 +1,372 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="formula" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{formulaDetailsController.currentFormulaId}" />
+            <f:viewParam name="ro" value="#{formulaDetailsController.readonly}" />
+            <f:viewAction action="#{formulaDetailsController.loadFormula()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('formula:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Formula Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{formulaDetailsController.currentFormula.formulaId == null ? 'New Formula' : formulaDetailsController.currentFormula.formulaName }
+        </h4>
+        <div class="md-card">
+            <h:panelGroup id="input" class="md-card-content" layout="block">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-4-10">
+                        <div class="uk-margin-small-top">
+
+                            <p:autoComplete id="opratUnit" value="#{formulaDetailsController.currentFormula.ownerOrganizationId}" 
+                                            completeMethod="#{formulaDetailsController.completeOperatingUnit}" 
+                                            emptyMessage="No Records.."  converter="#{organizationUnitConverter}" 
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input" readonly="#{formulaDetailsController.readonly}"
+                                            placeholder="Operating Unit" 
+                                            forceSelection="true" required="true"  >
+                            </p:autoComplete>
+                            <h:message for="opratUnit" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-4-10">
+                        <div class="uk-margin-small-top">
+                            <p:autoComplete id="formulaclass" value="#{formulaDetailsController.currentFormula.formulaClass}" 
+                                            completeMethod="#{formulaDetailsController.completeFormulaClass}"  
+                                            emptyMessage="No Records.."  converter="#{formulaClassConverter}"
+                                            var="citem" itemLabel="#{citem.name}" itemValue="#{citem}"
+                                            inputStyleClass="md-input" readonly="#{formulaDetailsController.readonly}"
+                                            placeholder="Formula Class" 
+                                            forceSelection="true" required="true"  >
+                            </p:autoComplete>
+                            <h:message for="formulaclass" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+                            <h:selectOneMenu id="stat" value="#{formulaDetailsController.currentFormula.status}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                             pt:data-placeholder="Formula Status" 
+                                             disabled="true">
+                                <f:selectItem  itemValue="#{null}" />
+                                <f:selectItems  value="#{formulaDetailsController.statuses}"
+                                                var="item3" itemLabel="#{item3}" itemValue="#{item3}"/>
+                            </h:selectOneMenu>
+                            <h:message for="stat" style="color:red;"  />
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-10">
+                        <p:outputLabel for="formulaNo" value="Formula No." />
+                        <p:inputText class="md-input" id="formulaNo"  value="#{formulaDetailsController.currentFormula.formulaNo}" 
+                                     validator="#{formulaDetailsController.validateCodeExist}" 
+                                     readonly="#{formulaDetailsController.readonly}">
+                            <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="formulaNo" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-6-10">
+                        <p:outputLabel for="name" value="Formula Name" />
+                        <p:inputText class="md-input" id="name"  value="#{formulaDetailsController.currentFormula.formulaName}" 
+                                     readonly="#{formulaDetailsController.readonly}">
+                            <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="name" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <p:outputLabel for="vers" value="Formula Version" />
+                        <p:inputText class="md-input" id="vers"   value="#{formulaDetailsController.currentFormula.formulaVers}" 
+                                     readonly="#{formulaDetailsController.readonly}">
+                        </p:inputText>
+                        <h:message for="vers" style="color:red;"  />
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-1">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc"  value="#{formulaDetailsController.currentFormula.formulaDescription}" 
+                                     readonly="#{formulaDetailsController.readonly}">
+                        </p:inputText>
+                        <h:message for="desc" style="color:red;"  />
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li id="l1" class="uk-active"><a id="p1" class="tab-btn" href="#">Product</a></li>
+                            <li id="l2"><a id="p2" class="tab-btn" href="#">By-Products</a></li>
+                            <li id="l3"><a id="p3" class="tab-btn" href="#">Ingredients</a></li>
+                        </ul> 
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+
+                                                    <p:commandLink  id="addprod" update="productsTable @this" process="productsTable @this" 
+                                                                    action="#{formulaDetailsController.addProductLine()}"
+                                                                    disabled="#{formulaDetailsController.pnum == 1}">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                    </p:commandLink>   
+
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <p:dataTable id="productsTable" var="line1" value="#{formulaDetailsController.productLines}" 
+                                                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                        <p:column headerText="Line No." styleClass="uk-width-1-10 uk-text-center">
+                                                            <h:outputText value="#{line1.lineNo}" />
+                                                        </p:column>
+                                                        <p:column headerText="Item Name" styleClass="uk-width-5-10 uk-text-center">
+                                                            <p:autoComplete id="systemitem1" value="#{line1.systemItem}" inputStyleClass="uk-width-1-1"
+                                                                            completeMethod="#{formulaDetailsController.completeProducts}"  
+                                                                            emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                                            var="lsitem" itemLabel="#{lsitem.description}" itemValue="#{lsitem}"
+                                                                            placeholder="Search System Item" 
+                                                                            readonly="#{formulaDetailsController.readonly}"
+                                                                            forceSelection="true" required="true"  >
+                                                                <p:ajax update="uom1 systemitemTip1 @this" 
+                                                                        listener="#{formulaDetailsController.onItemSelectChange(line1)}" event="itemSelect" />
+                                                            </p:autoComplete>
+                                                            <p:tooltip id="systemitemTip1" for="systemitem1" position="right">
+                                                                <h:message for="systemitem1" />
+                                                            </p:tooltip>
+                                                        </p:column>
+                                                        <p:column headerText="UOM" styleClass="uk-width-1-10 uk-text-center">
+
+                                                            <h:outputText id="uom1" value="#{line1.detailUomCode}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Quantity" styleClass="uk-width-2-10 uk-text-center">
+                                                            <p:inputText id="lqty1" value="#{line1.qty}" required="true" 
+                                                                         readonly="#{formulaDetailsController.readonly}">
+                                                            </p:inputText>
+                                                            <p:tooltip id="qtyTip1" for="lqty1" position="left">
+                                                                <h:message for="lqty1" />
+                                                            </p:tooltip>
+                                                        </p:column>     
+                                                        <p:column headerText="Action" styleClass="uk-width-1-10 uk-text-center">    
+
+                                                            <p:commandLink action="#{formulaDetailsController.removeProductLine(line1)}" 
+                                                                           immediate="true" update="productsTable addprod" 
+                                                                           disabled="#{formulaDetailsController.readonly}">
+                                                                <i class="material-icons md-24">close</i>
+                                                            </p:commandLink>
+
+
+                                                        </p:column>                                 
+                                                    </p:dataTable>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                    <p:commandLink update="byTable" process="byTable @this" 
+                                                                   action="#{formulaDetailsController.addByProductLine()}"
+                                                                   disabled="#{formulaDetailsController.readonly}">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                    </p:commandLink>                         
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <p:dataTable id="byTable" var="line2" value="#{formulaDetailsController.byProductLines}" 
+                                                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                        <p:column headerText="Line No." styleClass="uk-width-1-10 uk-text-center">
+                                                            #{line2.lineNo}
+                                                        </p:column>
+                                                        <p:column headerText="Item Name" styleClass="uk-width-5-10 uk-text-center">
+                                                            <p:autoComplete id="systemitem2" value="#{line2.systemItem}"  inputStyleClass="uk-width-1-1"
+                                                                            completeMethod="#{formulaDetailsController.completeByProducts}"  
+                                                                            emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                                            var="lsitem" itemLabel="#{lsitem.description}" itemValue="#{lsitem}"
+                                                                            placeholder="Search System Item"
+                                                                            readonly="#{formulaDetailsController.readonly}"
+                                                                            forceSelection="true" required="true"  >
+                                                                <p:ajax update="uom2 systemitemTip2 @this" 
+                                                                        listener="#{formulaDetailsController.onItemSelectChange(line2)}" event="itemSelect" />
+                                                            </p:autoComplete>
+                                                            <p:tooltip id="systemitemTip2" for="systemitem2" position="right">
+                                                                <h:message for="systemitem2" />
+                                                            </p:tooltip>
+                                                        </p:column>
+                                                        <p:column headerText="UOM" styleClass="uk-width-1-10 uk-text-center">
+                                                            <h:outputText id="uom2" value="#{line2.detailUomCode}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Quantity" styleClass="uk-width-2-10 uk-text-center">
+                                                            <p:inputText id="lqty2" value="#{line2.qty}" required="true"
+                                                                         readonly="#{formulaDetailsController.readonly}">
+                                                            </p:inputText>
+                                                            <p:tooltip id="lqtyTip2" for="lqty2" position="left">
+                                                                <h:message for="lqty2" />
+                                                            </p:tooltip>
+                                                        </p:column>     
+                                                        <p:column headerText="Action" styleClass="uk-width-1-10 uk-text-center">                                
+                                                            <p:commandLink action="#{formulaDetailsController.removeByProductLine(line2)}" immediate="true"
+                                                                           update="byTable" disabled="#{formulaDetailsController.readonly}">
+                                                                <i class="material-icons md-24">close</i>
+                                                            </p:commandLink>
+                                                        </p:column>                                 
+                                                    </p:dataTable>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                    <p:commandLink update="ingTable" process="ingTable @this" 
+                                                                   action="#{formulaDetailsController.addIngredientLine()}"
+                                                                   disabled="#{formulaDetailsController.readonly}">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                    </p:commandLink>                         
+                                                </div>
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <p:dataTable id="ingTable" var="line3" value="#{formulaDetailsController.ingredientLines}" 
+                                                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                        <p:column headerText="Line No." styleClass="uk-width-1-10 uk-text-center" >
+                                                            #{line3.lineNo}
+                                                        </p:column>
+                                                        <p:column headerText="Item Name" styleClass="uk-width-5-10 uk-text-center">
+
+                                                            <p:autoComplete id="systemitem3" value="#{line3.systemItem}" inputStyleClass="uk-width-1-1"
+                                                                            completeMethod="#{formulaDetailsController.completeIngredients}"  
+                                                                            emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                                            var="lsitem" itemLabel="#{lsitem.description}" itemValue="#{lsitem}"
+                                                                            placeholder="Search System Item"
+                                                                            readonly="#{formulaDetailsController.readonly}"
+                                                                            forceSelection="true" required="true"  >
+                                                                <p:ajax update="uom3 systemitemTip3 @this" 
+                                                                        listener="#{formulaDetailsController.onItemSelectChange(line3)}" event="itemSelect" />
+                                                            </p:autoComplete>
+                                                            <p:tooltip id="systemitemTip3" for="systemitem3" position="right">
+                                                                <h:message for="systemitem3" />
+                                                            </p:tooltip>
+
+                                                        </p:column>
+                                                        <p:column headerText="UOM" styleClass="uk-width-1-10 uk-text-center">
+
+                                                            <h:outputText id="uom3" value="#{line3.detailUomCode}"/>
+                                                        </p:column>
+                                                        <p:column headerText="Quantity" styleClass="uk-width-2-10 uk-text-center" >
+                                                            <p:inputText id="lqty3" value="#{line3.qty}" required="true" 
+                                                                         readonly="#{formulaDetailsController.readonly}">
+                                                            </p:inputText>
+                                                            <p:tooltip id="qtyTip3" for="lqty3" position="left">
+                                                                <h:message for="lqty3" />
+                                                            </p:tooltip>
+                                                        </p:column>     
+                                                        <p:column headerText="Action" styleClass="uk-width-1-10 uk-text-center">                                
+                                                            <p:commandLink action="#{formulaDetailsController.removeIngredientLine(line3)}" immediate="true"
+                                                                           update="ingTable" disabled="#{formulaDetailsController.readonly}">
+                                                                <i class="material-icons md-24">close</i>
+                                                            </p:commandLink>
+                                                        </p:column>                                 
+                                                    </p:dataTable>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h:messages/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"   id="page_settings_submit" update="input productsTable byTable ingTable" process="@form" action="#{formulaDetailsController.save()}" 
+                           disabled="#{formulaDetailsController.readonly}">
+
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:remoteCommand name="processProducts" process=" @this productsTable" update="productsTable"
+                         action="#{formulaDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)" />
+        <p:remoteCommand name="processByProducts" process="@this byTable" update="byTable"
+                         action="#{formulaDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)" />
+        <p:remoteCommand name="processIngs" process="@this ingTable" update="ingTable"
+                         action="#{formulaDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)"/>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            $("a.tab-btn").click(function (e) {
+                e.preventDefault();
+                var newId = $(e.target).attr('id');
+                var id = $('#user_edit_tabs li.uk-active a').attr('id');
+                if (id !== newId)
+                {
+                    if (id === 'p1')
+                        processProducts([{name: 'tabId', value: newId}]);
+                    else if (id === 'p2')
+                        processByProducts([{name: 'tabId', value: newId}]);
+                    else
+                        processIngs([{name: 'tabId', value: newId}]);
+                    return false;
+                }
+            });
+            function onComplete(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    $('#user_edit_tabs li.uk-active').removeClass("uk-active");
+                    $("#" + args.tabId + "").parent().addClass("uk-active");
+                    $("#" + args.tabId + "").click();
+                }
+            }
+        </script>
+    </ui:define>
+</ui:composition>

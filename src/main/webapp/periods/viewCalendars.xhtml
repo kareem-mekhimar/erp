@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="calendar" />
+
+    <ui:define name="title">
+        Calendars
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup id="header" class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Calendar Name" for="cname" />
+                        <h:inputText id="cname" class="md-input" 
+                                     value="#{calendarController.currenName}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:autoComplete id="ctype" value="#{calendarController.currentPeriodTypeId}" 
+                                        converter="javax.faces.Integer"
+                                        completeMethod="#{calendarController.completePeriods}"  
+                                        emptyMessage="No Records.."  
+                                        var="type" itemLabel="#{type.periodTypeName}" 
+                                        itemValue="#{type.periodTypeId}"
+                                        inputStyleClass="md-input"
+                                        placeholder="Period Type" 
+                                        forceSelection="true"  >
+                        </p:autoComplete>
+                        <h:message for="ctype" style="color:red;"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" 
+                                       process="header" actionListener="#{calendarController.setFilterTriggred(true)}"
+                                       update="table" action="#{calendarController.filter}"/>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="table" var="row" value="#{calendarController.periodSets}" 
+                                     paginator="true"
+                                     paginatorAlwaysVisible="false"
+                                     rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" 
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.periodSetName}
+                            </p:column>
+                            <p:column headerText="Period Type" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.periodType.periodTypeName}
+                            </p:column>
+                            <p:column headerText="Description" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.description}
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <p:commandLink update="dialogContent" oncomplete="modal.show()" process="@this">
+                                    <f:setPropertyActionListener target="#{calendarController.currentCalendar}" 
+                                                                 value="#{row}" />
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </p:commandLink>
+                                <h:link outcome="calendarDetails?id=#{row.periodSetId}">
+                                    <i class="material-icons md-24">style</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-accent" oncomplete="modal.show();" update="dialogContent" process="@this">
+                <i class="material-icons">&#xE145;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Calendar 
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="dialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-medium-1-2">
+                                <p:outputLabel for="name" value="Calendar Name" />
+                                <p:inputText id="name" class="md-input" required="true"
+                                             value="#{calendarController.currentCalendar.periodSetName}" >
+                                    <p:ajax update="@this m1" />
+                                </p:inputText>
+                                <h:message id="m1" for="name" style="color:red;" />
+                            </div>
+                            <div class="uk-width-medium-1-2">
+                                <p:autoComplete id="type" value="#{calendarController.currentCalendar.periodType}" 
+
+                                                completeMethod="#{calendarController.completePeriods}"  
+                                                emptyMessage="No Records.."  
+                                                converter="#{glPeroidTypeConverter}"
+                                                var="type" itemLabel="#{type.periodTypeName}" 
+                                                itemValue="#{type}"
+                                                inputStyleClass="md-input" required="true"
+                                                placeholder="Search Period Type" 
+                                                forceSelection="true"  >
+                                    <p:ajax update="@this m2" event="itemSelect" />
+                                </p:autoComplete>
+                                <h:message id="m2" for="type" style="color:red;"  />
+                            </div>
+                        </div>
+                        <div class="uk-grid">
+                            <div class="uk-width-medium-1-1">
+                                <p:outputLabel for="desc" value="Description" />
+                                <p:inputText id="desc" class="md-input" 
+                                             value="#{calendarController.currentCalendar.description}">
+                                    <p:ajax update="@this m3" />
+                                </p:inputText>
+                                <h:message id="m3" for="desc" style="color:red;" />
+                            </div>
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent" oncomplete="onDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{calendarController.onDialogOk}">OK</p:commandLink>
+                </div>
+            </div>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>      
+    </ui:define>
+</ui:composition>

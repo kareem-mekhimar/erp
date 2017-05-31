@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:altair="http://xmlns.jcp.org/jsf/composite/components">
+
+    <h:head>
+        <ui:insert name="metadata" />
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700|Roboto:400,300,500,700,400italic&amp;subset=latin,latin" rel="stylesheet" /> 
+
+        <h:outputStylesheet library="css" name="uikit/css/uikit.almost-flat.min.css" />
+        <h:outputStylesheet library="css" name="icons/flags/flags.min.css" />
+        <h:outputStylesheet library="css" name="main.min.css" />
+
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+              rel="stylesheet" />
+        <h:outputStylesheet library="css" name="styles.css" />
+    </h:head>
+
+    <h:body>
+
+        <h:form>
+            <div class="uk-grid">
+                <div class="uk-width-1-1">
+                    <div class="md-card">
+                        <div class="md-card-content">
+                            <altair:tab titles="one,two">
+                                <h:panelGroup id="tab1" class="tab" layout="block">
+                                    <div class="uk-grid">
+                                        <div class="uk-width-1-1">
+                                            <div class="md-card">
+                                                <h1>asdsadasd</h1>
+                                                <p:inputText id="s1" required="true" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h:panelGroup>
+                                <h:panelGroup id="tab2" layout="block" class="tab"  >
+                                    <div class="uk-grid">
+                                        <div class="uk-width-1-1">
+                                            <div class="md-card">
+                                                <h1>two</h1>
+                                                <p:inputText id="s2" required="true" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h:panelGroup>
+                            </altair:tab>
+                            
+                            <p:commandButton value="Submit" update="@form" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+        <h:outputScript library="primefaces" name="jquery/jquery.js" />
+        <h:outputScript library="js" name="common.min.js" />
+        <h:outputScript library="js" name="uikit_custom.min.js" />
+        <h:outputScript library="js" name="altair_admin_common.min.js" />
+
+    </h:body>
+</html>

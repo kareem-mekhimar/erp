@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="batch" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('batch:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Pick
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h2 class="heading_b uk-margin-medium-bottom">Pick Materials</h2>
+                <h:panelGroup layout="block" class="uk-grid" pt:data-uk-grid-margin="true" id="input" >
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Source Main Inventory" class="uk-form-label" for="sourceMain"/>
+                                    <p:autoComplete var="sourceMain" id="sourceMain" forceSelection="true"
+                                                    completeMethod="#{pickController.completeMainInvByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Source Main Inventory"
+                                                    value="#{pickController.sourceMainInventory}"
+                                                    converter="#{mainInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{sourceMain.organizationName}" 
+                                                    itemValue="#{sourceMain}" required="true" >
+                                        <p:ajax update="sourceSub @this m1 table" event="itemSelect"
+                                                listener="#{pickController.resetSubInvSource}"/>
+
+                                    </p:autoComplete>
+                                    <h:message id="m1" for="sourceMain" style="color:red" />
+                                </div>
+
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Transfer Main Inventory" class="uk-form-label" for="transferMain"/>
+                                    <p:autoComplete var="transferMain" id="transferMain" forceSelection="true"
+                                                    completeMethod="#{pickController.completeMainInvByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Transfer Main Inventory"
+                                                    value="#{pickController.targetMainInventory}" 
+                                                    converter="#{mainInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{transferMain.organizationName}" 
+                                                    itemValue="#{transferMain}" required="true" >
+                                        <p:ajax update="transferSub @this m2"  event="itemSelect" 
+                                                listener="#{pickController.resetSubInvTarget}" />
+                                    </p:autoComplete>
+                                    <h:message id="m2" for="transferMain" style="color:red" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Source Secondary Inventory" class="uk-form-label" for="sourceSub"/>
+                                    <p:autoComplete var="sourceSub" id="sourceSub" forceSelection="true"
+                                                    completeMethod="#{pickController.completeSecondaryForSourceByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Source Sub Inventory"
+                                                    value="#{pickController.sourceSecondaryInventory}" 
+                                                    converter="#{subInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{sourceSub.secondaryInventoryName}" 
+                                                    itemValue="#{sourceSub}" required="true" >
+                                        <p:ajax update="transferSub @this m3 table" event="itemSelect"
+                                                listener="#{pickController.onSourceSubInvItemSelect}" />
+                                    </p:autoComplete>
+
+                                    <h:message id="m3" for="sourceSub" style="color:red" />
+                                </div>
+
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel value="Transfer Secondary Inventory" class="uk-form-label" for="transferSub"/>
+                                    <p:autoComplete var="transferSub" id="transferSub" forceSelection="true"
+                                                    completeMethod="#{pickController.completeSecondaryForTargetByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Transfer Sub Inventory"
+                                                    value="#{pickController.targetSecondaryInventory}" 
+                                                    converter="#{subInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{transferSub.secondaryInventoryName}" 
+                                                    itemValue="#{transferSub}" required="true" >
+                                        <p:ajax update="@this m4"  event="itemSelect" />
+                                    </p:autoComplete>
+                                    <h:message for="transferSub" id="m4" style="color:red" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-overflow-container">
+                    <p:dataTable var="line" value="#{pickController.lines}" id="table"
+                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                        <p:column headerText="Item" styleClass="uk-text-center uk-width-3-6">
+                            #{line.inventoryItem.description}
+                        </p:column>
+
+                        <p:column headerText="Reserved Quantity" styleClass="uk-text-center uk-width-1-6">
+                            <h:outputText id="resvQty" value="#{line.reservedQty}" />
+                        </p:column>
+                        <p:column headerText="Quantity" styleClass="uk-text-center uk-width-1-6">
+                            <h:panelGroup id="quantityGroup">
+                                <p:inputText value="#{line.quantityNeededToPickOrTransact}" id="q" 
+                                             validator="#{pickController.validateQuantityGtZero}"
+                                             disabled="#{empty pickController.sourceSecondaryInventory}">
+                                    <p:ajax update="tip1 @this" 
+                                            listener="#{pickController.onChangeCheckQuantityCover(line)}" 
+                                            oncomplete="if(args.warn) $(PrimeFaces.escapeClientId(this.source)).addClass('ui-state-warning')" />
+                                </p:inputText>
+                                <p:keyFilter  for="q" mask="num" /> 
+                                <p:tooltip for="q" id="tip1" position="left">
+                                    <h:message for="q" />
+                                </p:tooltip>
+                            </h:panelGroup>
+                        </p:column>
+                        <p:column headerText="Date Required" styleClass="uk-text-center uk-width-1-6">
+                            <p:calendar disabled="#{empty pickController.sourceSecondaryInventory}" id="date" 
+                                        value="#{line.txDate}" validator="#{pickController.validateDate}">
+                                <p:ajax event="dateSelect" update="tip2 @this" />
+                                <p:ajax event="blur" update="tip2 @this" process="@this"/>
+                            </p:calendar>
+                            <p:tooltip for="date" id="tip2" position="right">
+                                <h:message for="date" />
+                            </p:tooltip>
+                        </p:column>
+
+                    </p:dataTable>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" 
+                           update="table no input" process="@form" action="#{pickController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="modal">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h3 class="uk-modal-title">Confirm</h3>
+                </div>
+                <h:panelGroup id="no">
+                    <h1 class="uk-text-success" style="font-size:18px;">  Move Order with No ( #{pickController.newMoveOrderId} ) Created Successfully..!  </h1>
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+                    <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{pickController.onDialogOk}"
+                                   value="Ok" />
+                </div>
+            </div>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#modal', {keyboard: false, bgclose: false, center: true});
+        </script>
+    </ui:define>
+</ui:composition>

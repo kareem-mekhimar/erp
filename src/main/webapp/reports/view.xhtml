@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="reports" /> 
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('reports')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Reports
+    </ui:define>
+
+    <ui:define name="main">
+        <h3 class="heading_a uk-margin-bottom">Reports</h3>       
+        <ul id="filter" class="uk-subnav uk-subnav-pill">
+            <li class="uk-active" data-uk-filter=""><a href="#">All</a></li>
+            <li data-uk-filter="filter-a"><a href="#">Inventories</a></li>
+            <li data-uk-filter="filter-b"><a href="#">Financial</a></li>
+            <li data-uk-filter="filter-c"><a href="#">Asset</a></li>
+        </ul>
+        <div class="uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-4 uk-margin-large-bottom hierarchical_show" data-uk-grid="{gutter: 20, controls: '#filter'}"> 
+            <div data-uk-filter="filter-a">
+                <h:commandLink style="color:black" action="inventorycredit">
+                    <div class="md-card">
+                        <div class="md-card-content">
+                            <h4 class="heading_c uk-margin-bottom uk-text-primary">Inventory Credit</h4>
+                            Displays the current quantities of system items in secondary inventories
+                        </div>
+                    </div>
+                </h:commandLink>
+            </div>     
+            <div data-uk-filter="filter-a">
+                <h:commandLink style="color:black" action="transactions">
+                    <div class="md-card">
+                        <div class="md-card-content">
+                            <h4 class="heading_c uk-margin-bottom uk-text-primary">Material Transactions</h4>
+                            Displays the current quantities of system items in secondary inventories during transactions
+                            between start and end dates
+                        </div>
+                    </div>
+                </h:commandLink>
+            </div>   
+        </div>  
+        <div class="uk-grid-width-small-1-2 uk-grid-width-medium-1-3 uk-grid-width-large-1-4 uk-margin-large-bottom hierarchical_show" data-uk-grid="{gutter: 20, controls: '#filter'}"> 
+            <div data-uk-filter="filter-c">
+                <h:commandLink style="color:black" action="viewfixedassets">
+                    <div class="md-card">
+                        <div class="md-card-content">
+                            <h4 class="heading_c uk-margin-bottom uk-text-primary">View Fixed Asset</h4>
+                           View fixed assets
+                        </div>
+                    </div>
+                </h:commandLink>
+            </div>     
+    
+        </div>  
+    </ui:define>
+
+</ui:composition>

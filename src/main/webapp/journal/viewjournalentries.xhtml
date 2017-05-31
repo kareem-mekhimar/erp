@@ -1,0 +1,151 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="jentry" />
+
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('journal_entries:read')}" />
+        </f:metadata>
+    </ui:define>    
+    
+    <ui:define name="title">
+        Journal Entries
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="header" class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-4-6">
+                        <h:outputLabel value="Name" for="name" />
+                        <h:inputText id="name" class="md-input" value="#{journalEntryController.currentName}"  />
+                    </div>
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter"
+                                       class="md-btn md-btn-primary uk-margin-small-top" process="header" 
+                                       update="table" action="#{journalEntryController.filter}">
+
+                        </p:commandLink>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="row" value="#{journalEntryController.headers}" 
+                                     paginator="true" sortBy="#{row.jeHeaderId}"
+                                     paginatorAlwaysVisible="false"
+                                     rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Name" styleClass="uk-width-7-10 uk-text-left">
+                                #{row.jeHeaderName}
+                            </p:column>
+                            <p:column headerText="Approve" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{row.approveStatus == 'APPROVED'  ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{row.approveStatus}
+                                </span>
+                            </p:column>
+                            <p:column headerText="Post" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{row.postStatus == 'POSTED' ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{row.postStatus}
+                                </span>
+                            </p:column>                            
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link
+                                    rendered="#{currentUser.hasPermission('journal_entries:create')}"
+                                    outcome="journalentrydetails?id=#{row.jeHeaderId}&amp;batch=#{row.batch.jeBatchId}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                                <ui:fragment rendered="#{not row.reversedFlag and not row.distributedFlag}">
+                                    <p:commandLink
+                                        rendered="#{currentUser.hasPermission('journal_entries:create')}"
+                                        title="reverse" process="@this"
+                                                   oncomplete="UIkit.modal.confirm('Reverse ?', function(){ reverse() ;}); return false; ">
+                                        <f:setPropertyActionListener target="#{journalEntryController.headerTobeReversed}" 
+                                                                     value="#{row}" />
+                                        <i class="material-icons md-24">cached</i>
+                                    </p:commandLink>
+                                </ui:fragment>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Journal Batch
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="dialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-1-1">
+                                <p:autoComplete id="batch" completeMethod="#{journalEntryController.completeBatch}" 
+                                                forceSelection="true" converter="javax.faces.Integer"
+                                                emptyMessage="No Records Found..!"  required="true"
+                                                value="#{journalEntryController.currentBatchId}"
+                                                inputStyleClass="md-input" placeholder="Search Batch" var="batch" 
+                                                itemLabel="#{batch.batchName}" itemValue="#{batch.jeBatchId}">
+                                    <p:ajax event="itemSelect" update="msg"   />
+                                </p:autoComplete> 
+                                <h:message for="batch" style="color:red" id="msg" />
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent" oncomplete="onDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{journalEntryController.redirectToDetails}">OK</p:commandLink>
+                </div>         
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink oncomplete="modal.show();" class="md-fab md-fab-accent" 
+                           rendered="#{currentUser.hasPermission('journal_entries:create')}">
+                <f:setPropertyActionListener target="#{journalEntryController.currentBatchId}" 
+                                             value="#{null}"/>
+                <i class="material-icons">&#xE145;</i>
+            </p:commandLink>
+        </div>
+
+        <p:remoteCommand name="reverse" update="table" process="@this" action="#{journalEntryController.reverseHeader}" />
+
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>      
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,99 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="formc" />
+
+    <ui:define name="title">
+        Formula Class
+    </ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('formulaclass:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <h:outputLabel value="Formula Class Code" for="fmcc" />
+                        <h:inputText id="fmcc" class="md-input" value="#{formulaClassController.formulaClassCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Formula Class Name" for="fmcn" />
+                        <h:inputText id="fmcn" class="md-input" value="#{formulaClassController.formulaClassName}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{formulaClassController.status}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItem itemLabel="Active" itemValue="1" />
+                                <f:selectItem itemLabel="Inactive" itemValue="0" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{formulaClassController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="foc" value="#{formulaClassController.formulaClassesList}" 
+                                     paginator="#{not empty formulaClassController.formulaClassesList}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+                            <p:column headerText="Code" styleClass="uk-width-2-10 uk-text-left">
+                                #{foc.code}
+                            </p:column>
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{foc.name}
+                            </p:column>
+                            <p:column headerText="Description" styleClass="uk-width-3-10 uk-text-left">
+                                #{foc.description}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{foc.status ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{foc.status ? 'Active' : 'InActive'}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="formulaClassDetails?id=#{foc.id}" 
+                                        rendered="#{currentUser.hasPermission('formulaclass:create')}">                                    
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="formulaClassDetails" 
+                    rendered="#{currentUser.hasPermission('formulaclass:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

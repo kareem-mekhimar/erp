@@ -1,0 +1,323 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="createPo" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{poDetailsController.currentPoId}" />
+            <f:viewAction action="#{poDetailsController.loadPo}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('po:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Purchase Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{poDetailsController.currentPo.poHeaderId == null ? 'New Purchase Order' : poDetailsController.currentPo.poHeaderId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-3-6">
+                                    <p:outputLabel value="Operating unit" class="uk-form-label" for="org"/>
+                                    <p:autoComplete id="org" value="#{poDetailsController.currentPo.org}" 
+                                                    completeMethod="#{poDetailsController.completeOperatingUnitsByName}"  
+                                                    emptyMessage="No Records.."  
+                                                    converter="#{organizationUnitConverter}"
+                                                    var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                                    placeholder="Search Operating Unit" inputStyleClass="md-input"
+                                                    readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                    validator="#{poDetailsController.validateOperatingUnitPayableConfiguration}"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update="@this m1 cur" event="itemSelect"  listener="#{poDetailsController.loadCurrencies()}" />
+                                    </p:autoComplete>
+                                    <h:message for="org" id="m1" style="color:red" />                                 
+                                </div>
+                                <div class="uk-width-medium-1-6">
+                                    <p:outputLabel for="reqestedon"   value="Requested On" style="margin-top: 5px" />
+                                    <h:inputText class="md-input" id="reqestedon" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true" 
+                                                 value="#{poDetailsController.currentPo.requestedOn}" style="margin-top: 20px">
+                                        <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                                    </h:inputText>
+                                    <h:message for="reqestedon" style="color:red;"  />
+
+                                </div>
+
+                                <div class="uk-width-medium-1-6">
+                                    <h:outputLabel for="status" class="uk-form-label" value="Status" style="margin-top: 5px" />
+                                    <h:inputText id="status" class="md-input" readonly="true" 
+                                                 value="#{poDetailsController.currentPo.poStatus}" style="margin-top: 20px"/>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-3-10">
+                                    <p:outputLabel value="Supplier" class="uk-form-label" for="sup"/>
+                                    <p:autoComplete id="sup" value="#{poDetailsController.currentPo.client}" 
+                                                    completeMethod="#{poDetailsController.completeClientByName}"  
+                                                    emptyMessage="No Records.."  converter="#{clientConverter}"
+                                                    var="cl" itemLabel="#{cl.clientName}" itemValue="#{cl}"
+                                                    placeholder="Search Supplier" inputStyleClass="md-input"
+                                                    readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update="purchasingSite paymentSite contact @this m2" event="itemSelect"
+                                                listener="#{poDetailsController.resetSite}"/>
+                                    </p:autoComplete>
+                                    <h:message for="sup" id="m2" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-2-10">
+                                    <p:outputLabel value="Purchasing from" class="uk-form-label" for="purchasingSite"/>
+                                    <p:autoComplete id="purchasingSite" value="#{poDetailsController.currentPo.clientSite}" 
+                                                    completeMethod="#{poDetailsController.completeSupplingSitesForClient}"  
+                                                    emptyMessage="No Records.." converter="#{clientSiteConverter}" 
+                                                    var="site" itemLabel="#{site.siteName}" itemValue="#{site}"
+                                                    placeholder="Search Site" inputStyleClass="md-input"
+                                                    readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update=" @this m3 contact" event="itemSelect" 
+                                                listener="#{poDetailsController.resetContact}"/>
+                                    </p:autoComplete>
+                                    <h:message for="purchasingSite" id="m3" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-2-10">
+                                    <p:outputLabel value="Contact" class="uk-form-label" for="contact"/>
+                                    <p:autoComplete id="contact" value="#{poDetailsController.currentPo.clientContact}" 
+                                                    completeMethod="#{poDetailsController.completeContactsForSite}"  
+                                                    emptyMessage="No Records.." converter="#{clientContactConverter}"
+                                                    inputStyleClass="md-input"
+                                                    var="con" itemLabel="#{con.contactName}" itemValue="#{con}"
+                                                    readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                    placeholder="Search Contacts"
+                                                    forceSelection="true"  ><!--required="true" -->
+                                        <p:ajax update="contact @this m4" event="itemSelect"  />
+                                    </p:autoComplete>
+                                    <h:message for="contact" id="m4" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-2-10">
+                                    <p:outputLabel value="Payment Site" class="uk-form-label" for="paymentSite"/>
+                                    <p:autoComplete id="paymentSite" value="#{poDetailsController.currentPo.clientPaymentSite}" 
+                                                    completeMethod="#{poDetailsController.completePaymentSitesForClient}"  
+                                                    emptyMessage="No Records.." converter="#{clientSiteConverter}" 
+                                                    var="site" itemLabel="#{site.siteName}" itemValue="#{site}"
+                                                    placeholder="Search Site" inputStyleClass="md-input"
+                                                    readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update=" @this m04 contact" event="itemSelect" 
+                                                listener="#{poDetailsController.resetContact}"/>
+                                    </p:autoComplete>
+                                    <h:message for="paymentSite" id="m04" style="color:red" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <h:panelGroup layout="block" id="cur">
+                                <div class="uk-grid">
+                                    <div class="uk-width-medium-1-4">
+                                        <p:outputLabel value="Payment Term" class="uk-form-label" for="term"/>
+                                        <h:selectOneMenu id="term" value="#{poDetailsController.currentPo.paymentTerm}"
+                                                         pt:data-md-selectize="true" required="true"
+                                                         disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                         pt:data-placeholder="Payment Term">
+                                            <f:selectItem noSelectionOption="true" itemLabel="Payment Term" />
+                                            <f:selectItems itemLabel="#{t.label}" itemValue="#{t}" 
+                                                           var="t" value="#{poDetailsController.paymentTerms}" />
+                                        </h:selectOneMenu> 
+                                        <h:message for="term" style="color:red" />
+                                    </div>
+
+                                    <div class="uk-width-medium-1-4">
+                                        <p:outputLabel value="Currency" class="uk-form-label" for="currency"/>
+                                        <h:selectOneMenu id="currency" value="#{poDetailsController.currentPo.currency}"
+                                                         pt:data-md-selectize="true" converter="#{fndCurrencyConverter}"
+                                                         disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                         pt:data-placeholder="Currency">
+                                            <f:selectItem noSelectionOption="true" itemLabel="Currency" />
+                                            <f:selectItems  value="#{poDetailsController.currencies}"
+                                                            var="c" itemLabel="#{c.currencyCode}" itemValue="#{c}"  />
+                                        </h:selectOneMenu>  
+                                    </div>
+
+                                    <div class="uk-width-medium-1-4">
+                                        <ui:remove>
+                                            <h:outputLabel for="rev" value="Revision" style="margin-top: 8px"/>
+                                            <h:inputText id="rev" class="md-input label-fixed" value="#{poDetailsController.currentPo.revisionNum}" 
+                                                         readonly="true" style="margin-top: 12px" />
+                                        </ui:remove>
+                                    </div>
+                                    <div class="uk-width-medium-1-6">
+                                        <h:outputLabel for="totalAmount"  value="Total Amount" style="margin-top: 8px"/>
+                                        <h:inputText id="totalAmount" class="md-input label-fixed" readonly="true" style="margin-top: 12px"
+                                                     value="#{poDetailsController.currentPo.totalAmount}" />
+                                    </div>
+                                </div>
+                            </h:panelGroup>
+                        </div>
+                        <dic class="uk-form-row">
+                            <div class="uk-grid uk-margin-top">
+                                <div class="uk-width-1-1">
+                                    <h:outputLabel value="Note To vendor" class="uk-form-label" for="note" />
+                                    <h:inputText class="md-input label-fixed" id="note" value="#{poDetailsController.currentPo.noteToVendor}" />
+                                </div>
+                            </div>
+                        </dic>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="linesTable" process="linesTable @this" action="#{poDetailsController.addLine}"
+                                           disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}" >
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{poDetailsController.currentPo.poLines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="No." >
+                                    #{line.lineNum}
+                                </p:column>
+                                <p:column headerText="Line Type" styleClass="uk-text-left">
+
+                                    <h:selectOneMenu value="#{line.poLineType}" style="height: 27px"
+                                                     disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}">
+                                        <f:selectItems value="#{poDetailsController.lineTypes}" />
+                                        <f:ajax execute="@this" render="linesTable"/>
+                                    </h:selectOneMenu>
+                                </p:column>
+                                <p:column headerText="Item" styleClass="uk-text-left">
+                                    <ui:fragment id="iid" rendered="#{line.poLineType == 'ITEM' || line.poLineType == null}">
+                                        <p:autoComplete id="systemitem" value="#{line.systemItem}" inputStyleClass="uk-width-1-1"
+                                                        completeMethod="#{poDetailsController.completeSystemItems}"  
+                                                        emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                        var="item" itemLabel="#{item.description}" itemValue="#{item}"
+                                                        readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                        placeholder="Search System Item"
+                                                        forceSelection="true" required="true"  >
+                                            <p:ajax update="uom tax systemitemTip @this" 
+                                                    listener="#{poDetailsController.onItemSelectChange(line)}" event="itemSelect" />
+                                        </p:autoComplete>
+                                        <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                            <h:message for="systemitem" />
+                                        </p:tooltip>
+
+                                    </ui:fragment>
+                                    <ui:fragment id="iname" rendered="#{line.poLineType == 'ASSET' || line.poLineType == 'SERVICE'}">
+                                        <p:inputText id="itemName" value="#{line.itemName}" required="true" styleClass="uk-width-1-1"
+                                                     readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}">
+
+                                        </p:inputText>
+
+                                        <p:tooltip id="itemNameTip" for="itemName" position="right">
+                                            <h:message for="itemName" />
+                                        </p:tooltip>
+
+                                    </ui:fragment>
+
+                                </p:column>
+
+                                <p:column headerText="UOM" styleClass="uk-text-center">
+                                    <h:outputText id="uom" value="#{line.primaryUom.uomCode}"/>
+                                </p:column>                              
+                                <p:column headerText="Quantity" styleClass="uk-text-left">
+                                    <p:inputText id="quantity" value="#{line.quantityOrdered}" required="true" 
+                                                 readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}" style="width: 80px">
+                                        <p:ajax listener="#{poDetailsController.onUnitPriceOrAmountChange(line)}" 
+                                                update="amount totalAmount @this quantityTip" />
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="quantity" />
+                                    <p:tooltip id="quantityTip" for="quantity" position="right">
+                                        <h:message for="quantity" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Unit Price" styleClass="uk-text-left">
+                                    <p:inputText  id="unitprice" value="#{line.listPricePerUnit}" required="true" 
+                                                  readonly="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}" style="width: 80px">
+                                        <p:ajax listener="#{poDetailsController.onUnitPriceOrAmountChange(line)}" 
+                                                update="amount totalAmount unitpriceTip @this" />
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="unitprice" />
+                                    <p:tooltip id="unitpriceTip" for="unitprice"  position="left">
+                                        <h:message for="unitprice" />
+                                    </p:tooltip>
+                                </p:column>                         
+                                <p:column headerText="Amount" styleClass="uk-text-center">
+                                    <h:outputText value="#{line.amount}" id="amount" />
+                                </p:column>                             
+                                <p:column headerText="Taxable" styleClass="uk-text-center">
+                                    <p:selectBooleanCheckbox id="tax" value="#{line.taxable}" 
+                                                             disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}" />
+                                </p:column>  
+                                <p:column headerText="Action" styleClass="uk-text-center">
+                                    <p:commandLink action="#{poDetailsController.removeLine(line)}" disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}"
+                                                   immediate="true" update="linesTable">
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                </p:column>
+
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  type="submit" update="@form" process="@form" class="md-fab md-fab-primary" action="#{poDetailsController.save}" 
+                            disabled="#{poDetailsController.currentPo.poStatus!='INCOMPLETE'}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            function addToMenu(id, options) {
+
+                //                  //$("#supplier").selectize() ;
+                //                  $("#supplier")[0].selectize.addOption({value:13,text:'foo'}) ;
+                //                          $("#supplier")[0].selectize.addItem(13); 
+            }
+
+            //  addToMenu("site") ;
+        </script>
+    </ui:define>
+</ui:composition>

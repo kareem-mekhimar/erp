@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="emp" />   
+
+    <ui:define name="title">
+        Employees
+    </ui:define>
+
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom">Employees</h3>
+        <div class="md-card uk-margin-medium-bottom">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Employee Name" for="name" />
+                        <h:inputText id="name" class="md-input" value="#{employeeController.currentName}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="depart" value="#{employeeController.currentDeptId}" 
+
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Department" itemValue="#{null}" />
+
+                                <f:selectItems var="de" value="#{employeeController.departments}" 
+                                               itemLabel="#{de.departmentName}" itemValue="#{de.departmentId}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="job" value="#{employeeController.currentJobId}" 
+
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Job" itemValue="#{null}" />
+
+                                <f:selectItems var="job" value="#{employeeController.jobs}" 
+                                               itemLabel="#{job.jobName}" itemValue="#{job.jobId}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="grid"  action="#{employeeController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup layout="block"  id="grid" pt:data-uk-grid="{gutter:10}">
+
+            <!-- CARD -->
+            <ui:repeat var="emp" value="#{employeeController.employees}">
+
+                <div class="uk-width-small-1-2 uk-width-medium-1-4 uk-margin-medium-top">
+                    <div class="md-card md-card-hover">
+                        <div class="md-card-head">
+                            <div class="md-card-head-menu">
+                                <h:link outcome="details?id=#{emp.employeeId}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </div>
+                            <div class="uk-text-center">
+                                <h:graphicImage class="md-card-head-avatar" library="imgs" name="avatars/user.png" />
+                            </div>
+                            <h3 class="md-card-head-text uk-text-center">
+                                #{emp.firstNameEn} #{emp.lastNameEn}  
+                                <span class="uk-text-truncate">#{emp.job.jobName} </span>
+                            </h3>
+                        </div>
+                        <div class="md-card-content">
+                            <ul class="md-list">
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Department</span>
+                                        <span class="uk-text-small uk-text-muted">#{emp.department.departmentName}</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Email</span>
+                                        <span class="uk-text-small uk-text-muted uk-text-truncate">#{emp.email}</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Phone</span>
+                                        <span class="uk-text-small uk-text-muted">#{emp.phoneNumber}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </ui:repeat>
+
+        </h:panelGroup>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="details" 
+                    rendered="#{currentUser.hasPermission('emp:create')}"> 
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+        <p:outputPanel autoUpdate="true">
+            <h:outputScript>
+                UIkit.grid("#grid", {gutter:10});
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

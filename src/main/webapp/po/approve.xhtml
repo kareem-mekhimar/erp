@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="approvePo" />
+    
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('po:approve')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Approve
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-5">
+                        <h:outputLabel value="Po Code" for="pocode" />
+                        <h:inputText id="pocode" class="md-input" value="#{poApproveController.currentpoCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-5">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="supplier" value="#{poApproveController.currentSelectedClientId}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem itemLabel="Select Supplier" itemValue="#{null}" />
+                                <f:selectItems var="cl" value="#{poApproveController.clients}" 
+                                               itemLabel="#{cl.clientName}" itemValue="#{cl.clientId}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-5 uk-text-center">
+                        <p:commandLink value="Filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{poApproveController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="po" value="#{poApproveController.poHeaders}" 
+                                     selection="#{poApproveController.selectedPos}" 
+                                     rowSelectMode="checkbox"
+                                     rowKey="#{po.poHeaderId}" tableStyleClass="uk-table">
+                            
+                            <p:ajax event="rowSelectCheckbox" update=":fabBtns" />
+                            <p:ajax event="rowUnselectCheckbox" update=":fabBtns" />
+                            <p:ajax event="toggleSelect" update=":fabBtns" />
+                            
+                            <p:column selectionMode="multiple" styleClass="uk-width-1-10 uk-text-center" />
+                            
+                            <p:column headerText="PoCode" styleClass="uk-width-1-10">
+                                #{po.poCode}
+                            </p:column>
+
+                            <p:column headerText="Supplier" styleClass="uk-width-3-10">
+                                #{po.client.clientName}
+                            </p:column>
+                            <p:column headerText="Ship Location" styleClass="uk-width-2-10">
+                                #{po.clientSite.siteName}
+                            </p:column>
+                            <p:column headerText="Amount" styleClass="uk-width-1-10">
+                                 #{po.totalAmount}
+                            </p:column>
+
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup id="fabBtns" class="md-fab-wrapper" layout="block">
+            <p:commandLink class="md-fab md-fab-success" disabled="#{empty poApproveController.selectedPos}" onclick="UIkit.modal.confirm('Approve ?', function(){ approve() ;}); return false; "><i class="material-icons">done</i></p:commandLink>
+            <p:commandLink  class="md-fab md-fab-danger" disabled="#{empty poApproveController.selectedPos}" onclick="UIkit.modal.confirm('Reject ?', function(){ reject() ;}); return false; "><i class="material-icons">close</i></p:commandLink>
+        </h:panelGroup>
+   
+     
+        <p:remoteCommand update="table" action="#{poApproveController.approveSelectedPos}" name="approve"/>
+        <p:remoteCommand update="table" action="#{poApproveController.rejectSelectedPos}" name="reject" />
+    </ui:define>
+
+</ui:composition>

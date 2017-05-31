@@ -1,0 +1,588 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="clients" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{siteDetailsController.currentSiteId}" />
+            <f:viewParam name="clientId" value="#{siteDetailsController.currentClientId}" />
+            <f:viewAction action="#{siteDetailsController.loadSite()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('clients:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Site Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{siteDetailsController.currentClient == null ? 'Unknown Client' : siteDetailsController.currentClient.clientName }  -  
+            #{siteDetailsController.currentSite.siteId == null ? 'New Site': siteDetailsController.currentSite.siteName}
+
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="pageHead">
+
+
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-1-5">
+                            <p:outputLabel for="code" value="Site Code" />
+                            <p:inputText class="md-input" id="code" value="#{siteDetailsController.currentSite.siteNumber}"  required="true">
+                            </p:inputText>
+                            <h:message for="code" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-2-5">
+                            <p:outputLabel for="name" value="Site Name" />
+                            <p:inputText class="md-input" id="name" value="#{siteDetailsController.currentSite.siteName}"  required="true">
+                            </p:inputText>
+                            <h:message for="name" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-2-5">
+                            <p:outputLabel for="aliasName" value="Site Alias" />
+                            <p:inputText class="md-input" id="aliasName" value="#{siteDetailsController.currentSite.aliasName}"  required="true">
+                            </p:inputText>
+                            <h:message for="aliasName" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-2-6">
+                            <p:outputLabel for="inactiveDate" value="End Active Date" />
+                            <h:inputText class="md-input" id="inactiveDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                         value="#{siteDetailsController.currentSite.endDateActive}">
+                                <f:convertDateTime pattern="dd-MM-yyyy"/>
+                            </h:inputText>
+                            <h:message id="dateMsg1" for="inactiveDate" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-2-6">
+                        </div>
+                        <div class="uk-width-medium-1-6">
+                            <h:selectBooleanCheckbox id="status" class="icheckbox_md"
+                                                     value="#{siteDetailsController.currentSite.status}" />
+                            <h:outputLabel  for="status" value=" Enabled"/>
+                        </div>
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-2-6">
+                            <p:autoComplete id="country" value="#{siteDetailsController.currentSite.countryCode}" 
+                                            completeMethod="#{siteDetailsController.completeCountry}" 
+                                            emptyMessage="No Records.." converter="#{countryConverter}"
+                                            var="item" itemLabel="#{item.countryName}" itemValue="#{item}"
+                                            inputStyleClass="md-input" 
+                                            placeholder="Country" required="true"
+                                            forceSelection="true">
+
+                                <p:ajax   event="itemSelect" />
+                            </p:autoComplete>
+                            <h:message for="country" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-2-6">
+                            <p:autoComplete id="state" value="#{siteDetailsController.currentSite.stateCode}" 
+                                            completeMethod="#{siteDetailsController.completeState}" 
+                                            emptyMessage="No Records.."
+                                            var="item" itemLabel="#{item}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="State" required="true"
+                                            forceSelection="true">
+                            </p:autoComplete>
+                            <h:message for="state" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-2-6">
+                            <p:outputLabel for="city" value="City" />
+                            <p:inputText class="md-input" id="city"  value="#{siteDetailsController.currentSite.cityCode}">
+                            </p:inputText>
+                            <h:message for="city" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-1-1">
+                            <p:outputLabel for="addressLine" value="Address Line" />
+                            <p:inputText class="md-input" id="addressLine"  value="#{siteDetailsController.currentSite.address}" required="true" >
+                            </p:inputText>
+                            <h:message for="addressLine" style="color:red;"  />
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <h:panelGroup layout="block" id="tab2" rendered="#{siteDetailsController.currentClient.customerFlag}">
+                <div class="md-card-content">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-1">
+
+
+                            <div class="uk-grid uk-margin-top" data-uk-grid-margin="true">
+                                <div class="uk-width-medium-2-6">
+
+                                    <h:selectOneMenu id="freightTerms" value="#{siteDetailsController.currentCustomerAcc.priceListId}"
+                                                     pt:data-md-selectize="true"
+                                                     pt:data-placeholder="Price List">
+                                        <f:selectItem noSelectionOption="true" itemLabel="Price List" itemValue="#{null}" />
+                                        <f:selectItems  value="#{siteDetailsController.priceLists}" 
+                                                        var="p" itemLabel="#{p.listHeaderName}" itemValue="#{p.listHeaderId}" 
+                                                        />
+                                    </h:selectOneMenu>
+
+                                </div>
+
+                                <div class="uk-width-medium-2-6">
+                                    <p:autoComplete id="salesAccountId" value="#{siteDetailsController.currentCustomerAcc.salesAccountId}" 
+                                                    completeMethod="#{siteDetailsController.completeCombinationCode}"  
+                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                    var="sales" itemLabel="#{sales.codeCombinationShortName}" itemValue="#{sales}"
+                                                    inputStyleClass="md-input"
+                                                    placeholder="Sales Account" 
+                                                    forceSelection="true" required="true">
+
+                                    </p:autoComplete>
+                                    <h:message for="salesAccountId" style="color:red;"  /> 
+                                </div>
+
+                                <div class="uk-width-medium-1-6">
+                                    <h:selectBooleanCheckbox id="shipToFlag" class="icheckbox_md"
+                                                             value="#{siteDetailsController.currentCustomerAcc.shipToFlag}" />
+                                    <h:outputLabel  for="shipToFlag" value=" Ship To"/>
+                                </div>
+                                <div class="uk-width-medium-1-6">
+                                    <h:selectBooleanCheckbox id="billToFlag" class="icheckbox_md"
+                                                             value="#{siteDetailsController.currentCustomerAcc.billToFlag}" />
+                                    <h:outputLabel  for="billToFlag" value=" Bill To"/>
+                                </div>
+
+
+                                <div class="uk-width-medium-1-3">
+                                    <p:outputLabel for="receivableAccount" value="Receivable Account" class="uk-form-label" />
+                                    <p:autoComplete id="receivableAccount" value="#{siteDetailsController.currentCustomerAcc.receivableAcc}" 
+                                                    completeMethod="#{siteDetailsController.completeAccounts}" 
+                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                    inputStyleClass="md-input" 
+                                                    placeholder="Search Accounts" 
+                                                    forceSelection="true" required="true" >                                                         
+                                    </p:autoComplete>                                                              
+                                    <h:message for="receivableAccount" style="color:red;"  />                                               
+                                </div>
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <div class="md-card">
+            <h:panelGroup layout="block" id="tab3" rendered="#{siteDetailsController.currentClient.supplierFlag}">
+                <div class="md-card-content">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-1">
+
+                            <div class="uk-width-1-1">
+                                <ul id="user_edit_tabs2" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content2',animation: 'slide-horizontal'}">
+                                    <li  class="uk-active"><a href="#">Accounting</a></li>
+                                    <li ><a href="#">Purchasing</a></li>
+                                    <li><a href="#">Receiving</a></li>
+                                    <li><a href="#">Payment details</a></li>                           
+                                </ul> 
+
+                                <ul id="user_edit_tabs_content2" class="uk-switcher uk-margin-small-top">
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <h:panelGroup layout="block" id="tab31">
+                                                        <div class="md-card-content"> 
+                                                            <div class="uk-grid" data-uk-grid-margin="true">
+                                                                <div class="uk-width-medium-1-3">
+                                                                    <p:autoComplete id="prepaymentAccount" value="#{siteDetailsController.currentSupplierAcc.prepaymentAccountId}" 
+                                                                                    completeMethod="#{siteDetailsController.completeCombinationCode}"  
+                                                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                                                    var="acc1" itemLabel="#{acc1.codeCombinationShortName}" itemValue="#{acc1}"
+                                                                                    inputStyleClass="md-input"
+                                                                                    placeholder="Prepayment" 
+                                                                                    forceSelection="true" required="true">
+
+                                                                    </p:autoComplete>
+                                                                    <h:message for="prepaymentAccount" style="color:red;"  />
+                                                                </div>
+                                                                <div class="uk-width-medium-1-3">
+                                                                    <p:autoComplete id="liabilityAccount" value="#{siteDetailsController.currentSupplierAcc.liabilityAccountId}" 
+                                                                                    completeMethod="#{siteDetailsController.completeCombinationCode}"  
+                                                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                                                    var="acc2" itemLabel="#{acc2.codeCombinationShortName}" itemValue="#{acc2}"
+                                                                                    inputStyleClass="md-input"
+                                                                                    placeholder="Liability" 
+                                                                                    forceSelection="true" required="true">
+
+                                                                    </p:autoComplete>
+                                                                    <h:message for="liabilityAccount" style="color:red;"  />
+                                                                </div>
+                                                                <div class="uk-width-medium-1-3">
+                                                                    <p:autoComplete id="billsPayableAccount" value="#{siteDetailsController.currentSupplierAcc.billsPayableAccountId}" 
+                                                                                    completeMethod="#{siteDetailsController.completeCombinationCode}"  
+                                                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                                                    var="acc3" itemLabel="#{acc3.codeCombinationShortName}" itemValue="#{acc3}"
+                                                                                    inputStyleClass="md-input"
+                                                                                    placeholder="Bills Payable" 
+                                                                                    forceSelection="true" required="true">
+
+                                                                    </p:autoComplete>
+                                                                    <h:message for="billsPayableAccount" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <h:panelGroup layout="block" id="tab32">
+
+                                                        <div class="md-card-content"> 
+                                                            <div class="uk-overflow-container">
+                                                                <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                                    <div class="uk-width-medium-2-6">
+                                                                        <h:selectBooleanCheckbox id="purchasingFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.purchasingFlag}"/>
+                                                                        <h:outputLabel for="purchasingFlag" value="Purchasing Site"/>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-2-6">
+                                                                        <h:selectBooleanCheckbox id="paymentFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.paymentFlag}"/>
+                                                                        <h:outputLabel for="paymentFlag" value="Payment Site"/>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-2-6">
+
+                                                                        <h:selectBooleanCheckbox id="purchasingHoldFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.purchasingHoldFlag}"/>
+                                                                        <h:outputLabel for="purchasingHoldFlag" value=" Hold new purchasing orders"/>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <h:panelGroup layout="block" id="tab33">
+
+                                                        <div class="md-card-content"> 
+                                                            <div class="uk-overflow-container">
+                                                                <div class="uk-grid uk-margin-small-top" data-uk-grid-margin="true">
+                                                                    <div class="uk-width-medium-2-6">
+                                                                        <p:outputLabel for="daysEarlyReceiptAllowed" value="Days Early Receipt Allowed" />
+                                                                        <p:inputText class="md-input" id="daysEarlyReceiptAllowed"  value="#{siteDetailsController.currentSupplierAcc.daysEarlyReceiptAllowed}" >
+                                                                        </p:inputText>
+                                                                        <h:message for="daysEarlyReceiptAllowed" style="color:red;"  />
+                                                                    </div>
+                                                                    <div class="uk-width-medium-2-6">
+                                                                        <p:outputLabel for="daysLateReceiptAllowed" value="Days Late Receipt Allowed" />
+                                                                        <p:inputText class="md-input" id="daysLateReceiptAllowed"  value="#{siteDetailsController.currentSupplierAcc.daysLateReceiptAllowed}" >
+                                                                        </p:inputText>
+                                                                        <h:message for="daysLateReceiptAllowed" style="color:red;"  />
+                                                                    </div>
+                                                                    <div class="uk-width-medium-2-6">
+                                                                        <p:outputLabel for="qtyRcvTolerance" value="Qty Rcv Tolerance" />
+                                                                        <p:inputText class="md-input" id="qtyRcvTolerance"  value="#{siteDetailsController.currentSupplierAcc.qtyRcvTolerance}" >
+                                                                        </p:inputText>
+                                                                        <h:message for="qtyRcvTolerance" style="color:red;"  />
+                                                                    </div>
+                                                                </div>
+                                                                <div class="uk-grid" data-uk-grid-margin="true">
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+
+                                                                            <h:selectOneMenu id="matchApprovalLevel" value="#{siteDetailsController.currentSupplierAcc.matchApprovalLevel}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Match Approval Level"  />
+                                                                                <f:selectItems var="al" value="#{siteDetailsController.approvalLevels}" 
+                                                                                               itemLabel="#{al}" itemValue="#{al}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+
+                                                                            <h:selectOneMenu id="invoiceMatchingOption" value="#{siteDetailsController.currentSupplierAcc.invoiceMatchingOption}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Matching Option"  />
+                                                                                <f:selectItems var="al" value="#{siteDetailsController.invoiceMatchingOptions}" 
+                                                                                               itemLabel="#{al}" itemValue="#{al}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+
+                                                                            <h:selectOneMenu id="enforceShipTypes" value="#{siteDetailsController.currentSupplierAcc.enforceShipToLocation}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Enforce Ship To Location" />
+                                                                                <f:selectItems var="es" value="#{siteDetailsController.enforceShipTypes}" 
+                                                                                               itemLabel="#{es}" itemValue="#{es}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+                                                                            <h:selectOneMenu id="qtyRcvExceptionCode" value="#{siteDetailsController.currentSupplierAcc.qtyRcvExceptionCode}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Qty Rcv Exception"  />
+                                                                                <f:selectItems var="rc" value="#{siteDetailsController.rcvExceptions}" 
+                                                                                               itemLabel="#{rc}" itemValue="#{rc}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+
+                                                                            <h:selectOneMenu id="receiptDateException" value="#{siteDetailsController.currentSupplierAcc.receiptDateException}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Receipt Date Exception" />
+                                                                                <f:selectItems var="re" value="#{siteDetailsController.recExceptions}" 
+                                                                                               itemLabel="#{re}" itemValue="#{re}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="uk-grid" data-uk-grid-margin="true">
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <div class="uk-margin-small-top">
+
+                                                                            <h:selectOneMenu id="receiptRouting" value="#{siteDetailsController.currentSupplierAcc.receiptRouting}" 
+                                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                                <f:selectItem noSelectionOption="true" itemLabel="Receipt Routing" />
+                                                                                <f:selectItems var="rr" value="#{siteDetailsController.recRoutings}" 
+                                                                                               itemLabel="#{rr}" itemValue="#{rr}" />
+                                                                            </h:selectOneMenu>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <h:selectBooleanCheckbox id="allowUnorderedReceiptsFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.allowUnorderedReceiptsFlag}" />
+                                                                        <h:outputLabel  for="allowUnorderedReceiptsFlag" value=" Allow Unordered Receipts"/>
+
+                                                                    </div>
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <h:selectBooleanCheckbox id="allowSubstituteReceiptsFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.allowSubstituteReceiptsFlag}" />
+                                                                        <h:outputLabel  for="allowSubstituteReceiptsFlag" value=" Allow Substitute Receipts"/>
+
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <h:panelGroup layout="block" id="tab34">
+
+                                                        <div class="md-card-content"> 
+                                                            <div class="uk-overflow-container">
+                                                                <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <h:selectOneMenu id="currency" value="#{siteDetailsController.currentSupplierAcc.paymentCurrencyCode}"
+                                                                                         pt:data-md-selectize="true" 
+                                                                                         pt:data-placeholder="Payment Currency">
+                                                                            <f:selectItem noSelectionOption="true" itemLabel="Currency"/>
+                                                                            <f:selectItems  value="#{siteDetailsController.currencies}"
+                                                                                            var="c" itemLabel="#{c.currencyCode}" itemValue="#{c.currencyCode}"  />
+                                                                        </h:selectOneMenu> 
+                                                                    </div>   
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <h:selectOneMenu id="method" value="#{siteDetailsController.currentSupplierAcc.paymentMethodLookupCode}"
+                                                                                         pt:data-md-selectize="true" 
+                                                                                         pt:data-placeholder="Payment Method">
+                                                                            <f:selectItem noSelectionOption="true" itemLabel="Method" itemValue="#{null}" />
+                                                                            <f:selectItems  value="#{siteDetailsController.allMethods}"
+                                                                                            var="m" itemLabel="#{m.paymentMethodCode}" itemValue="#{m.paymentMethodCode}"  />
+                                                                        </h:selectOneMenu> 
+                                                                    </div>   
+                                                                    <div class="uk-width-medium-1-4">
+
+                                                                    </div>   
+                                                                    <div class="uk-width-medium-1-4">
+                                                                        <h:selectBooleanCheckbox id="holdFuturePaymentsFlag" class="icheckbox_md"
+                                                                                                 value="#{siteDetailsController.currentSupplierAcc.holdFuturePaymentsFlag}"/>
+                                                                        <h:outputLabel for="holdFuturePaymentsFlag" value=" Hold Future Payments"/>
+
+                                                                    </div>   
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Contacts</a></li>
+                            <!--<li><a href="#">Bank Account</a></li>-->
+
+                        </ul> 
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab1">
+
+
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                        <p:commandLink update="linesTable" process="linesTable @this" action="#{siteDetailsController.addLine()}" immediate="true">
+                                                            <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                        </p:commandLink>   
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <p:dataTable id="linesTable" var="line" value="#{siteDetailsController.currentSite.contactList}" 
+                                                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left" >
+                                                                <p:inputText id="contactName" value="#{line.contactName}" styleClass="uk-width-1-1" required="true" >
+                                                                </p:inputText>
+                                                                <p:tooltip id="tip1" for="contactName" position="right">
+                                                                    <h:message for="contactName" />
+                                                                </p:tooltip>
+                                                            </p:column>
+                                                            <p:column headerText="phone Number" styleClass="uk-width-2-10 uk-text-left">
+                                                                <p:inputText id="phoneNo" value="#{line.phoneNo}" styleClass="uk-width-1-1" required="true">
+                                                                    <f:validateRegex pattern="[0-9]*"/>
+                                                                </p:inputText>
+                                                                <p:tooltip id="tip2" for="phoneNo" position="right">
+                                                                    <h:message for="phoneNo" />
+                                                                </p:tooltip>
+                                                            </p:column>
+                                                            <p:column headerText="Email Address" styleClass="uk-width-3-10 uk-text-left">
+                                                                <p:inputText id="emailAddress" value="#{line.emailAddress}" styleClass="uk-width-1-1" rendered="true">
+                                                                    <f:validateRegex pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)"/>
+                                                                </p:inputText>
+                                                                <p:tooltip id="tip3" for="emailAddress" position="left">
+                                                                    <h:message for="emailAddress" />
+                                                                </p:tooltip>
+                                                            </p:column>         
+                                                            <p:column headerText="Disabled" styleClass="uk-width-1-10 uk-text-center" >
+                                                                <p:selectBooleanCheckbox  id="disabledFlag" value="#{line.disabledFlag}"/>
+                                                            </p:column>  
+                                                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">                                
+                                                                <p:commandLink action="#{siteDetailsController.removeContact(line)}" 
+                                                                               immediate="true" update="linesTable" >
+                                                                    <i class="material-icons md-24">close</i>
+                                                                </p:commandLink>
+                                                            </p:column>                                 
+                                                        </p:dataTable>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab4">
+
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+
+
+
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectOneMenu id="account" value="#{siteDetailsController.currentSite.bankAccount}"
+                                                                                 pt:data-md-selectize="true" 
+                                                                                 pt:data-placeholder="Bank Account">
+                                                                    <f:selectItem noSelectionOption="true" itemLabel="Bank Account"/>
+                                                                    <f:selectItems  value="#{siteDetailsController.bankAccounts}"
+                                                                                    var="ba" itemLabel="#{ba.bankAccountName}" itemValue="#{ba.bankAccountId}"  />
+                                                                </h:selectOneMenu> 
+                                                            </div>   
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit" update="@this pageHead tab1 tab2 tab31 tab32 tab33 tab34 tab4" 
+                           process="@this pageHead tab1 tab2 tab31 tab32 tab33 tab34 tab4" action="#{siteDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

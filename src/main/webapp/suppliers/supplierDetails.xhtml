@@ -1,0 +1,567 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="supplier" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{apSuppliersDetailsController.currentSupplierId}" />
+            <f:viewAction action="#{apSuppliersDetailsController.loadSupplier()}" />
+        </f:metadata>
+
+    </ui:define>
+    <ui:define name="title">
+        Supplier Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{apSuppliersDetailsController.currentSupplier.vendorId == null ? 'New Supplier' : 
+              apSuppliersDetailsController.currentSupplier.vendorName }
+        </h4>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="pageHead">
+                    <div class="uk-grid" data-uk-grid-margin="true">
+
+
+
+
+                        <div class="uk-width-medium-3-10">
+                            <h:outputLabel value="Supplier Name" for="supplierName" />
+                            <h:inputText id="supplierName" class="md-input" value="#{apSuppliersDetailsController.currentSupplier.vendorName}"  
+                                         required="true"  />
+                            <h:message for="supplierName" style="color:red;" />
+                        </div>
+                        <div class="uk-width-medium-3-10">
+                            <h:outputLabel value="Alias Name" for="aliasName" />
+                            <h:inputText id="aliasName" class="md-input" value="#{apSuppliersDetailsController.currentSupplier.vendorNameAlt}" />
+                            <h:message for="aliasName" style="color:red;" />
+                        </div>
+                        <div class="uk-width-medium-2-10">
+                            <h:selectOneMenu id="vendorTypeLookupCode" value="#{apSuppliersDetailsController.currentSupplier.vendorTypeLookupCode}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Supplier Type"/>
+                                <f:selectItems var="typ" value="#{apSuppliersDetailsController.supplierTypes}" 
+                                               itemLabel="#{typ}" itemValue="#{typ}" />
+                            </h:selectOneMenu>
+                            <h:message for="vendorTypeLookupCode" style="color:red;" /> 
+                        </div>
+                        <div class="uk-width-medium-2-10">
+                            <h:selectBooleanCheckbox  id="enabledFlagId" class="icheckbox_md"
+                                                      value="#{apSuppliersDetailsController.currentSupplier.enabledFlagId}"/>
+                            <h:outputLabel for="enabledFlagId" value=" Enabled"/>
+
+
+                        </div>
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+
+                        <div class="uk-width-medium-2-6">
+                            <h:outputLabel value="Supplier Code" for="suppliernumber" />
+                            <h:inputText id="suppliernumber" class="md-input" value="#{apSuppliersDetailsController.currentSupplier.vendorNumber}"  
+                                         required="true"  />
+                            <h:message for="suppliernumber" style="color:red;"  />
+                        </div>
+
+                        <div class="uk-width-medium-2-6">
+                            <h:outputLabel value="Customer number" for="customernumber" />
+                            <h:inputText id="customernumber" class="md-input" value="#{apSuppliersDetailsController.currentSupplier.customerNum}"  
+                                         required="true"  />
+                            <h:message for="customernumber" style="color:red;"  />
+                        </div> 
+                        <div class="uk-width-medium-2-6">
+                            <p:outputLabel for="endDateActive" value="End Active Date" />
+                            <h:inputText class="md-input" id="endDateActive" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                         value="#{apSuppliersDetailsController.currentSupplier.endDateActive}">
+                                <f:convertDateTime pattern="dd-MM-yyyy"/>
+                            </h:inputText>
+                            <h:message for="endDateActive" style="color:red;"  />
+                        </div>
+                    </div> 
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li id="siteTab" class="uk-active"><a href="#">Sites</a></li>
+                            <li><a href="#">Accounting</a></li>
+                            <li><a href="#">Purchasing</a></li>
+                            <li><a href="#">Receiving</a></li>
+                            <li><a href="#">Payment details</a></li>                           
+                        </ul> 
+
+
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+
+                                                    <p:commandLink action="#{apSuppliersDetailsController.createSite()}" process="@this">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                    </p:commandLink >     
+
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <p:dataTable id="siteTable" var="sLine" value="#{apSuppliersDetailsController.currentSupplier.supplierSites}" 
+                                                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                                        <p:column headerText="Code" styleClass="uk-width-1-10 uk-text-center">    
+                                                            #{sLine.vendorSiteCode}
+                                                        </p:column>                                 
+                                                        <p:column headerText="Name" styleClass="uk-width-2-10 uk-text-center">    
+                                                            #{sLine.vendorSiteName}
+                                                        </p:column>                                 
+                                                        <p:column headerText="Country" styleClass="uk-width-2-10 uk-text-center">    
+                                                            #{sLine.country.countryName}
+                                                        </p:column>                                 
+                                                        <p:column headerText="City" styleClass="uk-width-2-10 uk-text-center">    
+                                                            #{sLine.cityId.cityName}
+                                                        </p:column>                                                       
+                                                        <p:column headerText="Address Line" styleClass="uk-width-2-10 uk-text-center">    
+                                                            #{sLine.addressLine1}
+                                                        </p:column>                                  
+
+                                                        <p:column headerText="Action" styleClass="uk-width-1-10 uk-text-center">    
+                                                            <h:link  outcome="siteDetails?id=#{sLine.vendorSiteId}">
+                                                                <i class="material-icons md-24">mode_edit</i>
+                                                            </h:link>
+                                                        </p:column>                                 
+                                                    </p:dataTable>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                    <p:commandLink   oncomplete="modal.show();" process="@this" update="dialogContent"
+                                                                     action="#{apSuppliersDetailsController.initSiteAccount()}"
+                                                                     disabled="#{apSuppliersDetailsController.currentSupplier.vendorId==null}">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+
+                                                    </p:commandLink>
+
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <p:dataTable id="accountTable" var="aLine" value="#{apSuppliersDetailsController.currentSupplier.supplierSiteAcounts}"
+                                                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                                        <p:column headerText="Site Code" styleClass="uk-width-1-10 uk-text-center">    
+                                                            #{aLine.vendorSiteId.vendorSiteCode}
+                                                        </p:column>                                 
+                                                        <p:column headerText="Site Name" styleClass="uk-width-2-10 uk-text-left">    
+                                                            #{aLine.vendorSiteId.vendorSiteName}
+                                                        </p:column>                                 
+                                                        <p:column headerText="Pre Payments Account" styleClass="uk-width-2-10 uk-text-left">    
+                                                            #{aLine.prepaymentAccountId.codeCombination}
+                                                        </p:column>                                 
+                                                        <p:column headerText="Liability Account" styleClass="uk-width-2-10 uk-text-left">    
+                                                            #{aLine.liabilityAccountId.codeCombination}
+                                                        </p:column>                                                       
+                                                        <p:column headerText="Bills Payable Account" styleClass="uk-width-2-10 uk-text-left">    
+                                                            #{aLine.billsPayableAccountId.codeCombination}
+                                                        </p:column>                                  
+
+                                                        <p:column headerText="Action" styleClass="uk-width-1-10 uk-text-center">    
+                                                            <p:commandLink  update="dialogContent" process="@this" oncomplete="modal.show();" 
+                                                                            action="#{apSuppliersDetailsController.loadLists()}">
+                                                                <f:setPropertyActionListener target="#{apSuppliersDetailsController.currentSiteAccount}" value="#{aLine}" />
+                                                                <i class="material-icons md-24">mode_edit</i>
+                                                            </p:commandLink>
+                                                        </p:column>                                 
+                                                    </p:dataTable>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab3">
+
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <h:selectBooleanCheckbox id="purchasingHoldFlag" class="icheckbox_md"
+                                                                                         value="#{apSuppliersDetailsController.currentSupplier.purchasingHoldFlag}"/>
+                                                                <h:outputLabel for="purchasingHoldFlag" value=" Hold new purchasing orders"/>
+
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab4">
+
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-small-top" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+                                                                <p:outputLabel for="daysEarlyReceiptAllowed" value="Days Early Receipt Allowed" />
+                                                                <p:inputText class="md-input" id="daysEarlyReceiptAllowed"  value="#{apSuppliersDetailsController.currentSupplier.daysEarlyReceiptAllowed}" >
+                                                                </p:inputText>
+                                                                <h:message for="daysEarlyReceiptAllowed" style="color:red;"  />
+
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <p:outputLabel for="daysLateReceiptAllowed" value="Days Late Receipt Allowed" />
+                                                                <p:inputText class="md-input" id="daysLateReceiptAllowed"  value="#{apSuppliersDetailsController.currentSupplier.daysLateReceiptAllowed}" >
+                                                                </p:inputText>
+                                                                <h:message for="daysLateReceiptAllowed" style="color:red;"  />
+
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <p:outputLabel for="qtyRcvTolerance" value="Qty Rcv Tolerance" />
+                                                                <p:inputText class="md-input" id="qtyRcvTolerance"  value="#{apSuppliersDetailsController.currentSupplier.qtyRcvTolerance}" >
+                                                                </p:inputText>
+                                                                <h:message for="qtyRcvTolerance" style="color:red;"  />
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="matchApprovalLevel" value="#{apSuppliersDetailsController.currentSupplier.matchApprovalLevel}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                        <f:selectItem noSelectionOption="true" itemLabel="Match Approval Level"  />
+                                                                        <f:selectItems var="al" value="#{apSuppliersDetailsController.approvalLevels}" 
+                                                                                       itemLabel="#{al}" itemValue="#{al}" />
+                                                                    </h:selectOneMenu>
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="enforceShipTypes" value="#{apSuppliersDetailsController.currentSupplier.enforceShipToLocation}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                        <f:selectItem noSelectionOption="true" itemLabel="Enforce Ship To Location" />
+                                                                        <f:selectItems var="es" value="#{apSuppliersDetailsController.enforceShipTypes}" 
+                                                                                       itemLabel="#{es}" itemValue="#{es}" />
+                                                                    </h:selectOneMenu>
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="qtyRcvExceptionCode" value="#{apSuppliersDetailsController.currentSupplier.qtyRcvExceptionCode}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                        <f:selectItem noSelectionOption="true" itemLabel="Qty Rcv Exception"  />
+                                                                        <f:selectItems var="rc" value="#{apSuppliersDetailsController.rcvExceptions}" 
+                                                                                       itemLabel="#{rc}" itemValue="#{rc}" />
+                                                                    </h:selectOneMenu>
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="receiptDateException" value="#{apSuppliersDetailsController.currentSupplier.receiptDateException}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                        <f:selectItem noSelectionOption="true" itemLabel="Receipt Date Exception" />
+                                                                        <f:selectItems var="re" value="#{apSuppliersDetailsController.recExceptions}" 
+                                                                                       itemLabel="#{re}" itemValue="#{re}" />
+                                                                    </h:selectOneMenu>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="receiptRouting" value="#{apSuppliersDetailsController.currentSupplier.receiptRouting}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                                        <f:selectItem noSelectionOption="true" itemLabel="Receipt Routing" />
+                                                                        <f:selectItems var="rr" value="#{apSuppliersDetailsController.recRoutings}" 
+                                                                                       itemLabel="#{rr}" itemValue="#{rr}" />
+                                                                    </h:selectOneMenu>
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectBooleanCheckbox id="allowUnorderedReceiptsFlag" class="icheckbox_md"
+                                                                                         value="#{apSuppliersDetailsController.currentSupplier.allowUnorderedReceiptsFlag}" />
+                                                                <h:outputLabel  for="allowUnorderedReceiptsFlag" value=" Allow Unordered Receipts"/>
+
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectBooleanCheckbox id="allowSubstituteReceiptsFlag" class="icheckbox_md"
+                                                                                         value="#{apSuppliersDetailsController.currentSupplier.allowSubstituteReceiptsFlag}" />
+                                                                <h:outputLabel  for="allowSubstituteReceiptsFlag" value=" Allow Substitute Receipts"/>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab5">
+
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectOneMenu id="currency" value="#{apSuppliersDetailsController.currentSupplier.paymentCurrencyCode}"
+                                                                                 pt:data-md-selectize="true" 
+                                                                                 pt:data-placeholder="Payment Currency">
+                                                                    <f:selectItem noSelectionOption="true" itemLabel="Currency" itemValue="#{null}" />
+                                                                    <f:selectItems  value="#{apSuppliersDetailsController.allCurrencies}"
+                                                                                    var="c" itemLabel="#{c.currencyCode}" itemValue="#{c.currencyCode}"  />
+                                                                </h:selectOneMenu> 
+                                                            </div>   
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectOneMenu id="method" value="#{apSuppliersDetailsController.currentSupplier.paymentMethodLookupCode}"
+                                                                                 pt:data-md-selectize="true" 
+                                                                                 pt:data-placeholder="Payment Method">
+                                                                    <f:selectItem noSelectionOption="true" itemLabel="Method" itemValue="#{null}" />
+                                                                    <f:selectItems  value="#{apSuppliersDetailsController.allMethods}"
+                                                                                    var="m" itemLabel="#{m.paymentMethodCode}" itemValue="#{m.paymentMethodCode}"  />
+                                                                </h:selectOneMenu> 
+                                                            </div>   
+                                                            <div class="uk-width-medium-1-4">
+
+                                                            </div>   
+                                                            <div class="uk-width-medium-1-4">
+                                                                <h:selectBooleanCheckbox id="holdFuturePaymentsFlag" class="icheckbox_md"
+                                                                                         value="#{apSuppliersDetailsController.currentSupplier.holdFuturePaymentsFlag}"/>
+                                                                <h:outputLabel for="holdFuturePaymentsFlag" value=" Hold Future Payments"/>
+
+                                                            </div>   
+
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="uk-modal" id="dialog">
+
+                <div class="uk-modal-dialog uk-modal-dialog-large">
+                    <div class="uk-modal-header">
+                        <h5 class="uk-modal-title">Account</h5>
+                    </div>
+                    <h:panelGroup layout="block" id="dialogContent" >
+                        <h:panelGroup layout="block" id="childDialogContent"  rendered="#{apSuppliersDetailsController.currentSiteAccount!=null}">
+                            
+                            
+                                <div class="uk-grid" data-uk-grid-margin="true">
+                                <div class="uk-width-medium-1-2">
+                                    <p:autoComplete id="vendorSiteId" value="#{apSuppliersDetailsController.currentSiteAccount.vendorSiteId}" 
+                                                    completeMethod="#{apSuppliersDetailsController.completeSites}"  
+                                                    emptyMessage="No Records.." converter="#{apSupplierSiteConverter}"
+                                                    var="sit" itemLabel="#{sit.vendorSiteName}" itemValue="#{sit}"
+                                                    inputStyleClass="md-input"
+                                                    placeholder="Site Name" 
+                                                    forceSelection="true" required="true">
+
+                                    </p:autoComplete>
+                                    <h:message for="vendorSiteId" style="color:red;"  />
+
+                                </div>
+                                </div>
+                            
+                            <div class="uk-grid" data-uk-grid-margin="true">
+
+                                <div class="uk-width-medium-1-3">
+                                    <h:selectOneMenu id="ledgerId" value="#{apSuppliersDetailsController.currentSiteAccount.ledgerId}" 
+                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true">
+                                        <f:selectItem noSelectionOption="true" itemLabel="General Ledger" itemValue="#{null}" />
+                                        <f:selectItems var="gl" value="#{apSuppliersDetailsController.ledgerList}" 
+                                                       itemLabel="#{gl.name}" itemValue="#{gl.ledgerId}" />
+                                        <f:ajax execute="@this" render="dialogContent" listener="#{apSuppliersDetailsController.loadLegalEntity()}"/>
+                                    </h:selectOneMenu>
+                                    <h:message for="ledgerId" style="color:red;" /> 
+
+                                </div>
+                                <div class="uk-width-medium-1-3">
+                                    <h:selectOneMenu id="legalEntityId" value="#{apSuppliersDetailsController.currentSiteAccount.legalEntityId}" 
+                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true">
+                                        <f:selectItem noSelectionOption="true" itemLabel="Legal Entity" itemValue="#{null}" />
+                                        <f:selectItems var="leg" value="#{apSuppliersDetailsController.legalentityList}" 
+                                                       itemLabel="#{leg.orgUnitName}" itemValue="#{leg.orgUnitId}" />
+                                        <f:ajax execute="@this" render="dialogContent" listener="#{apSuppliersDetailsController.loadOperatingUnit()}"/>
+                                    </h:selectOneMenu>
+                                    <h:message for="legalEntityId" style="color:red;" /> 
+
+
+                                </div>
+
+                                <div class="uk-width-medium-1-3">
+                                    <h:selectOneMenu id="operatingUnitId" value="#{apSuppliersDetailsController.currentSiteAccount.operatingUnitId}" 
+                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true">
+                                        <f:selectItem noSelectionOption="true" itemLabel="Operating Unit" itemValue="#{null}" />
+                                        <f:selectItems var="op" value="#{apSuppliersDetailsController.operatingUnitList}" 
+                                                       itemLabel="#{op.orgUnitName}" itemValue="#{op.orgUnitId}" />
+                                    </h:selectOneMenu>
+                                    <h:message for="operatingUnitId" style="color:red;" /> 
+
+                                </div>
+                            </div>
+
+                        
+                                <div class="uk-grid" data-uk-grid-margin="true">
+                                <div class="uk-width-medium-1-3">
+                                    <p:autoComplete id="prepaymentAccount" value="#{apSuppliersDetailsController.currentSiteAccount.prepaymentAccountId}" 
+                                                    completeMethod="#{apSuppliersDetailsController.completeCombinationCode}"  
+                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                    var="acc1" itemLabel="#{acc1.codeCombination}" itemValue="#{acc1}"
+                                                    inputStyleClass="md-input"
+                                                    placeholder="Liability" 
+                                                    forceSelection="true" required="true">
+
+                                    </p:autoComplete>
+                                    <h:message for="prepaymentAccount" style="color:red;"  />
+
+                                </div>
+
+                       
+                                <div class="uk-width-medium-1-3">
+                                    <p:autoComplete id="liabilityAccount" value="#{apSuppliersDetailsController.currentSiteAccount.liabilityAccountId}" 
+                                                    completeMethod="#{apSuppliersDetailsController.completeCombinationCode}"  
+                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                    var="acc2" itemLabel="#{acc2.codeCombination}" itemValue="#{acc2}"
+                                                    inputStyleClass="md-input"
+                                                    placeholder="Bills Payable" 
+                                                    forceSelection="true" required="true">
+
+                                    </p:autoComplete>
+                                    <h:message for="liabilityAccount" style="color:red;"  />
+
+                                </div>
+                                <div class="uk-width-medium-1-3">
+                                    <p:autoComplete id="billsPayableAccount" value="#{apSuppliersDetailsController.currentSiteAccount.billsPayableAccountId}" 
+                                                    completeMethod="#{apSuppliersDetailsController.completeCombinationCode}"  
+                                                    emptyMessage="No Records.." converter="#{accConverter}"
+                                                    var="acc3" itemLabel="#{acc3.codeCombination}" itemValue="#{acc3}"
+                                                    inputStyleClass="md-input"
+                                                    placeholder="Bills Payable" 
+                                                    forceSelection="true" required="true">
+
+                                    </p:autoComplete>
+                                    <h:message for="billsPayableAccount" style="color:red;"  />
+
+                                </div>
+                            </div>
+
+                        </h:panelGroup>
+                    </h:panelGroup>
+                    <div class="uk-modal-footer uk-text-right">
+
+                        <p:commandLink  class="md-btn md-btn-flat uk-modal-close" process="@this"  update="dialogContent"
+                                        actionListener="#{apSuppliersDetailsController.clearLists()}">
+
+                            Cancel</p:commandLink>
+                        <p:commandLink update="dialogContent accountTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                       class="md-btn md-btn-flat md-btn-flat-primary" 
+                                       action="#{apSuppliersDetailsController.addSiteAccount()}">OK</p:commandLink>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="uk-modal" id="saveDialog">
+                <div class="uk-modal-dialog">
+                    <div class="uk-modal-header">
+                        <h3 class="uk-modal-title">Confirm</h3>
+                    </div>
+                    <p>Save Supplier...? </p>
+                    <div class="uk-modal-footer uk-text-right">
+                        <p:commandLink  class="md-btn md-btn-flat uk-modal-close" value="No"  />
+                        <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary" update="pageHead siteTable accountTable tab3 tab4 tab5" process="@this @form"
+                                       oncomplete="saveModal.hide()"
+                                       action="#{apSuppliersDetailsController.saveForSite()}" value="Yes" />
+                    </div>
+                </div>
+            </div>
+
+
+            <h:messages/>
+            <div class="md-fab-wrapper">
+                <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{apSuppliersDetailsController.save()}" >
+                    <i class="material-icons">&#xE161;</i>
+                </p:commandLink>
+            </div>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+            var saveModal = UIkit.modal('#saveDialog', {keyboard: false, bgclose: false, center: true});
+
+        </script>
+    </ui:define>
+</ui:composition>
+

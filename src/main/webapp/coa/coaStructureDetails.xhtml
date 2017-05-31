@@ -1,0 +1,416 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="structure" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{coaStructureDetailsController.currentStructureId}" />
+            <f:viewAction action="#{coaStructureDetailsController.loadStructure()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('coa:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        COA Structure Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{coaStructureDetailsController.currentStructureId == null ? 'New Structure' : coaStructureDetailsController.currentCoaStructure.coaName }
+        </h4>
+        <div class="md-card">
+            <h:panelGroup id="pageHead"  layout="block" class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-3-10">
+                        <p:outputLabel for="code" value="Code" />
+                        <p:inputText styleClass="md-input" id="code" required="true" value="#{coaStructureDetailsController.currentCoaStructure.coaCode}" 
+                                     readonly="#{coaStructureDetailsController.coaDisabled}">
+
+                        </p:inputText>
+                        <h:message id="m1" for="code" style="color:red;"  />
+
+                    </div>
+                    <div class="uk-width-medium-5-10">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText class="md-input" id="name" value="#{coaStructureDetailsController.currentCoaStructure.coaName}" 
+                                     readonly="#{coaStructureDetailsController.coaDisabled}" required="true">
+
+
+                        </p:inputText>
+                        <h:message id="m2" for="name" style="color:red;"  />
+
+                    </div>
+
+
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+
+
+                            <div class="uk-margin-small-top">
+
+
+                                <h:selectBooleanCheckbox id="enabledFlag" class="icheckbox_md"
+                                                         value="#{coaStructureDetailsController.currentCoaStructure.enabledFlagId}"/>
+                                <h:outputLabel for="enabledFlag" value=" Enabled"/>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-4-10">
+                        <div class="uk-margin-small-top">
+                            <p:outputLabel for="businessGroup" value="Business Group" />
+                            <p:autoComplete id="businessGroup" value="#{coaStructureDetailsController.currentCoaStructure.organization}" 
+                                            completeMethod="#{coaStructureDetailsController.completeBusinessGroup}"  
+                                            emptyMessage="No Records.." converter="#{organizationUnitConverter}"
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="Business Group" 
+                                            forceSelection="true" required="true"  
+                                            readonly="#{coaStructureDetailsController.coaDisabled}">
+
+                            </p:autoComplete>
+                            <h:message id="m3" for="businessGroup" style="color:red;"  />
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-3-10">
+                        <p:outputLabel for="sad" value="Start Active Date" />
+                        <h:inputText class="md-input" id="sad" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{coaStructureDetailsController.currentCoaStructure.startDateActive}" 
+                                     required="true" disabled="#{coaStructureDetailsController.coaDisabled}">
+
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                        </h:inputText>
+                        <h:message id="dateMsg1" for="sad" style="color:red;"  />
+
+                    </div>
+
+                    <div class="uk-width-medium-3-10">
+                        <p:outputLabel for="ead" value="End Active Date" />
+                        <h:inputText class="md-input" id="ead" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{coaStructureDetailsController.currentCoaStructure.endDateActive}" 
+                                     validator="#{coaStructureDetailsController.validateDate}" 
+                                     disabled="#{coaStructureDetailsController.coaDisabled}">
+
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+
+                        </h:inputText>
+                        <h:message id="dateMsg2" for="ead" style="color:red;"  />
+
+                    </div>
+
+                </div>
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-6-10">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc"  value="#{coaStructureDetailsController.currentCoaStructure.description}" 
+                                     readonly="#{coaStructureDetailsController.coaDisabled}">
+
+
+                        </p:inputText>
+                        <h:message id="m4" for="desc" style="color:red;"  />
+
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="separator" value="#{coaStructureDetailsController.currentCoaStructure.segmentsSeparator}"
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true"
+                                             pt:data-placeholder="Separator" disabled="#{coaStructureDetailsController.coaDisabled}" >
+
+                                <f:selectItems value="#{coaStructureDetailsController.separators}" 
+                                               var="sep"  itemLabel="#{sep.label}" itemValue="#{sep}" />
+
+                            </h:selectOneMenu>
+                            <h:message id="m7" for="separator" style="color:red;" />
+
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="coastat" value="#{coaStructureDetailsController.currentCoaStructure.coaStatus}" 
+                                             disabled="#{coaStructureDetailsController.currentCoaStructure.coaStatus=='LOCKED'}"
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" required="true"
+                                             pt:data-placeholder="Coa Status" readonly="false">
+                                <f:selectItems value="#{coaStructureDetailsController.coaStatus}" 
+                                               var="st" itemValue="#{st}" itemLabel="#{st}" />
+
+                            </h:selectOneMenu>
+                            <h:message id="m6" for="coastat" style="color:red;" />
+
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="dialogContent" oncomplete="modal.show();" process="@this"
+                                           action="#{coaStructureDetailsController.loadModal(null)}"
+                                           disabled="#{coaStructureDetailsController.coaDisabled}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                  
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Segment
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+
+                            <p:dataTable id="linesTable" rowIndexVar="rowIndex" var="line" value="#{coaStructureDetailsController.currentCoaStructure.coaSegmentList}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="Order" styleClass="uk-text-left">
+                                    <h:outputText id="lsequ" value="#{line.sequenceNumber}" >
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Code" styleClass="uk-text-left">
+                                    <h:outputText id="lcode" value="#{line.segmentCode}" >
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Name" styleClass="uk-text-left">
+                                    <h:outputText id="lname" value="#{line.segmentName}">
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Lable" styleClass="uk-text-left">
+                                    <h:outputText id="lable" value="#{line.segmentLable}">
+                                    </h:outputText>
+                                </p:column>
+                                <p:column headerText="Balancing" styleClass="uk-text-center">
+                                    <p:selectBooleanCheckbox value="#{line.balancingSegment}" disabled="#{coaStructureDetailsController.coaDisabled}"  >
+                                        <f:ajax execute="@this" render="@this linesTable" listener="#{coaStructureDetailsController.setRole(line, 1)}"/>
+                                    </p:selectBooleanCheckbox>
+                                </p:column>
+                                <p:column headerText="Cost Center" styleClass="uk-text-center">
+                                    <p:selectBooleanCheckbox value="#{line.costCenterSegment}" disabled="#{coaStructureDetailsController.coaDisabled}"  >
+                                        <f:ajax execute="@this" render="@this linesTable" listener="#{coaStructureDetailsController.setRole(line, 2)}"/>
+                                    </p:selectBooleanCheckbox>
+                                </p:column>
+                                <p:column headerText="Account" styleClass="uk-text-center">
+                                    <p:selectBooleanCheckbox value="#{line.naturalAccountSegment}" disabled="#{coaStructureDetailsController.coaDisabled}"  >
+                                        <f:ajax execute="@this" render="@this linesTable" listener="#{coaStructureDetailsController.setRole(line, 3)}"/>
+                                    </p:selectBooleanCheckbox>
+                                </p:column>
+                                <p:column headerText="#" styleClass="uk-text-center">
+                                    <p:commandLink disabled="#{coaStructureDetailsController.coaDisabled}"  
+                                                   action="#{coaStructureDetailsController.loadModal(line)}"
+                                                   update="dialogContent" process="@this" oncomplete="modal.show();"  >
+
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+
+                                    <p:commandLink process="@this" disabled="#{!coaStructureDetailsController.coaDisabled}" 
+                                                   action="#{coaStructureDetailsController.redirectToSegmentDetails(rowIndex)}">
+                                        <i class="material-icons md-24">add_circle</i>
+                                    </p:commandLink>
+                                </p:column>
+                            </p:dataTable>
+
+                            <div class="uk-modal" id="dialog">
+
+                                <div class="uk-modal-dialog">
+                                    <div class="uk-modal-header">
+                                        <h5 class="uk-modal-title">Segment</h5>
+                                    </div>
+                                    <h:panelGroup layout="block" id="dialogContent">
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="codep" value="Code" />
+                                                <p:inputText class="md-input" id="codep" required="true" value="#{coaStructureDetailsController.currentCoaSegment.segmentCode}" >
+
+                                                </p:inputText>
+                                                <h:message for="codep" style="color:red;"  />
+
+                                            </div>
+                                            <div class="uk-width-medium-4-6">
+                                                <p:outputLabel for="namep" value="Name" />
+                                                <p:inputText class="md-input" id="namep" required="true" value="#{coaStructureDetailsController.currentCoaSegment.segmentName}" >
+
+                                                </p:inputText>
+                                                <h:message for="namep" style="color:red;"  />
+
+                                            </div>
+                                        </div>
+
+
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-3-6">
+                                                <p:outputLabel for="lable" value="Lable" />
+                                                <p:inputText class="md-input" id="lable" required="true" value="#{coaStructureDetailsController.currentCoaSegment.segmentLable}" >
+
+
+                                                </p:inputText>
+                                                <h:message for="lable" style="color:red;"  />
+
+                                            </div>
+                                            <div class="uk-width-medium-3-6">
+                                                <div class="uk-margin-small-top">
+
+                                                    <h:selectOneMenu id="dependentOnSegmentId"  value="#{coaStructureDetailsController.currentCoaSegment.dependentOnSegmentSequence}"
+                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                     pt:data-placeholder="Dependent Segment"  >
+                                                        <f:selectItem noSelectionOption="true" itemLabel="Dependent Segment"/>
+                                                        <f:selectItems value="#{coaStructureDetailsController.dependableSegments}" 
+                                                                       var="seg" itemValue="#{seg.sequenceNumber}" itemLabel="#{seg.segmentName}" />
+
+                                                    </h:selectOneMenu>
+                                                    <h:message  for="dependentOnSegmentId" style="color:red;" />
+
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="maxs" value="Max Size" />
+                                                <p:inputText class="md-input" id="maxs" required="true" value="#{coaStructureDetailsController.currentCoaSegment.maximumSize}" >
+
+                                                    <f:validateLongRange minimum="1" />
+                                                </p:inputText>
+                                                <h:message for="maxs" style="color:red;"  />
+
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="minv" value="Min Vale" />
+                                                <p:inputText class="md-input" id="minv" value="#{coaStructureDetailsController.currentCoaSegment.minimumValue}" >
+                                                </p:inputText>
+                                                <h:message for="minv" style="color:red;"  />
+
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="maxv" value="Max Value" />
+                                                <p:inputText class="md-input" id="maxv" value="#{coaStructureDetailsController.currentCoaSegment.maximumValue}" >
+                                                </p:inputText>
+                                                <h:message for="maxv" style="color:red;"  />
+
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-1-3">
+                                                <h:selectBooleanCheckbox id="numon" class="icheckbox_md"
+                                                                         value="#{coaStructureDetailsController.currentCoaSegment.numbersOnlyFlagId}">
+                                                    <p:ajax event="click" update="upperon" 
+                                                            listener="#{coaStructureDetailsController.onNoOnlyClick}" />
+
+                                                </h:selectBooleanCheckbox>
+                                                <h:outputLabel for="numon" value=" Num Only"/>
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <h:selectBooleanCheckbox id="upperon" class="icheckbox_md"
+                                                                         value="#{coaStructureDetailsController.currentCoaSegment.uppercaseOnlyFlagId}">
+                                                    <p:ajax event="click" update="numon" 
+                                                            listener="#{coaStructureDetailsController.onUpperCaseClick}" />
+                                                </h:selectBooleanCheckbox>
+                                                <h:outputLabel for="upperon" value="UCase Only"/>
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <h:selectBooleanCheckbox id="justify" class="icheckbox_md"
+                                                                         value="#{coaStructureDetailsController.currentCoaSegment.rightJustifyZeroFillNum}">
+                                                </h:selectBooleanCheckbox>
+                                                <h:outputLabel for="justify" value=" RJustify Zero"/>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-1-1">
+                                                <p:outputLabel for="descp" value="Description" />
+                                                <p:inputText class="md-input" id="descp" value="#{coaStructureDetailsController.currentCoaSegment.description}" >
+                                                </p:inputText>
+                                                <h:message for="descp" style="color:red;"  />
+
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                    <div class="uk-modal-footer uk-text-right">
+                                        <p align="left"   style="color:red;" >
+                                            <i>
+                                                Not allowed using special characters in the segments
+                                            </i>   
+                                        </p>
+
+                                        <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                                        <p:commandLink update="dialogContent linesTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                                       class="md-btn md-btn-flat md-btn-flat-primary"
+                                                       action="#{coaStructureDetailsController.addLine()}">OK</p:commandLink>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="uk-modal" id="saveModal">
+                                <div class="uk-modal-dialog">
+                                    <div class="uk-modal-header">
+                                        <h3 class="uk-modal-title">Confirm</h3>
+                                    </div>
+                                    <p>Save...? </p>
+                                    <div class="uk-modal-footer uk-text-right">
+                                        <button type="button" class="md-btn md-btn-flat uk-modal-close">Close</button>
+                                        <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary" process="@this pageHead"
+                                                       update="pageHead" oncomplete="saveModal.hide()"
+                                                       action="#{coaStructureDetailsController.saveThenRedirect}" value="Save" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:messages id="mm"/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit" update="pageHead linesTable" process="pageHead @this linesTable" action="#{coaStructureDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+            var saveModal = UIkit.modal('#saveModal', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>
+

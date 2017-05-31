@@ -1,0 +1,138 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="jbatch" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{journalBatchDetailController.currentBatchId}"  />
+            <f:viewAction action="#{journalBatchDetailController.loadBatch}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('journal_batches:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Batch Details
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="heading_b uk-margin-bottom">
+            #{journalBatchDetailController.currentBatchId == null ? 'New Batch' : journalBatchDetailController.currentBatch.batchName }
+        </h2>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText id="name" class="md-input" required="true"
+                                     value="#{journalBatchDetailController.currentBatch.batchName}" >
+                            <p:ajax update="name @this m1" />
+                        </p:inputText>
+                        <h:message id="m1" for="name" style="color:red;" />                       
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel value="Type" for="type" class="uk-form-label" />
+                        <h:selectOneMenu disabled="#{journalBatchDetailController.currentBatch.jeBatchId != null}" id="type" required="true" pt:data-md-selectize="true"
+                                         value="#{journalBatchDetailController.currentBatch.batchType}"
+                                         pt:data-md-selectize-bottom="true">
+                            <f:selectItem noSelectionOption="true" itemValue="#{null}" itemLabel="Select Type" />
+                            <f:selectItems itemLabel="#{type}" itemValue="#{type}" var="type" 
+                                           value="#{journalBatchDetailController.batchTypes}"/>
+
+                            <p:ajax listener="#{journalBatchDetailController.onTypeChange}" 
+                                    update="m7 periodGroup onceGroup"
+                                    />
+                        </h:selectOneMenu>
+                        <h:message for="type" id="m7" style="color:red;" />    
+                    </div>
+                    <h:panelGroup id="onceGroup" class="uk-width-medium-2-6">
+
+                        <h:panelGrid rendered="#{journalBatchDetailController.currentBatch.batchType == 'RECURRING'}"
+                                     cellpadding="5" class="uk-margin-top" columns="2" >                         
+                            <h:selectBooleanCheckbox  value="#{journalBatchDetailController.currentBatch.runOncePeriod}" 
+                                                      id="once" class="icheckbox_md" />
+                            <p:outputLabel for="once" value="Run Once Per Period" />
+                        </h:panelGrid>
+                    </h:panelGroup>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-1">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText id="desc" class="md-input" 
+                                     value="#{journalBatchDetailController.currentBatch.description}">
+                            <p:ajax update="desc @this m2" />
+                        </p:inputText>
+                        <h:message id="m2" for="desc" style="color:red;" />
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="ledger" class="uk-form-label" value="Ledger" />
+                        <p:autoComplete readonly="#{journalBatchDetailController.currentBatch.jeBatchId != null}" id="ledger" 
+                                        completeMethod="#{journalBatchDetailController.completeLedger}" 
+                                        forceSelection="true" converter="#{glLedgerConverter}"
+                                        emptyMessage="No Records Found..!"  required="true"
+                                        value="#{journalBatchDetailController.currentBatch.ledger}"
+                                        inputStyleClass="md-input" placeholder="Ledger" var="ledger" 
+                                        itemLabel="#{ledger.name}" itemValue="#{ledger}">
+                            <p:ajax event="itemSelect" update="period @this m3" listener="#{journalBatchDetailController.onLedgerChange}"   />
+                        </p:autoComplete>                       
+                        <h:message for="ledger" id="m3" style="color:red;" />                        
+                    </div>
+                    <h:panelGroup id="periodGroup" class="uk-width-medium-2-4" layout="block">
+                        <ui:fragment rendered="#{journalBatchDetailController.currentBatch.batchType == 'NORMAL'}">
+                            <p:outputLabel for="period" class="uk-form-label" value="Period" />
+                            <p:autoComplete readonly="#{journalBatchDetailController.currentBatch.jeBatchId != null}"
+                                            id="period" 
+                                            completeMethod="#{journalBatchDetailController.completePeriod}" 
+                                            forceSelection="true" converter="#{glPeriodStatusConverter}"
+                                            emptyMessage="No Records Found..!" required="true"
+                                            value="#{journalBatchDetailController.currentBatch.period}"
+                                            inputStyleClass="md-input" placeholder="Period" var="s" 
+                                            itemLabel="#{s.periodName}" itemValue="#{s}" >
+                                <p:ajax event="itemSelect" update="@this m4" />
+                            </p:autoComplete>
+                            <h:message for="period" id="m4" style="color:red;" />   
+                        </ui:fragment>
+                    </h:panelGroup>                
+                </div> 
+                <div class="uk-grid">
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="approve" value="Approve Status" />
+                        <p:inputText id="approve" class="md-input" readonly="true"
+                                     value="#{journalBatchDetailController.currentBatch.approveStatus}"/>
+                    </div>
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="post" value="Post Status" />
+                        <p:inputText id="post" class="md-input" readonly="true"
+                                     value="#{journalBatchDetailController.currentBatch.batchPostStatus}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" update="@form" process="@form"
+                           action="#{journalBatchDetailController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+</ui:composition>

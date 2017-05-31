@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="formula" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('formula:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Formula
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+                            <h:outputLabel value="Formula No." for="fmcc" />
+                            <h:inputText id="fmcc" class="md-input" value="#{formulaController.formulaNo}"  />
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-2-6">
+                        <div class="uk-margin-small-top">
+                            <h:outputLabel value="Formula Name" for="fmn" />
+                            <h:inputText id="fmn" class="md-input" value="#{formulaController.formulaName}"  />
+                        </div>
+                    </div>
+                    <ui:remove>
+                        <div class="uk-width-medium-2-6">
+                            <div class="uk-margin-small-top">
+                                <p:autoComplete id="fname" value="#{formulaController.formulaName}" 
+                                                completeMethod="#{formulaController.completeFormula}"  
+                                                emptyMessage="No Records.."  
+                                                var="item" itemLabel="#{item.formulaName}" itemValue="#{item.formulaName}"
+                                                inputStyleClass="md-input"
+                                                placeholder="Formula Name" 
+                                                forceSelection="true" required="true"  >
+                                </p:autoComplete>
+                                <h:message for="fname" style="color:red;"  />
+                            </div>
+                        </div>
+                    </ui:remove>
+
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{formulaController.formulaStatus}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItems var="s" value="#{formulaController.statuses}" 
+                                               itemLabel="#{s}" itemValue="#{s}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{formulaController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="line" value="#{formulaController.formulaList}" 
+                                     paginator="#{not empty formulaController.formulaList}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="No." styleClass="uk-width-1-10 uk-text-left">
+                                #{line.formulaNo}
+                            </p:column>
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{line.formulaName}
+                            </p:column>
+                            <p:column headerText="Description" styleClass="uk-width-4-10 uk-text-left">
+                                #{line.formulaDescription}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{line.status == 'APPROVED' ? 'uk-badge-success':'uk-badge-primary' }">
+                                    #{line.status}
+                                </span>
+                            </p:column>                            
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="formulaDetails?id=#{line.formulaId}" 
+                                        rendered="#{currentUser.hasPermission('formula:create')}">
+
+                                    <i class="material-icons md-24">#{line.status == 'NEW' ? 'mode_edit' : 'visibility'}</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="formulaDetails" 
+                    rendered="#{currentUser.hasPermission('formula:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

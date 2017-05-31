@@ -1,0 +1,610 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="SysItemTemp" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{itemTemplateDetailsController.currentItemId}" />
+            <f:viewAction action="#{itemTemplateDetailsController.loadItem()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('item_templates:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        System Item Template Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{itemTemplateDetailsController.currentItemTemplate.templateId == null ? 'New Template' : 
+              itemTemplateDetailsController.currentItemTemplate.templateName }
+        </h4>
+        <div class="md-card">
+            <h:panelGroup layout="block" id="pageHead">
+                <div class="md-card-content">
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-1-5">
+                            <h:outputLabel value="Template Code" for="templateCode" />
+                            <h:inputText id="templateCode" class="md-input" value="#{itemTemplateDetailsController.currentItemTemplate.templateCode}"  
+                                         required="true"  />
+                            <h:message for="templateCode" style="color:red;" />
+                        </div>
+                        <div class="uk-width-medium-2-5">
+                            <h:outputLabel value="Template Name" for="itemn" />
+                            <h:inputText id="itemn" class="md-input" value="#{itemTemplateDetailsController.currentItemTemplate.templateName}"  
+                                         required="true"  />
+                            <h:message for="itemn" style="color:red;" />
+                        </div>
+
+
+
+
+                        <div class="uk-width-medium-2-4">
+                            <p:autoComplete id="businessGroup" 
+                                            value="#{itemTemplateDetailsController.currentItemTemplate.businessGroupId}" 
+                                            completeMethod="#{itemTemplateDetailsController.completeOrgUnit}" 
+                                            emptyMessage="No Records.."  converter="#{organizationUnitConverter}" 
+                                            var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                            inputStyleClass="md-input"
+                                            placeholder="Business Group" 
+                                            forceSelection="true" required="true"  >
+                            </p:autoComplete>
+                            <h:message for="businessGroup" style="color:red;"  />
+                        </div>
+
+
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-5-6">
+                            <h:outputLabel value="Description" for="desc" />
+                            <h:inputText id="itemc" class="md-input" value="#{itemTemplateDetailsController.currentItemTemplate.templateDescription}"  />
+                            <h:message  for="desc" style="color:red;" />
+                        </div>
+                        <div class="uk-width-medium-1-6">
+
+                            <h:selectBooleanCheckbox id="status" class="icheckbox_md" 
+                                                     value="#{itemTemplateDetailsController.currentItemTemplate.enabledFlag}"/>
+                            <h:outputLabel for="status" value=" Active"/>
+                        </div> 
+
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Main</a></li>
+                            <li><a href="#">Inventory</a></li>
+                            <li><a href="#">Bills of Material</a></li>
+                            <li><a href="#">Costing</a></li>
+                            <li><a href="#">Order Entry</a></li>
+                            <li><a href="#">Purchasing</a></li>
+                            <li><a href="#">Receiving</a></li>
+                            <li><a href="#">Physical Attributes</a></li>
+                            <li><a href="#">Item Categories</a></li>
+                        </ul> 
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab1">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                       
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+
+                                                            <div class="uk-width-medium-2-6">
+                                                                <p:outputLabel value="Primary UOM" class="uk-form-label" for="weightUnit"/>
+                                                                <p:autoComplete id="weightUnit" value="#{itemTemplateDetailsController.currentItemTemplate.primaryUomId}" 
+                                                                                completeMethod="#{mainInvDetailsController.completeWeightUnits}" 
+                                                                                emptyMessage="No Records.."  converter="#{uomConverter}" 
+                                                                                var="item" itemLabel="#{item.uomName}" itemValue="#{item}"
+                                                                                inputStyleClass="md-input" 
+                                                                                placeholder="Primary UOM" 
+                                                                                forceSelection="true"  >
+                                                                </p:autoComplete>
+                                                                <h:message for="weightUnit" style="color:red;"  />
+
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <p:outputLabel value="Item Type" class="uk-form-label" for="systemItemType"/>
+                                                                <h:selectOneMenu id="systemItemType" value="#{itemTemplateDetailsController.currentItemTemplate.itemTypeId}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 pt:data-placeholder="Item Type"
+                                                                                 required="true"
+                                                                                 >
+                                                                    <f:selectItem  noSelectionOption="true" itemLabel="Item Type" />
+                                                                    <f:selectItems value="#{itemTemplateDetailsController.itemTypes}" var="typ" itemLabel="#{typ}"  itemValue="#{typ}" />
+                                                                </h:selectOneMenu>
+                                                                <h:message for="systemItemType" style="color:red;"  />
+
+                                                            </div> 
+
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab2">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="isInvItem" class="icheckbox_md"
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.inventoryItemFlag}"/>
+                                                                    <h:outputLabel for="isInvItem" value=" Inventory Item"/>
+
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="stockable" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.stockEnabledFlag}" />
+                                                                    <h:outputLabel for="stockable" value=" Stockable"/>
+
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="transactable" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.mtlTransactionsEnabledFlag}"/>
+                                                                    <h:outputLabel for="transactable" value=" Transactable"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+
+                                                                    <h:selectBooleanCheckbox id="cycleCount" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.cycleCountEnabledFlag}"/>
+
+                                                                    <h:outputLabel for="cycleCount" value=" Cycle Count"/>
+                                                                </div>
+                                                            </div> 
+
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab3">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="bomEnabledFlag"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.bomEnabledFlag}"/>
+                                                                    <h:outputLabel for="bomEnabledFlag" value=" BOM Enabled"/>
+
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="bomItemType"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.bomItemType}"/>
+                                                                    <h:outputLabel for="bomItemType" value=" BOM Type Enabled"/>
+
+                                                                </div>
+                                                            </div> 
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab4">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+
+                                                                    <h:selectBooleanCheckbox id="costingEnabledFlag"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.costingEnabledFlag}"/>
+                                                                    <h:outputLabel for="costingEnabledFlag" value=" Costing"/>
+
+                                                                </div>
+                                                            </div> 
+
+
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab5">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+
+                                                                    <h:selectBooleanCheckbox id="customerOrderFlag"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.customerOrderFlag}"/>
+                                                                    <h:outputLabel for="customerOrderFlag" value=" Customer Order"/>
+
+                                                                </div>
+                                                            </div> 
+
+
+
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab6">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+
+                                                                    <p:selectBooleanCheckbox id="purchasingEnabledFlag" value="#{itemTemplateDetailsController.currentItemTemplate.purchasingEnabledFlag}" itemLabel="Purchasable"/>
+
+
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="rfqRequiredFlag"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.rfqRequiredFlag}"/>
+                                                                    <h:outputLabel for="rfqRequiredFlag" value=" RFQ Required"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="taxableFlag"  class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.taxableFlag}"/>
+                                                                    <h:outputLabel for="taxableFlag" value=" Taxable"/>
+                                                                </div>
+                                                            </div> 
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab7">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="allowSubstituteReceiptsFlag" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.allowSubstituteReceiptsFlag}"/>
+                                                                    <h:outputLabel for="allowSubstituteReceiptsFlag" value=" Allow Substitute Receipts"/>
+
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectBooleanCheckbox id="allowUnorderedReceiptsFlag" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.allowUnorderedReceiptsFlag}" />
+
+                                                                    <h:outputLabel for="allowUnorderedReceiptsFlag" value=" Allow Unordered Receipts"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="allowExpressDeliveryFlag" class="icheckbox_md" 
+                                                                                             value="#{itemTemplateDetailsController.currentItemTemplate.allowExpressDeliveryFlag}" />
+                                                                    <h:outputLabel for="allowExpressDeliveryFlag" value=" Allow Express Delivery"/>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <h:panelGroup layout="block" id="tab8">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectOneMenu id="unitWeight" value="#{itemTemplateDetailsController.currentItemTemplate.unitWeight}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" 
+                                                                                     pt:data-placeholder="Weight Unit" required="true">
+                                                                        <f:selectItems var="s" value="#{itemTemplateDetailsController.unitList}" 
+                                                                                       itemLabel="#{s.uomName}" itemValue="#{s.uomId}" />
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="unitWeight" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="unitVolume" value="#{itemTemplateDetailsController.currentItemTemplate.unitVolume}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" 
+                                                                                     pt:data-placeholder="Volume Unit" required="true">
+                                                                        <f:selectItems var="s" value="#{itemTemplateDetailsController.unitList}" 
+                                                                                       itemLabel="#{s.uomName}" itemValue="#{s.uomId}" />
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="unitVolume" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="unitLength" value="#{itemTemplateDetailsController.currentItemTemplate.unitLength}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" 
+                                                                                     pt:data-placeholder="Length Unit" required="true">
+                                                                        <f:selectItems var="s" value="#{itemTemplateDetailsController.unitList}" 
+                                                                                       itemLabel="#{s.uomName}" itemValue="#{s.uomId}" />
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="unitLength" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="unitHeight" value="#{itemTemplateDetailsController.currentItemTemplate.unitHeight}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" 
+                                                                                     pt:data-placeholder="Height Unit" required="true">
+                                                                        <f:selectItems var="s" value="#{itemTemplateDetailsController.unitList}" 
+                                                                                       itemLabel="#{s.uomName}" itemValue="#{s.uomId}" />
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="unitHeight" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="unitWidth" value="#{itemTemplateDetailsController.currentItemTemplate.unitWidth}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true" 
+                                                                                     pt:data-placeholder="Width Unit" required="true">
+                                                                        <f:selectItems var="s" value="#{itemTemplateDetailsController.unitList}" 
+                                                                                       itemLabel="#{s.uomName}" itemValue="#{s.uomId}" />
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="unitWidth" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+
+                                            <h:panelGroup layout="block" id="tab9">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                        <p:commandLink update="dialogContent" oncomplete="modal.show();" process="@this">
+                                                            <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                        </p:commandLink>                    
+                                                    </div>
+                                                    <h3 class="md-card-toolbar-heading-text">
+                                                        Categories
+                                                    </h3>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <p:dataTable id="catTable" rowIndexVar="rowIndex" var="line" 
+                                                                     value="#{itemTemplateDetailsController.currentItemTemplate.categoryList}" 
+                                                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                            <p:column headerText="Category Name" styleClass="uk-text-left">
+                                                                <h:outputText id="categoryName" value="#{line.categoryName}" />
+                                                            </p:column>
+                                                            <p:column headerText="Description" styleClass="uk-text-left">
+                                                                <h:outputText id="description" value="#{line.description}" />
+                                                            </p:column>
+                                                            <p:column headerText="#" styleClass="uk-text-center">
+                                                            </p:column>
+                                                        </p:dataTable>
+                                                    </div>
+                                                </div>
+                                                <div class="uk-modal" id="dialog">
+                                                    <div class="uk-modal-dialog">
+                                                        <div class="uk-modal-header">
+                                                            <h5 class="uk-modal-title">Category</h5>
+                                                        </div>
+                                                        <h:panelGroup layout="block" id="dialogContent" >
+                                                            <div class="uk-grid" data-uk-grid-margin="true" >
+                                                                <div class="uk-width-medium-6-6">                          
+                                                                    <p:autoComplete  id="itemCategory" styleClass="itemcat" value="#{itemTemplateDetailsController.currentCategory}" 
+                                                                                     completeMethod="#{itemTemplateDetailsController.completeCategories}"  
+                                                                                     emptyMessage="No Records.." converter="#{categoryConverter}"
+                                                                                     var="item" itemLabel="#{item.categoryName}" itemValue="#{item}"
+                                                                                     inputStyleClass="md-input" required="true"
+                                                                                     placeholder="Search Category" 
+                                                                                     forceSelection="true" >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="itemCategory" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                        </h:panelGroup>
+                                                        <div class="uk-modal-footer uk-text-right">
+                                                            <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                                                            <p:commandLink update="dialogContent catTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                                                           class="md-btn md-btn-flat md-btn-flat-primary"
+                                                                           action="#{itemTemplateDetailsController.addLine()}">OK</p:commandLink>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </h:panelGroup>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h:messages/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" update="pageHead tab1 tab2 tab3 tab4 tab5 tab6 tab7 tab8 catTable" 
+                           process="@this pageHead tab1 tab2 tab3 tab4 tab5 tab6 tab7 tab8 catTable" action="#{itemTemplateDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>
+

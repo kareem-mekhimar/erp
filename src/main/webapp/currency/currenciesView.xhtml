@@ -1,0 +1,183 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="currency" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('currency:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Currencies
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="header" class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <h:outputLabel value="Code" for="code" />
+                        <h:inputText id="code" class="md-input" value="#{currencyController.currentcode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Name" for="name" />
+                        <h:inputText id="name" class="md-input" value="#{currencyController.currentName}"  />
+                    </div>
+
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{currencyController.currentStatus}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItem itemLabel="Enabled" itemValue="true" />
+                                <f:selectItem itemLabel="Disabled" itemValue="false" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" actionListener="#{currencyController.setFilterTriggred(true)}"
+                                       class="md-btn md-btn-primary uk-margin-small-top" process="header" 
+                                       update="table" action="#{currencyController.filter}">
+
+                        </p:commandLink>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="row" value="#{currencyController.currencies}" 
+                                     paginator="true" 
+                                     paginatorAlwaysVisible="false"
+                                     rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Code" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.currencyCode}
+                            </p:column>
+                            <p:column headerText="Name" styleClass="uk-width-4-10 uk-text-left">
+                                #{row.description}
+                            </p:column>
+
+                            <p:column headerText="Status" styleClass="uk-width-2-10 uk-text-center">
+                                <span class="uk-badge  #{row.enabled  ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{row.enabled ? 'Enabled' : 'Disabled'}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <p:commandLink
+                                    rendered="#{currentUser.hasPermission('currency:create')}"
+                                    update="dialogContent" oncomplete="modal.show()" process="@this">
+                                    <f:setPropertyActionListener target="#{currencyController.currentCurrency}" 
+                                                                 value="#{row}" />
+                                    <f:setPropertyActionListener target="#{currencyController.openDialogCurrencyCode}"
+                                                                 value="#{currencyController.currentCurrency.currencyCode}" />
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </p:commandLink>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        <h:outputText value="#{currencyController.currentCurrency.currencyId == null ? 'New Currency' : currencyController.currentCurrency.currencyId}" />
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="dialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-1-2">
+                                <p:outputLabel value="Currency Code" for="currCode" />
+                                <p:inputText value="#{currencyController.currentCurrency.currencyCode}"
+                                             class="md-input" required="true"
+                                             id="currCode" validator="#{currencyController.validateCodeExist}">
+                                    <p:ajax update="msg @this"/>
+                                </p:inputText>
+                                <h:message id="msg" for="currCode" style="color:red;" />
+                            </div>
+                            <div class="uk-width-1-2 uk-margin-top">
+                                <h:selectBooleanCheckbox id="enabled" 
+                                                         value="#{currencyController.currentCurrency.enabled}" />
+                                <p:outputLabel value=" Enabled" for="enabled" />
+                            </div>
+                        </div>
+                        <div class="uk-grid">
+                            <div class="uk-width-1-1">
+                                <p:outputLabel value="Currency Name" for="currName" />
+                                <p:inputText value="#{currencyController.currentCurrency.description}"
+                                             class="md-input" required="true"
+                                             id="currName" />
+                                <h:message for="currName" style="color:red;" />                                
+                            </div>
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent" oncomplete="onDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{currencyController.onDialogOk}">OK</p:commandLink>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink 
+                 rendered="#{currentUser.hasPermission('currency:create')}"
+                class="md-fab md-fab-accent" oncomplete="modal.show();" update="dialogContent" process="@this">
+                <f:setPropertyActionListener target="#{currencyController.currentCurrency}" value="#{null}" />
+                <f:setPropertyActionListener target="#{currencyController.openDialogCurrencyCode}"
+                                             value="#{null}" />
+                <i class="material-icons">&#xE145;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>      
+    </ui:define>
+</ui:composition>

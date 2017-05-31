@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="customer" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{apSuppliersDetailsController.currentSupplierId}" />
+            <f:viewAction action="#{apSuppliersDetailsController.loadSupplier()}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Customer Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{apSuppliersDetailsController.currentSupplier.vendorId == null ? 'New Supplier' : 
+              apSuppliersDetailsController.currentSupplier.vendorName }
+        </h4>
+        
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                  
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Supplier Name" for="supplierName" />
+                        <h:inputText id="supplierName" class="md-input" value="#{apSuppliersDetailsController.currentSupplier.vendorName}"  
+                                     required="true"  />
+                        <h:message for="supplierName" style="color:red;" />
+                    </div>
+           
+
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Main</a></li>
+                            <li><a href="#">sub1</a></li>
+                            <li><a href="#">sub1</a></li>
+                            <li><a href="#">sub1</a></li>
+                            <li><a href="#">sub1</a></li>
+                            <li><a href="#">sub1</a></li>
+                           
+                        </ul> 
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                       
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                             
+                                                   
+                                                      
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                  
+                                                  
+               
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+
+                                                  
+                                                
+
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+
+
+
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <h:panelGroup layout="block" styleClass="tab-content uk-grid" id="tab11">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </h:panelGroup>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                      
+                
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+      
+            <h:messages/>
+            <div class="md-fab-wrapper">
+                <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{apSuppliersDetailsController.save()}" >
+                    <i class="material-icons">&#xE161;</i>
+                </p:commandLink>
+            </div>
+        </div>
+
+    </ui:define>
+ 
+</ui:composition>
+

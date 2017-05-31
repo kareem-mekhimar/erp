@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="position" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{positionDetailsController.currentPositionId}" />
+            <f:viewAction action="#{positionDetailsController.loadPosition()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('positions:create')}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Position Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{positionDetailsController.currentPosition.positionId== null ? 'New Position' : 
+              positionDetailsController.currentPosition.positionName}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-3-6">
+                        <p:autoComplete id="businessGroup" value="#{positionDetailsController.currentPosition.businessGroupId}" 
+                                        completeMethod="#{positionDetailsController.completeOrgUnit}" 
+                                        emptyMessage="No Records.."  converter="#{organizationUnitConverter}" 
+                                        var="item" itemLabel="#{item.orgUnitName}" itemValue="#{item}"
+                                        inputStyleClass="md-input"
+                                        placeholder="Business Group" required="true"
+                                        forceSelection="true" >
+                        </p:autoComplete>
+                        <h:message for="businessGroup" style="color:red;"  />
+                    </div> 
+                    <div class="uk-width-medium-3-6">
+                        <p:autoComplete id="jobId" value="#{positionDetailsController.currentPosition.jobId}" 
+                                        completeMethod="#{positionDetailsController.completeJob}" 
+                                        emptyMessage="No Records.." converter="#{jobConverter}"
+                                        var="item" itemLabel="#{item.jobName}" itemValue="#{item}"
+                                        inputStyleClass="md-input"
+                                        placeholder="Job"  required="true"
+                                        forceSelection="true">
+                        </p:autoComplete>
+                        <h:message for="jobId" style="color:red;"  />
+                    </div>                    
+                </div>                    
+
+                <div class="uk-grid" data-uk-grid-margin="true"> 
+                    <div class="uk-width-medium-3-6">
+                        <p:outputLabel for="positionCode" value="Position Code" />
+                        <p:inputText class="md-input" id="positionCode" validator="#{positionDetailsController.validatePositionCodeExist}" 
+                                     value="#{positionDetailsController.currentPosition.positionCode}" required="true">
+                        </p:inputText>
+                        <h:message for="positionCode" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-3-6">
+                        <p:outputLabel for="positionName" value="Position Name" />
+                        <p:inputText class="md-input" id="positionName" validator="#{positionDetailsController.validateNameExist}" 
+                                     value="#{positionDetailsController.currentPosition.positionName}" required="true">
+                        </p:inputText>
+                        <h:message for="positionName" style="color:red;"  />
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-1">
+                        <p:outputLabel for="comments" value="Comments" />
+                        <p:inputText class="md-input" id="comments" value="#{positionDetailsController.currentPosition.comments}">
+                        </p:inputText>
+                        <h:message for="comments" style="color:red;"  />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h:messages/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{positionDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>
+

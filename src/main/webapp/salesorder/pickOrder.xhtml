@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:param name="active" value="sopick" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('so:pick')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Pick Sales Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h2 class="heading_b uk-margin-medium-bottom">Pick Order</h2>
+
+                <h:panelGroup layout="block" class="uk-grid" pt:data-uk-grid-margin="true" id="input" >
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-5">
+                                    <p:outputLabel value="Source Main Inventory" class="uk-form-label" for="sourceMain"/>
+
+                                    <p:autoComplete var="sourceMain" id="sourceMain" forceSelection="true"
+                                                    completeMethod="#{salesOrderPickController.completeMainInvByName}" 
+                                                    validator="#{salesOrderPickController.validateShippingInventory}"
+                                                    emptyMessage="No Records.." placeholder="Search Source Main Inventory"
+                                                    value="#{salesOrderPickController.mainInventory}"
+                                                    converter="#{mainInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{sourceMain.organizationName}" 
+                                                    itemValue="#{sourceMain}" required="true" >
+                                        <p:ajax process="@this" update="sourceSub @this m1" event="itemSelect"
+                                                listener="#{salesOrderPickController.resetSubInvSource}"/>
+
+                                    </p:autoComplete>
+                                    <h:message id="m1" for="sourceMain" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-2-5">
+                                    <p:outputLabel value="Source Secondary Inventory" class="uk-form-label"
+                                                   for="sourceSub"/>
+
+                                    <p:autoComplete var="sourceSub" id="sourceSub" forceSelection="true"
+                                                    completeMethod="#{salesOrderPickController.completeSecondaryByName}" 
+                                                    emptyMessage="No Records.." placeholder="Search Source Sub Inventory"
+                                                    value="#{salesOrderPickController.secondaryInventory}" 
+                                                    converter="#{subInvConverter}" inputStyleClass="md-input"
+                                                    itemLabel="#{sourceSub.secondaryInventoryName}" 
+                                                    itemValue="#{sourceSub}" required="true" >
+                                        <p:ajax update="@this m2 linesTable" event="itemSelect" listener="#{salesOrderPickController.onSourceSubInvItemSelect}" />
+                                    </p:autoComplete>
+
+                                    <h:message id="m2" for="sourceSub" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-1-5">
+                                    <h:selectBooleanCheckbox  id="transact" class="icheckbox_md"
+                                                              value="#{salesOrderPickController.transactFlag}">
+                                        <p:ajax oncomplete="processTable()"/>
+                                    </h:selectBooleanCheckbox>
+                                    <h:outputLabel for="transact" value=" Transact"/>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="linesTable" var="line" value="#{salesOrderPickController.selectedOrder.lines}" 
+                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                            <p:column headerText="No." >
+                                #{line.lineNumber}
+                            </p:column>
+
+                            <p:column headerText="Product" styleClass="uk-text-center">
+                                <h:outputText value="#{line.inventoryItem.description}" />
+                            </p:column>
+                            <p:column headerText="UOM" styleClass="uk-text-center">
+                                <h:outputText id="uom" value="#{line.orderQuantityUom}"/>
+                            </p:column> 
+                            <p:column headerText="Primary Qty" styleClass="uk-text-center">
+                                <h:outputText value="#{line.orderedQuantity}"/>
+                            </p:column> 
+                            <p:column headerText="Picked Qty" styleClass="uk-text-center">
+                                <h:outputText value="#{line.pickedQuantity}"/>
+                            </p:column> 
+                            <p:column headerText="Quantity" styleClass="uk-text-center uk-width-1-6">
+                                <p:inputText value="#{line.qtyToPick}" id="txQuantity" 
+                                             validator="#{salesOrderPickController.validateQtyGtZeroOrNotAvailableInInv}"
+                                             disabled="#{line.status=='CLOSED'}">
+                                    <p:ajax update="txTip @this" 
+                                            listener="#{salesOrderPickController.onChangeCheckQuantityCover(line)}" 
+                                            oncomplete="if(args.warn) $(PrimeFaces.escapeClientId(this.source)).addClass('ui-state-warning')" />
+                                </p:inputText>
+                                <p:keyFilter  for="txQuantity" mask="num" /> 
+                                <p:tooltip for="txQuantity" id="txTip" position="left">
+                                    <h:message for="txQuantity" />
+                                </p:tooltip>
+                            </p:column>
+                            <p:column headerText="Date" styleClass="uk-text-center uk-width-1-10">
+                                <p:calendar id="date" pattern="dd-MM-yyyy" readonlyInput="true" value="#{line.requestDate}" 
+                                            required="true" disabled="#{line.status=='CLOSED'}">
+                                    <p:ajax event="dateSelect" update="@this dateTip txQuantity" 
+                                            listener="#{salesOrderPickController.onDateChange(line)}"
+                                            oncomplete="processTable()"/>
+                                    <p:ajax event="change" update="@this dateTip txQuantity" 
+                                            listener="#{salesOrderPickController.onDateChange(line)}" 
+                                            oncomplete="processTable()"/>
+
+                                    <p:remoteCommand process="txQuantity" update="txQuantity txTip" name="testQty" />
+
+                                </p:calendar>
+                                <p:tooltip for="date" id="dateTip" position="top">
+                                    <h:message for="date" />
+                                </p:tooltip>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" 
+                           update="linesTable no input" process="@form" action="#{salesOrderPickController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="modal">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h3 class="uk-modal-title">Confirm</h3>
+                </div>
+                <h:panelGroup id="no">
+                    <h1 class="uk-text-success" style="font-size:18px;">  Move Order with No ( #{salesOrderPickController.newMoveOrderId} ) Created Successfully..!  </h1>
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+                    <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{salesOrderPickController.onDialogOk}"
+                                   value="Ok" />
+                </div>
+            </div>
+        </div>
+
+        <p:remoteCommand name="updateQuantities" process="@this" 
+                         action="#{moveOrderTransferController.onMessageRecieved}" 
+                         oncomplete="processTable()" />
+        <p:remoteCommand name="processTable" process="linesTable" update="linesTable" />
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <p:socket widgetVar="subscriber" channel="/subInvs" onMessage="onMessage" />
+        <script>
+
+            var modal = UIkit.modal('#modal', {keyboard: false, bgclose: false, center: true});
+            function onMessage(data) {
+                updateQuantities([{name: "data", value: data}]);  // remote Command
+            }
+            Pace.options.ajax.trackWebSockets = false;
+        </script>
+    </ui:define>
+
+</ui:composition>

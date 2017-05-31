@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="subInv" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('subinv:read')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Sub Inventory
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <h:outputLabel value="Inventory Code" for="classid" />
+                        <h:inputText id="classid" class="md-input" value="#{subInvController.invCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Inventory Name" for="classn" />
+                        <h:inputText id="classn" class="md-input" value="#{subInvController.invName}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{subInvController.statusId}"
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" />
+                                <f:selectItem itemLabel="Active" itemValue="true" />
+                                <f:selectItem itemLabel="Inactive" itemValue="false" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{subInvController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="row" value="#{subInvController.subInvList}" 
+                                     paginator="#{not empty subInvController.subInvList}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+                            <p:column headerText="Inventory Code" styleClass="uk-width-2-10 uk-text-left">
+                                #{row.organizationCode}
+                            </p:column>
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.secondaryInventoryName}
+                            </p:column>
+
+                            <p:column headerText="Main Inventory" styleClass="uk-width-3-10 uk-text-left">
+                                #{row.mainInv.organizationName}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-left">
+                                <span class="uk-badge  #{row.statusId ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{row.statusId?'Active':'Inactive'}
+                                </span>
+
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="subInventoryDetails?id=#{row.secondaryInventoryId}" 
+                                        rendered="#{currentUser.hasPermission('subinv:create')}">
+
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="subInventoryDetails" 
+                    rendered="#{currentUser.hasPermission('subinv:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

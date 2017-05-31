@@ -1,0 +1,171 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="custinvoicepay" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('customer_payments:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Payments
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h2 class="heading_b uk-margin-medium-bottom">
+                    Invoices No( #{arinvoicePayController.selectedInvoice.invoiceId} ) Payment
+                    <h:outputText class="uk-float-right" value="#{arinvoicePayController.selectedInvoice.invoiceCurrency.currencyCode}" />
+
+                </h2>
+
+                <div class="uk-overflow-container">
+                    <ui:remove>  
+                        <p:dataTable var="line" value="#{arinvoicePayController.currentPayments}" 
+                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped"  >
+                            <p:column headerText="Invoice No" styleClass="uk-width-2-10 uk-text-center">
+                                #{line.invoice.invoiceId}
+                            </p:column>
+                            <p:column headerText="Currency" styleClass="uk-width-2-10 uk-text-left">
+                                #{line.invoice.invoiceCurrency.currencyCode}
+                            </p:column>
+                            <p:column headerText="Quantity To Pay" styleClass="uk-width-2-10 uk-text-center">
+                                <p:inputText id="quantity" value="#{line.amount}" required="true" 
+                                             validator="#{arinvoicePayController.validateAmountGtZero}">
+                                    <p:keyFilter for="quantity" mask="num" />
+                                    <p:ajax update="@this m1" />
+                                </p:inputText>
+                                <p:tooltip id="m1" for="quantity" position="left">
+                                    <h:message for="quantity" />
+                                </p:tooltip>
+                            </p:column>
+
+                            <p:column headerText="Payment Date" styleClass="uk-width-1-10 uk-text-left">
+                                <p:calendar id="date" value="#{line.paymentDate}" 
+                                            pattern="dd-MM-yyyy"
+                                            required="true"
+                                            validator="#{arinvoicePayController.validatePaymentDate}">                                
+                                    <p:ajax event="change" update="@this m2" />
+                                    <p:ajax event="dateSelect" update="@this m2"  />
+                                </p:calendar>
+                                <p:tooltip id="m2" for="date" position="left">
+                                    <h:message for="date" />
+                                </p:tooltip>
+                            </p:column>
+
+                        </p:dataTable>
+                    </ui:remove>
+
+                    <div class="uk-grid uk-margin-large-top" >
+                        <div class="uk-width-medium-1-2">
+                            <p:outputLabel for="date" value="Payment Date" />
+                            <p:inputText id="date" class="md-input" required="true"
+                                         pt:data-uk-datepicker="{format:'DD-MM-YYYY',pos:'bottom'}"
+                                         validator="#{arinvoicePayController.validatePaymentDate}"
+                                         value="#{arinvoicePayController.currentPayment.paymentDate}">
+                                <f:convertDateTime pattern="dd-MM-yyyy" />
+                                <p:ajax update="date @this m1" />
+                            </p:inputText>   
+                            <h:message id="m1" for="date" style="color:red" />
+                        </div>
+                        <div class="uk-width-medium-1-2">
+                            <p:outputLabel value="Payment Type" for="type" class="uk-form-label" />
+                            <h:selectOneMenu id="type" 
+                                             value="#{arinvoicePayController.currentPayment.invoicePaymentType}"
+                                             pt:data-md-selectize="true" 
+                                             required="true"
+                                             pt:data-placeholder="Select Type">
+                                <f:selectItem noSelectionOption="true" itemLabel="Select Type" itemValue="#{null}" />
+                                <f:selectItems  value="#{arinvoicePayController.invoicePaymentTypes}"
+                                                var="c" itemLabel="#{c}" itemValue="#{c}"  />
+                                <p:ajax  update="m2 bankSection prePaySection amount" 
+                                         resetValues="true"
+                                         listener="#{arinvoicePayController.onTypeChange}"/>
+                            </h:selectOneMenu> 
+                            <h:message for="type" id="m2" style="color:red;" />                            
+                        </div>
+                    </div>
+                    <h:panelGroup id="bankSection" layout="block">
+                        <h:panelGroup layout="block" rendered="#{arinvoicePayController.currentPayment.invoicePaymentType == 'CHECK'}" class="uk-grid uk-margin-large-top">
+                            <div class="uk-width-medium-1-2">
+                                <p:outputLabel value="Bank Account" for="acc" class="uk-form-label" />
+                                <p:autoComplete id="acc" value="#{arinvoicePayController.currentPayment.bankAccount}" 
+                                                completeMethod="#{arinvoicePayController.completeBankAccounts}" 
+                                                emptyMessage="No Records.." 
+                                                converter="#{bankAccountConverter}"
+                                                var="acc" itemLabel="#{acc.bankAccountName}" 
+                                                itemValue="#{acc}"
+                                                inputStyleClass="md-input" 
+                                                placeholder="Search Bank Accounts" 
+                                                forceSelection="true" required="true"  >
+                                    <p:ajax update="@this m3" event="itemSelect" />
+                                </p:autoComplete>
+                                <h:message for="acc" id="m3" style="color:red;"  />                               
+                            </div>
+                            <div class="uk-width-medium-1-2">
+                                <p:outputLabel value="Check Number" for="check" />
+                                <p:inputText id="check" value="#{arinvoicePayController.currentPayment.checkNo}"
+                                             required="true" 
+                                             styleClass="md-input">
+                                    <p:ajax update="@this m4" />
+                                </p:inputText>   
+                                <h:message for="check" id="m4" style="color:red;" />  
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <h:panelGroup id="prePaySection" layout="block">
+                        <h:panelGroup layout="block" rendered="#{arinvoicePayController.currentPayment.invoicePaymentType == 'PREPAYMENT'}" class="uk-grid uk-margin-large-top">
+                            <div class="uk-width-medium-1-2">
+                                <p:outputLabel value="Pre Paid Amount" for="pre"/>
+                                <p:inputText id="pre" value="#{arinvoicePayController.prePayedAmount}"
+                                             readonly="true"
+                                             styleClass="md-input label-fixed" />                                
+                            </div>
+                        </h:panelGroup>
+                    </h:panelGroup>
+
+                    <div class="uk-grid uk-margin-large-top">
+                        <div class="uk-width-medium-1-2">
+                            <p:outputLabel value="Amount To Pay" for="amount"/>
+                            <p:inputText id="amount" value="#{arinvoicePayController.currentPayment.amount}"
+                                         required="true" 
+                                         styleClass="md-input"
+                                         validator="#{arinvoicePayController.validateAmount}">
+                                <p:keyFilter for="amount" mask="num" />
+                                <p:ajax update="@this m5" />
+                            </p:inputText>   
+                            <h:message for="amount" id="m5" style="color:red;" />  
+                        </div>
+                    </div>
+                </div>                 
+            </div>
+        </div>
+
+        <p:outputPanel autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" 
+                           update="@form" process="@form" action="#{arinvoicePayController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

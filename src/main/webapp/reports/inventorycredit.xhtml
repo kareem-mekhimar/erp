@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="reports" /> 
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('reports')}" />
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Inventory Credit
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="heading_b uk-margin-bottom">Inventory Credit</h2>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="Business Group" class="uk-form-label" for="bgroup"/>
+                        <p:autoComplete var="org" id="bgroup" forceSelection="true"
+                                        completeMethod="#{inventoryCreditController.completeBusinessGroup}" 
+                                        emptyMessage="No Records.." placeholder="Search Business Group"
+                                        value="#{inventoryCreditController.businessGroup}" 
+                                        inputStyleClass="md-input"
+                                        converter="#{organizationUnitConverter}" 
+                                        itemLabel="#{org.orgUnitName}" required="true"
+                                        itemValue="#{org}" >
+                            <p:ajax update="@this m1 legal m2 operating m3 sourceMain m4 sourceSub m5" event="itemSelect"
+                                    listener="#{inventoryCreditController.onBusinessGroupChange}"/>
+
+                        </p:autoComplete>
+                        <h:message id="m1" for="bgroup" style="color:red" />                            
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="Legal Entity" class="uk-form-label" for="legal"/>
+                        <p:autoComplete var="org" id="legal" forceSelection="true"
+                                        converter="#{organizationUnitConverter}" 
+                                        completeMethod="#{inventoryCreditController.completeLegalEntity}" 
+                                        emptyMessage="No Records.." placeholder="Search Legal Entity"
+                                        value="#{inventoryCreditController.legal}" inputStyleClass="md-input"
+                                        itemLabel="#{org.orgUnitName}" required="true"
+                                        itemValue="#{org}" >
+                            <p:ajax update="@this m2 operating m3 sourceMain m4 sourceSub m5" event="itemSelect"
+                                    listener="#{inventoryCreditController.onLegalChange}"/>
+
+                        </p:autoComplete>
+                        <h:message id="m2" for="legal" style="color:red" />                          
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="Operating Unit" class="uk-form-label" for="operating"/>
+                        <p:autoComplete var="org" id="operating" forceSelection="true"
+                                        converter="#{organizationUnitConverter}" 
+                                        completeMethod="#{inventoryCreditController.completeOperatingunit}" 
+                                        emptyMessage="No Records.." placeholder="Search Business Group"
+                                        value="#{inventoryCreditController.operating}" inputStyleClass="md-input"
+                                        itemLabel="#{org.orgUnitName}" required="true"
+                                        itemValue="#{org}" >
+                            <p:ajax update="@this m3 sourceMain m4 sourceSub m5" event="itemSelect"
+                                    listener="#{inventoryCreditController.onOperatingChange}"/>
+
+                        </p:autoComplete>
+                        <h:message id="m3" for="operating" style="color:red" />  
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="Main Inventory" class="uk-form-label" for="sourceMain"/>
+                        <p:autoComplete var="sourceMain" id="sourceMain" forceSelection="true"
+                                        converter="#{mainInvConverter}"
+                                        completeMethod="#{inventoryCreditController.completeMainInv}" 
+                                        emptyMessage="No Records.." placeholder="Search  Main Inventory"
+                                        value="#{inventoryCreditController.mainInv}" inputStyleClass="md-input"
+                                        itemLabel="#{sourceMain.organizationName}" 
+                                        itemValue="#{sourceMain}" >
+                            <p:ajax update="@this m4 sourceSub m5" event="itemSelect"
+                                    listener="#{inventoryCreditController.onMainInvChange}"/>
+
+                        </p:autoComplete>
+                        <h:message id="m4" for="sourceMain" style="color:red" />                        
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="Source Secondary Inventory" class="uk-form-label" for="sourceSub"/>
+                        <p:autoComplete var="sourceSub" id="sourceSub" forceSelection="true"
+                                        completeMethod="#{inventoryCreditController.completeSubInv}"
+                                        converter="#{subInvConverter}"
+                                        emptyMessage="No Records.." placeholder="Search Sub Inventory"
+                                        value="#{inventoryCreditController.secInv}" 
+                                        inputStyleClass="md-input"
+                                        itemLabel="#{sourceSub.secondaryInventoryName}" 
+                                        itemValue="#{sourceSub}" >
+                            <p:ajax update="@this m5" event="itemSelect" />
+                        </p:autoComplete>
+
+                        <h:message id="m5" for="sourceSub" style="color:red" />                        
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel value="System Items" class="uk-form-label" for="systemItem"/>
+                        <p:autoComplete var="systemItem" id="systemItem" forceSelection="true"
+                                        completeMethod="#{inventoryCreditController.completeSystemItems}" 
+                                        converter="#{systemItemConverter}"
+                                        emptyMessage="No Records.." placeholder="Search System Items"
+                                        value="#{inventoryCreditController.item}" 
+                                        inputStyleClass="md-input"
+                                        itemLabel="#{systemItem.description}" 
+                                        itemValue="#{systemItem}" >
+
+                        </p:autoComplete>                        
+                    </div>
+                </div>
+
+                <div class="md-fab-wrapper md-fab-speed-dial">
+                    <a class="md-fab md-fab-primary" href="#"><i class="material-icons">content_paste</i></a>
+                    <div class="md-fab-wrapper-small">
+                        <p:commandLink class="md-fab md-fab-small" title="Word" ajax="false"
+                                       action="#{inventoryCreditController.generateReport('WORD')}">
+                            <h:graphicImage library="imgs" name="word.png" />
+                        </p:commandLink>                        
+                        <p:commandLink class="md-fab md-fab-small" title="Excel" ajax="false"
+                                       action="#{inventoryCreditController.generateReport('XLS')}">
+                            <h:graphicImage library="imgs" name="excel.png" />
+                        </p:commandLink>
+                        <p:commandLink class="md-fab md-fab-small" title="CSV" ajax="false"
+                                       action="#{inventoryCreditController.generateReport('CSV')}">
+                            <h:graphicImage library="imgs" name="csv.png" />
+                        </p:commandLink> 
+                        <p:commandLink class="md-fab md-fab-small" title="PDF" ajax="false"
+                                       action="#{inventoryCreditController.generateReport('PDF')}">
+                            <h:graphicImage library="imgs" name="pdf.png" />
+                        </p:commandLink>
+                        <p:commandLink class="md-fab md-fab-small" title="Web Page" ajax="false" target="_blank"
+                                       action="#{inventoryCreditController.generateReport('HTML')}">
+                            <h:graphicImage library="imgs" name="html.png" />
+                        </p:commandLink>                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

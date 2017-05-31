@@ -1,0 +1,174 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="periodtype" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('period_types:read')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Period Types
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="header" class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-3-6">
+                        <h:outputLabel value="Name" for="name" />
+                        <h:inputText id="name" class="md-input" value="#{peroidTypeController.periodName}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" actionListener="#{peroidTypeController.setFilterTriggred(true)}"
+                                       class="md-btn md-btn-primary uk-margin-small-top" process="header" 
+                                       update="table" action="#{peroidTypeController.filter}">
+
+                        </p:commandLink>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="row" value="#{peroidTypeController.periodTypes}" 
+                                     paginator="true" 
+                                     paginatorAlwaysVisible="false"
+                                     rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover"
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Type Name" styleClass="uk-width-5-10 uk-text-left">
+                                #{row.periodTypeName}
+                            </p:column>
+                            <p:column headerText="Accounting Periods" styleClass="uk-width-2-10 uk-text-center">
+                                #{row.accountingPeriods}
+                            </p:column>
+                            <p:column headerText="Adjustment Periods" styleClass="uk-width-2-10 uk-text-center">
+                                #{row.noOfAdjusts}
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <p:commandLink 
+                                    rendered="#{currentUser.hasPermission('period_types:create')}"
+                                    update="dialogContent" oncomplete="modal.show()" process="@this">
+                                    <f:setPropertyActionListener target="#{peroidTypeController.currentPeriod}" 
+                                                                 value="#{row}" />
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </p:commandLink>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Period
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="dialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-1-2">
+                                <p:outputLabel value="Name" for="pName" />
+                                <p:inputText value="#{peroidTypeController.currentPeriod.periodTypeName}"
+                                             class="md-input" required="true"
+                                             id="pName" >
+                                </p:inputText>
+                                <h:message id="msg1" for="pName" style="color:red;" />
+                            </div>
+                        </div>
+                        <div class="uk-grid">
+                            <div class="uk-width-1-2">
+                                <p:outputLabel value="Number Per Fiscal Year" for="number" />
+                                <p:inputText value="#{peroidTypeController.currentPeriod.accountingPeriods}"
+                                             class="md-input" required="true"
+                                             id="number" >
+                                    <p:ajax update="msg2 @this"/>
+                                </p:inputText>
+                                <h:message id="msg2" for="number" style="color:red;" />                               
+                            </div>
+                            <div class="uk-width-1-2">
+                                <p:outputLabel value="Number of adjusts" for="adjust" />
+                                <p:inputText value="#{peroidTypeController.currentPeriod.noOfAdjusts}"
+                                             class="md-input" required="true"
+                                             id="adjust" >
+                                    <p:ajax update="msg4 @this"/>
+                                </p:inputText>
+                                <h:message id="msg4" for="adjust" style="color:red;" />    
+                            </div>
+
+                        </div>
+                        <div class="uk-grid">
+                            <div class="uk-width-1-1">
+                                <p:outputLabel value="Description" for="desc" />
+                                <p:inputText value="#{peroidTypeController.currentPeriod.description}"
+                                             class="md-input"
+                                             id="desc" >
+                                    <p:ajax update="msg3"/>
+                                </p:inputText>
+                                <h:message id="msg3" for="desc" style="color:red;" />                               
+                            </div>
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent" oncomplete="onDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{peroidTypeController.onDialogOk}">OK</p:commandLink>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-accent" oncomplete="modal.show();"
+                            rendered="#{currentUser.hasPermission('period_types:create')}"
+                           update="dialogContent" process="@this">
+                <i class="material-icons">&#xE145;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>      
+    </ui:define>
+</ui:composition>

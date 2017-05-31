@@ -1,0 +1,78 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="physical" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{physicalLevelDetailsController.currentLevelId}" />
+            <f:viewAction action="#{physicalLevelDetailsController.loadLevel()}" />
+        </f:metadata>
+    </ui:define>    
+    <ui:define name="title">
+        Level Details
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="heading_b uk-margin-medium-bottom">#{physicalLevelDetailsController.currPhysicalLevel.levelName}</h2>
+
+        <div class="md-card">
+            <div class="md-card-toolbar">
+                <div class="md-card-toolbar-actions">
+                    <p:commandLink action="#{physicalLevelDetailsController.addLine}" update="table" >
+                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                    </p:commandLink>
+                </div>
+
+                
+            </div>
+            <div class="md-card-content">
+                <p:dataTable id="table" var="line" value="#{physicalLevelDetailsController.currPhysicalLevel.levelDetails}"
+                             tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                    <p:column headerText="Level Name" styleClass="uk-text-left uk-width-3-10">
+                        <p:inputText id="name" value="#{line.detailName}" readonly="#{line.usedInLocations gt 0}"
+                                     required="true" class="uk-width-1-1" >
+                        </p:inputText>
+                        <p:tooltip id="tip" for="name" position="right">
+                            <h:message for="name" />
+                        </p:tooltip>
+                    </p:column>
+                    <p:column headerText="Depends On" styleClass="uk-text-left uk-width-3-10">
+
+                        <p:autoComplete id="dependsOnDetailId" value="#{line.dependsOnLevel}" 
+                                        disabled="#{line.levelId.dependentTypeId==false || line.usedInLocations gt 0}"
+                                        required="#{line.levelId.dependentTypeId==true}" 
+                                        completeMethod="#{physicalLevelDetailsController.completeLevelDetail}"  
+                                        emptyMessage="No Records.."  converter="#{levelDetailConverter}"
+                                        var="level" inputStyleClass="uk-width-1-1"
+                                        itemLabel="#{level.detailName}" 
+                                        itemValue="#{level}"
+                                        placeholder="Depends On"
+                                        forceSelection="true" >
+                        </p:autoComplete>
+
+                    </p:column>
+                    <p:column headerText="Enabled" styleClass="uk-text-center uk-width-2-10">
+                        <p:selectBooleanCheckbox value="#{line.detailStatus}" disabled="#{line.usedInLocations gt 0}"/>
+                    </p:column>
+           
+               
+                </p:dataTable>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" 
+                           update="@form" process="@form" action="#{physicalLevelDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,202 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="assets" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('assets:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Asset View
+    </ui:define>
+    <ui:define name="main">
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-1-6">
+                        <p:outputLabel for="code" value="Asset Code" />
+                        <p:inputText class="md-input" id="code" value="#{assetController.code}" />   
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="name" value="Asset Name" />
+                        <p:inputText class="md-input" id="name" value="#{assetController.name}" />   
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:selectOneMenu id="status" pt:data-md-selectize="true"
+                                         value="#{assetController.status}"
+                                         pt:data-md-selectize-bottom="true">
+                            <f:selectItem noSelectionOption="true" itemLabel="Status" />
+                            <f:selectItems itemLabel="#{stat}" itemValue="#{stat}" var="stat" 
+                                           value="#{assetController.statusList}"/>
+
+                        </h:selectOneMenu>                       
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@this code name status" 
+                                       update="table" action="#{assetController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content"> 
+                <div class="uk-width-1-1">
+
+                    <p:dataTable id="table" var="line" value="#{assetController.assetList}"
+                                 paginatorAlwaysVisible="false" rows="20"
+                                 paginatorPosition="bottom"  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                 tableStyleClass="uk-table uk-table-hover" 
+                                 sortBy="#{line.assetCode}" 
+                                 >
+                        <p:column headerText="Asset Code" styleClass="uk-text-left">
+                            <h:outputText  value="#{line.assetCode}" />
+                        </p:column>
+                        <p:column headerText="Asset Name" styleClass="uk-text-left">
+                            <h:outputText  value="#{line.assetName}" />
+                        </p:column>
+                        <p:column headerText="Original Cost" styleClass="uk-text-right">
+                            <h:outputText  value="#{line.originalCost}" />
+                        </p:column>
+                        <p:column headerText="Current Cost" styleClass="uk-text-right">
+                            <h:outputText value="#{line.currentCost}"/>
+                        </p:column>
+
+                        <p:column headerText="Onservice Date" styleClass="uk-text-center">
+                            <h:outputText value="#{line.onserviceDate}">
+                                <f:convertDateTime pattern="dd-MM-yyyy"/>
+                            </h:outputText>
+                        </p:column>
+                        <p:column headerText="Status" styleClass="uk-text-center">
+                            <span class="uk-badge #{line.status == 'PRESERVICE' ? 'uk-badge-primary' : 
+                                                    line.status == 'ONSERVICE' ? 'uk-badge-success' :
+                                                    line.status == 'RETIRED' ? 'uk-badge-warning'  : 'uk-badge-danger'}">
+                                  #{line.status}
+                            </span>
+
+                        </p:column>
+                        <p:column headerText="#" styleClass="uk-text-center">
+                            <h:link outcome="assetDetails?id=#{line.assetId}">
+                                <i class="material-icons md-24">edit</i>
+                            </h:link>
+                            <p:commandLink id="retired" update="dialogContent" process="@this" oncomplete="modal.show();"
+                                           rendered="#{line.status == 'ONSERVICE' || line.status == 'RETIRED'}">
+                                <f:setPropertyActionListener value="#{line}" target="#{assetController.currentAsset}"/>
+                                <i class="material-icons">launch</i>
+                            </p:commandLink>
+
+                        </p:column>
+                    </p:dataTable>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+
+        <div class="uk-modal" id="dialog">
+
+            <div class="uk-modal-dialog">
+
+                <h:panelGroup layout="block" id="dialogContent" >
+                    <div class="uk-modal-header">
+                        <h5 class="uk-modal-title">#{assetController.currentAsset.status == 'ONSERVICE' ? 'Retire Asset' : 'Reservice Asset'}</h5>
+                    </div>
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-1-2">
+                            <p:outputLabel for="date" value="Date" />
+                            <h:inputText class="md-input" id="date" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                         validator="#{assetController.validateDate}" required="true"
+                                         value="#{assetController.transDate}">
+                                <f:convertDateTime pattern="dd-MM-yyyy"/>
+                            </h:inputText>
+                            <h:message for="date" style="color:red;"  />
+                        </div>
+                        <div class="uk-width-medium-1-2">
+                            <p:outputLabel for="cost" value="Cost"/>
+                            <h:inputText class="md-input" id="cost" value="#{assetController.cost}">
+                                <f:validateLongRange minimum="1"/>
+                            </h:inputText>
+                            <p:keyFilter for="cost" mask="num" />
+                            <h:message for="cost" style="color:red;"  />
+                        </div>
+                    </div>
+                    <ui:fragment id="frag" rendered="#{assetController.currentAsset.status == 'ONSERVICE'}">
+                        <div class="uk-grid" data-uk-grid-margin="true">
+                            <div class="uk-width-medium-1-1">
+                                <p:outputLabel for="reason" value="Reason"  />
+                                <p:inputText class="md-input" id="reason" value="#{assetController.reason}">
+                                </p:inputText>
+                                <h:message for="reason" style="color:red;"  />
+
+                            </div>
+                        </div>
+                    </ui:fragment>
+
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="dialogContent table" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{assetController.changeServiceAsset()}">OK</p:commandLink>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <div class="md-fab-wrapper">
+
+            <p:link class="md-fab md-fab-success" outcome="assetReceipts">
+                <i class="material-icons">&#xE145;</i>
+            </p:link>
+
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+
+        </script>
+    </ui:define>
+</ui:composition>
+
+

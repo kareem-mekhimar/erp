@@ -1,0 +1,618 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="modules" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="operating" value="#{payablesController.currentOperatingUnitId}" />
+            <f:viewAction action="#{payablesController.loadModuleConfig()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('payables:read')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Payables
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{payablesController.currentModuleConfug.operatingUnit.orgUnitName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        Payables
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card uk-margin-medium-bottom">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="lines" class="md-card-content">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-1">
+                            <ui:remove>
+                                <ul id="user_edit_tabs" class="uk-tab" 
+                                    data-uk-tab="{connect:'#tab',animation: 'slide-horizontal'}">
+                                    <li id="l1" class="uk-active"><a class="tab-btn" id="p1" href="#">Accounting</a></li>
+                                    <li id="l2"><a class="tab-btn"  id="p2" href="#">Accounting Options</a></li>
+                                    <li id="l4"><a class="tab-btn"  id="p4" href="#">Suppliers</a></li>
+                                    <li id="l5"><a class="tab-btn"  id="p5" href="#">Currency</a></li>
+                                </ul>
+                                <ul id="tab" class="uk-switcher uk-margin-small-top">
+                                    <li>
+                                        <h:panelGroup styleClass="tabContent" id="t1">
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="liability" value="Liablitiy Account" class="uk-form-label" />
+                                                    <p:autoComplete id="liability" value="#{payablesController.currentModuleConfug.liabilityAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    required="true"
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="liability" style="color:red;" id="liabilityMsg" />         
+
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="pre" value="PrePayment Account" class="uk-form-label" />
+                                                    <p:autoComplete id="pre" value="#{payablesController.currentModuleConfug.prepaymentAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="pre" style="color:red;"  />                                               
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="discount" value="Discount Account" class="uk-form-label" />
+                                                    <p:autoComplete id="discount" value="#{payablesController.currentModuleConfug.discountAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="discount" style="color:red;"  />                                               
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="progain" value="Pro Gain Account" class="uk-form-label" />
+                                                    <p:autoComplete id="progain" value="#{payablesController.currentModuleConfug.poRateVrincGainAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="progain" style="color:red;"  />         
+
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="proless" value="Pro Loss Account" class="uk-form-label" />
+                                                    <p:autoComplete id="proless" value="#{payablesController.currentModuleConfug.poRateVrinceLossAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="proless" style="color:red;"  />                                               
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="bills" value="Bills  Account" class="uk-form-label" />
+                                                    <p:autoComplete id="bills" value="#{payablesController.currentModuleConfug.billsPayableAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="bills" style="color:red;"  />                                               
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="exp" value="Expenses Account" class="uk-form-label" />
+                                                    <p:autoComplete id="exp" value="#{payablesController.currentModuleConfug.expesnesClearingAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="exp" style="color:red;"  />         
+
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="miscellaneous" value="Miscellaneous Account" class="uk-form-label" />
+                                                    <p:autoComplete id="miscellaneous" value="#{payablesController.currentModuleConfug.miscellaneousAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="miscellaneous" style="color:red;"  />                                               
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="retain" value="Retainage  Account" class="uk-form-label" />
+                                                    <p:autoComplete id="retain" value="#{payablesController.currentModuleConfug.retainageAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="retain" style="color:red;"  />                                               
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="chargeAccount" value="Charge Account" class="uk-form-label" />
+                                                    <p:autoComplete id="chargeAccount" value="#{payablesController.currentModuleConfug.chargeAccount}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    required="true"
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="chargeAccount" style="color:red;" id="chargeMsg"  />                                               
+                                                </div> 
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="cachClearingAcc" value="Cach Clearing" class="uk-form-label" />
+                                                    <p:autoComplete id="cachClearingAcc" value="#{payablesController.currentModuleConfug.cachClearingAcc}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="cachClearingAcc" style="color:red;"  />                                               
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </li>
+                                    <li>
+                                        <h:panelGroup styleClass="tabContent" id="t2">
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-4">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.paymentAccWhenIssued}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Payment Acc When Issued" />
+                                                </div>
+                                                <div class="uk-width-medium-1-4">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.paymentAccWhenClears}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Payment Acc When Cleared" />
+                                                </div>
+                                                <div class="uk-width-medium-1-4">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.gainlossPayAccWhenIssued}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Gain Loss Pay When Issued" />
+                                                </div>
+                                                <div class="uk-width-medium-1-4">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.gainlossPayAccWhenClears}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Gain Loss Pay When Cleared" />
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top" data-uk-margin="true">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Bills Pay Acc Src" class="uk-form-label" />
+                                                    <h:selectOneRadio value="#{payablesController.currentModuleConfug.billsPayAccSrc}" layout="pageDirection">
+                                                        <f:selectItems var="e" value="#{payablesController.billsPayableAccountSources}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneRadio>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Automatic Offset Method" class="uk-form-label" />
+                                                    <h:selectOneRadio value="#{payablesController.currentModuleConfug.automaticOffsetMthod}" layout="pageDirection">
+                                                        <f:selectItems var="e" value="#{payablesController.automaticOffsetMethods}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneRadio>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Discount Method" class="uk-form-label" />
+                                                    <h:selectOneRadio value="#{payablesController.currentModuleConfug.discountMethod}" layout="pageDirection">
+                                                        <f:selectItems var="e" value="#{payablesController.discountMethods}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneRadio>
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top" data-uk-margin="true">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Interset Options" class="uk-form-label" />
+                                                    <h:selectOneRadio value="#{payablesController.currentModuleConfug.interest}" layout="pageDirection">
+                                                        <f:selectItems var="e" value="#{payablesController.interestOptions}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneRadio>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Prepayment Options" class="uk-form-label" />
+                                                    <h:selectOneRadio value="#{payablesController.currentModuleConfug.prepaymentAccountOption}" layout="pageDirection">
+                                                        <f:selectItems var="e" value="#{payablesController.prepaymentAccountOptions}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneRadio>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>                                    
+                                    </li>
+
+                                    <li>
+                                        <h:panelGroup styleClass="tabContent" id="t4">
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.holdUnmatchedInvoices}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Hold Un Matched Invoices" />
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Invoice Match Options" class="uk-form-label" />
+                                                    <h:selectOneMenu value="#{payablesController.currentModuleConfug.invoiceMatchOption}" pt:data-md-selectize="true">
+                                                        <f:selectItems var="e" value="#{payablesController.invoiceMatchingOptionses}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneMenu>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel value="Currency" for="curr"  class="uk-form-label" />
+                                                    <h:selectOneMenu  id="curr" pt:data-placeholder="Select Currency"
+                                                                      value="#{payablesController.currentModuleConfug.invoiceCurrency}"
+                                                                      required="true" converter="#{fndCurrencyConverter}"
+                                                                      pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                        <f:selectItems var="c" value="#{payablesController.currencys}" 
+                                                                       itemLabel="#{c.currencyCode}" itemValue="#{c}" />
+                                                    </h:selectOneMenu>
+                                                    <h:message for="curr" id="currMsg" style="color:red;"  />   
+                                                </div>
+                                            </div>
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Pay Group" class="uk-form-label" />
+                                                    <h:selectOneMenu value="#{payablesController.currentModuleConfug.payGroup}" pt:data-md-selectize="true">
+                                                        <f:selectItems var="e" value="#{payablesController.paymentGroups}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneMenu>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Payment Terms" class="uk-form-label" />
+                                                    <h:selectOneMenu value="#{payablesController.currentModuleConfug.paymentTerms}" pt:data-md-selectize="true">
+                                                        <f:selectItems var="e" value="#{payablesController.paymentTermses}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneMenu>
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel  value="Payment date Basis" class="uk-form-label" />
+                                                    <h:selectOneMenu value="#{payablesController.currentModuleConfug.payDateBasis}" pt:data-md-selectize="true">
+                                                        <f:selectItems var="e" value="#{payablesController.paymentDateBasises}" 
+                                                                       itemLabel="#{e}" itemValue="#{e}" />
+                                                    </h:selectOneMenu>
+                                                </div>
+
+                                            </div>
+                                        </h:panelGroup>
+                                    </li>
+                                    <li>
+                                        <h:panelGroup styleClass="tabContent" id="t5">
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.useMultipleCurrency}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Use Multiple Currency" />
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.exchangeRateEntryReq}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Exchange Rate entry Required" />
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.calcUsrExchangeRate}" 
+                                                                              class="icheckbox_md" />
+                                                    <p:outputLabel  value=" Calc User Exchange Rate" />
+                                                </div>
+
+                                            </div>
+                                            <div class="uk-grid uk-margin-top">
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="realagain" value="Realized Gain Account" class="uk-form-label" />
+                                                    <p:autoComplete id="realagain" value="#{payablesController.currentModuleConfug.realizedGainAcc}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="realagain" style="color:red;"  />   
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="realloss" value="Realized Loss Account" class="uk-form-label" />
+                                                    <p:autoComplete id="realloss" value="#{payablesController.currentModuleConfug.realizedLossAcc}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="realloss" style="color:red;"  />   
+                                                </div>
+                                                <div class="uk-width-medium-1-3">
+                                                    <p:outputLabel for="rounding" value="Rounding Account" class="uk-form-label" />
+                                                    <p:autoComplete id="rounding" value="#{payablesController.currentModuleConfug.roundingAcc}" 
+                                                                    completeMethod="#{payablesController.completeAccounts}" 
+                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                    inputStyleClass="md-input" 
+                                                                    placeholder="Search Accounts" 
+                                                                    forceSelection="true"  >                                                         
+                                                    </p:autoComplete>                                                              
+                                                    <h:message for="rounding" style="color:red;"  />   
+                                                </div>
+                                            </div>
+
+                                        </h:panelGroup>  
+                                    </li>
+                                </ul>
+                            </ui:remove>
+                            <p:tabView id="tabView" class="uk-tab" effect="slide">
+                                <p:tab id="tab0" title="Accounting Options">
+                                    <h:panelGroup styleClass="tabContent" id="t1">
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="liability" value="Liablitiy Account" class="uk-form-label" />
+                                                <p:autoComplete id="liability" value="#{payablesController.currentModuleConfug.liabilityAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                required="true"
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="liability" style="color:red;" id="liabilityMsg" />         
+
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="pre" value="PrePayment Account" class="uk-form-label" />
+                                                <p:autoComplete id="pre" value="#{payablesController.currentModuleConfug.prepaymentAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="pre" style="color:red;"  />                                               
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="discount" value="Discount Account" class="uk-form-label" />
+                                                <p:autoComplete id="discount" value="#{payablesController.currentModuleConfug.discountAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="discount" style="color:red;"  />                                               
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="progain" value="Pro Gain Account" class="uk-form-label" />
+                                                <p:autoComplete id="progain" value="#{payablesController.currentModuleConfug.poRateVrincGainAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="progain" style="color:red;"  />         
+
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="proless" value="Pro Loss Account" class="uk-form-label" />
+                                                <p:autoComplete id="proless" value="#{payablesController.currentModuleConfug.poRateVrinceLossAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="proless" style="color:red;"  />                                               
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="bills" value="Bills  Account" class="uk-form-label" />
+                                                <p:autoComplete id="bills" value="#{payablesController.currentModuleConfug.billsPayableAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="bills" style="color:red;"  />                                               
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="exp" value="Expenses Account" class="uk-form-label" />
+                                                <p:autoComplete id="exp" value="#{payablesController.currentModuleConfug.expesnesClearingAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="exp" style="color:red;"  />         
+
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="miscellaneous" value="Miscellaneous Account" class="uk-form-label" />
+                                                <p:autoComplete id="miscellaneous" value="#{payablesController.currentModuleConfug.miscellaneousAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="miscellaneous" style="color:red;"  />                                               
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="retain" value="Retainage  Account" class="uk-form-label" />
+                                                <p:autoComplete id="retain" value="#{payablesController.currentModuleConfug.retainageAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="retain" style="color:red;"  />                                               
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="chargeAccount" value="Charge Account" class="uk-form-label" />
+                                                <p:autoComplete id="chargeAccount" value="#{payablesController.currentModuleConfug.chargeAccount}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                required="true"
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="chargeAccount" style="color:red;" id="chargeMsg"  />                                               
+                                            </div> 
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="cachClearingAcc" value="Cach Clearing" class="uk-form-label" />
+                                                <p:autoComplete id="cachClearingAcc" value="#{payablesController.currentModuleConfug.cachClearingAcc}" 
+                                                                completeMethod="#{payablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true"  >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="cachClearingAcc" style="color:red;"  />                                               
+                                            </div>
+                                        </div>
+                                    </h:panelGroup>
+                                </p:tab>
+                                <p:tab id="tab1" title="Accounting Options">
+                                    <h:panelGroup styleClass="tabContent" id="t2">
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-4">
+                                                <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.paymentAccWhenIssued}" 
+                                                                          class="icheckbox_md" />
+                                                <p:outputLabel  value=" Payment Acc When Issued" />
+                                            </div>
+                                            <div class="uk-width-medium-1-4">
+                                                <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.paymentAccWhenClears}" 
+                                                                          class="icheckbox_md" />
+                                                <p:outputLabel  value=" Payment Acc When Cleared" />
+                                            </div>
+                                            <div class="uk-width-medium-1-4">
+                                                <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.gainlossPayAccWhenIssued}" 
+                                                                          class="icheckbox_md" />
+                                                <p:outputLabel  value=" Gain Loss Pay When Issued" />
+                                            </div>
+                                            <div class="uk-width-medium-1-4">
+                                                <h:selectBooleanCheckbox  value="#{payablesController.currentModuleConfug.gainlossPayAccWhenClears}" 
+                                                                          class="icheckbox_md" />
+                                                <p:outputLabel  value=" Gain Loss Pay When Cleared" />
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top" data-uk-margin="true">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel  value="Bills Pay Acc Src" class="uk-form-label" />
+                                                <h:selectOneRadio value="#{payablesController.currentModuleConfug.billsPayAccSrc}" layout="pageDirection">
+                                                    <f:selectItems var="e" value="#{payablesController.billsPayableAccountSources}" 
+                                                                   itemLabel="#{e}" itemValue="#{e}" />
+                                                </h:selectOneRadio>
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel  value="Automatic Offset Method" class="uk-form-label" />
+                                                <h:selectOneRadio value="#{payablesController.currentModuleConfug.automaticOffsetMthod}" layout="pageDirection">
+                                                    <f:selectItems var="e" value="#{payablesController.automaticOffsetMethods}" 
+                                                                   itemLabel="#{e}" itemValue="#{e}" />
+                                                </h:selectOneRadio>
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel  value="Discount Method" class="uk-form-label" />
+                                                <h:selectOneRadio value="#{payablesController.currentModuleConfug.discountMethod}" layout="pageDirection">
+                                                    <f:selectItems var="e" value="#{payablesController.discountMethods}" 
+                                                                   itemLabel="#{e}" itemValue="#{e}" />
+                                                </h:selectOneRadio>
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top" data-uk-margin="true">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel  value="Interset Options" class="uk-form-label" />
+                                                <h:selectOneRadio value="#{payablesController.currentModuleConfug.interest}" layout="pageDirection">
+                                                    <f:selectItems var="e" value="#{payablesController.interestOptions}" 
+                                                                   itemLabel="#{e}" itemValue="#{e}" />
+                                                </h:selectOneRadio>
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel  value="Prepayment Options" class="uk-form-label" />
+                                                <h:selectOneRadio value="#{payablesController.currentModuleConfug.prepaymentAccountOption}" layout="pageDirection">
+                                                    <f:selectItems var="e" value="#{payablesController.prepaymentAccountOptions}" 
+                                                                   itemLabel="#{e}" itemValue="#{e}" />
+                                                </h:selectOneRadio>
+                                            </div>
+                                        </div>
+                                    </h:panelGroup> 
+                                </p:tab>
+                            </p:tabView>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink
+                rendered="#{currentUser.hasPermission('payables:create')}"
+                class="md-fab md-fab-primary" process="@form" 
+                action="#{payablesController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+
+</ui:composition>

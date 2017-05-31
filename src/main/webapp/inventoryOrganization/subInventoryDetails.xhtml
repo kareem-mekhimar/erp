@@ -1,0 +1,533 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="subInv" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{subInvDetailsController.currentInventoryId}" />
+            <f:viewAction action="#{subInvDetailsController.loadInventory()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('subinv:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Sub Inventory Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{subInvDetailsController.currentSubInventory.secondaryInventoryId == null ? 'New Inventory' : 
+              subInvDetailsController.currentSubInventory.secondaryInventoryName }
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-6">
+                        <p:outputLabel for="code" value="Inventory Code" />
+                        <p:inputText class="md-input" id="code"  required="true"  value="#{subInvDetailsController.currentSubInventory.organizationCode}" >
+                        </p:inputText>
+                        <h:message for="code" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-3-6">
+                        <p:outputLabel for="name" value="Inventory Name" />
+                        <p:inputText class="md-input" id="name"  required="true"  value="#{subInvDetailsController.currentSubInventory.secondaryInventoryName}" >
+                        </p:inputText>
+                        <h:message for="name" style="color:red;"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+                            <h:selectBooleanCheckbox  id="enabledFlagId" class="icheckbox_md"
+                                                      value="#{subInvDetailsController.currentSubInventory.statusId}"/>
+                            <h:outputLabel for="enabledFlagId" value=" Active"/>
+                        </div>
+                    </div>  
+
+                </div>
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-3-6  uk-margin-small-top">                        
+                        <p:autoComplete id="opratUnit" value="#{subInvDetailsController.currentSubInventory.mainInv}" 
+                                        completeMethod="#{subInvDetailsController.completeMainInv}" 
+                                        emptyMessage="No Records.."  converter="#{mainInvConverter}" 
+                                        var="item" itemLabel="#{item.organizationName}" itemValue="#{item}"
+                                        inputStyleClass="md-input" 
+                                        placeholder="Main Inventory" 
+                                        forceSelection="true" required="true"  >
+                            <p:ajax event="itemSelect" listener="#{subInvDetailsController.resetInvType}" update="shipFlag" />
+                        </p:autoComplete>
+                        <h:message for="opratUnit" style="color:red;"  />
+                    </div> 
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel for="ead" value="End Active Date" />
+                        <h:inputText class="md-input" id="ead" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{subInvDetailsController.currentSubInventory.disableDate}" required="true">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                        </h:inputText>
+                        <h:message for="ead" style="color:red;"  />
+
+                    </div>
+
+                </div>
+
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-1">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc"  value="#{subInvDetailsController.currentSubInventory.description}" >
+                        </p:inputText>
+                        <h:message for="desc" style="color:red;"  />
+                    </div>
+
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">                        
+                        <p:autoComplete id="country" value="#{subInvDetailsController.currentSubInventory.country}" 
+                                        completeMethod="#{subInvDetailsController.completeCountry}" 
+                                        emptyMessage="No Records.." converter="#{countryConverter}"
+                                        var="item" itemLabel="#{item.countryName}" itemValue="#{item}"
+                                        inputStyleClass="md-input" 
+                                        placeholder="Country"  required="true"
+                                        forceSelection="true">
+                            <p:ajax   event="itemSelect" listener="#{subInvDetailsController.resetForm()}" update="city" />
+                        </p:autoComplete>
+                        <h:message for="country" style="color:red;"  />                       
+                    </div>
+                    <div class="uk-width-medium-2-6">                      
+                        <p:autoComplete id="city" value="#{subInvDetailsController.currentSubInventory.townOrCity}" 
+                                        completeMethod="#{subInvDetailsController.completeCity}" 
+                                        emptyMessage="No Records.."
+                                        var="item" itemLabel="#{item}" itemValue="#{item}"
+                                        inputStyleClass="md-input"
+                                        placeholder="City"  required="true"
+                                        forceSelection="true">
+                        </p:autoComplete>
+                        <h:message for="city" style="color:red;"  />                    
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="region1" value="Region" />
+                        <p:inputText class="md-input" id="region1" value="#{subInvDetailsController.currentSubInventory.region}">
+                        </p:inputText>
+                        <h:message for="region1" style="color:red;"  />
+                    </div>
+
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-6-10">
+                        <p:outputLabel for="addressLine1" value="Address" />
+                        <p:inputText class="md-input" id="addressLine1" value="#{subInvDetailsController.currentSubInventory.address}">
+                        </p:inputText>
+                        <h:message for="addressLine1" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-10">
+
+                        <p:outputLabel for="postalCode" value="Postal Code" />
+                        <p:inputText class="md-input" id="postalCode" value="#{subInvDetailsController.currentSubInventory.postalCode}">
+                        </p:inputText>
+                        <h:message for="postalCode" style="color:red;"  />
+
+                    </div>
+                    <div class="uk-width-medium-2-10">
+
+                        <p:outputLabel for="telephone" value="Telephone" />
+                        <p:inputText class="md-input" id="telephone" value="#{subInvDetailsController.currentSubInventory.telephoneNumber}">
+                            <f:validateRegex pattern="[0-9]*"/>
+                        </p:inputText>
+                        <h:message for="telephone" style="color:red;"  />
+
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Main</a></li>
+                            <li><a href="#">Accounts</a></li>
+                            <li><a href="#">Warehouse</a></li>
+                        </ul> 
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                       
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+
+                                                        <ui:remove>
+                                                            <div class="uk-width-medium-2-5">
+                                                                <p:outputLabel value="Location" class="uk-form-label" for="location"/>
+                                                                <h:selectOneMenu id="location" value="#{subInvDetailsController.currentSubInventory.locationId}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Location" />
+                                                                    <f:selectItems itemValue="#{loc.locationId}" value="#{subInvDetailsController.locations}" 
+                                                                                   var="loc" itemLabel="#{loc.locationCode}" />
+                                                                </h:selectOneMenu>
+                                                                <h:message for="location" style="color:red;"  />
+
+                                                            </div>
+                                                        </ui:remove>
+
+
+                                                        <div class="uk-width-medium-2-6">
+                                                            <p:outputLabel value="Cost Method" class="uk-form-label" for="costMethod"/>
+                                                            <h:selectOneMenu id="costMethod" value="#{subInvDetailsController.currentSubInventory.locatorType}" 
+                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                             pt:data-placeholder="Locator Control Type" >
+                                                                <f:selectItem  itemValue="#{null}" />
+                                                                <f:selectItems value="#{subInvDetailsController.locatorTypes}"
+                                                                               var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                            </h:selectOneMenu>
+                                                            <h:message for="costMethod" style="color:red;"  />
+                                                        </div> 
+                                                        <div class="uk-width-medium-2-6">
+                                                            <p:outputLabel value="UOM" class="uk-form-label" for="uom"/>
+                                                            <h:selectOneMenu id="uom" value="#{subInvDetailsController.currentSubInventory.pickingUomId}" 
+                                                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                             >
+                                                                <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select UOM" />
+                                                                <f:selectItems itemValue="#{uom.uomId}" value="#{subInvDetailsController.uoms}" 
+                                                                               var="uom" itemLabel="#{uom.uomCode}" />
+                                                            </h:selectOneMenu>
+                                                            <h:message for="uom" style="color:red;"  />                                                    
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="storageFlag" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.storageFlag}" />
+                                                                <h:outputLabel value=" Storage " for="storageFlag"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="receivingFlag" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.receivingFlag}" />
+                                                                <h:outputLabel value=" Receiving " for="receivingFlag"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="shipFlag" class="icheckbox_md" 
+                                                                                         disabled="#{subInvDetailsController.notShip}"
+                                                                                         value="#{subInvDetailsController.currentSubInventory.shippingFlag}" />
+                                                                <h:outputLabel value=" Shipping " for="shipFlag"/>
+                                                            </div>
+                                                        </div> 
+
+                                                    </div>
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="atp" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.includeInAtp}" />
+                                                                <h:outputLabel value=" Include In Atp " for="atp"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="allowReservation" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.allowReservation}" />
+                                                                <h:outputLabel value=" Allow Reservation " for="allowReservation"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="nettableFlagId" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.nettableFlagId}" />
+                                                                <h:outputLabel value=" Nettable " for="nettableFlagId"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="quantityTracked" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.quantityTracked}" />
+                                                                <h:outputLabel value=" Quantity Tracked " for="quantityTracked"/>
+                                                            </div>
+                                                        </div> 
+                                                    </div>
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="assetInventory" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.assetInventory}" />
+                                                                <h:outputLabel value=" Asset Inventory " for="assetInventory"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="depreciableInventory" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.depreciableInventory}" />
+                                                                <h:outputLabel value=" Depreciable " for="depreciableInventory"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-4">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="locatorStatus" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.locatorStatusId}" />
+                                                                <h:outputLabel value=" Active Locator " for="locatorStatus"/>
+                                                            </div>
+                                                        </div> 
+
+                                                    </div>
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-3">
+                                                            <h:outputLabel for="pickingorder" value="Picking Order" />
+                                                            <h:inputText class="md-input" id="pickingorder" value="#{subInvDetailsController.currentSubInventory.pickingOrder}">  
+                                                            </h:inputText>
+                                                            <h:message for="pickingorder" style="color:red;"  />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>                                            
+                                            </div>
+
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+
+
+                                                                <p:outputLabel value="Material Account" class="uk-form-label" for="materialAccount"/>
+                                                                <h:selectOneMenu id="materialAccount" value="#{subInvDetailsController.currentSubInventory.materialAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>
+                                                                <h:message for="materialAccount" style="color:red;"  />
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <p:outputLabel value="OutSide Processing Account" for="outside" class="uk-form-label" />
+                                                                <h:selectOneMenu id="outside" value="#{subInvDetailsController.currentSubInventory.outsideProcessingAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>
+                                                                <h:message for="outside" style="color:red;"  />
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <p:outputLabel value="Material Overhead Account" for="moverhead" class="uk-form-label" />
+                                                                <h:selectOneMenu id="moverhead" value="#{subInvDetailsController.currentSubInventory.materialOverheadAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>
+                                                                <h:message for="moverhead" style="color:red;"  />
+
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+                                                                <p:outputLabel value="OverHead Account" for="overhead" class="uk-form-label" />
+                                                                <h:selectOneMenu id="overhead" value="#{subInvDetailsController.currentSubInventory.overheadAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>                                                             
+                                                                <h:message for="overhead" style="color:red;"  />
+
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+                                                                <p:outputLabel value="Resource Account" for="resource" class="uk-form-label" />
+                                                                <h:selectOneMenu id="resource" value="#{subInvDetailsController.currentSubInventory.resourceAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>                                                             
+                                                                <h:message for="resource" style="color:red;"  />
+
+
+                                                            </div>
+                                                        </div>
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+                                                                <p:outputLabel value="Expense Account" for="expense" class="uk-form-label" />
+                                                                <h:selectOneMenu id="expense" value="#{subInvDetailsController.currentSubInventory.expenseAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>                                                             
+                                                                <h:message for="expense" style="color:red;"  />
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-3">
+                                                            <div class="uk-margin-small-top">
+                                                                <p:outputLabel value="Encumbrance Account" for="encumbrance" class="uk-form-label" />
+                                                                <h:selectOneMenu id="encumbrance" value="#{subInvDetailsController.currentSubInventory.encumbranceAccount}" 
+                                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                 >
+                                                                    <f:selectItem  itemValue="#{null}" noSelectionOption="true" itemLabel="Select Account" />
+                                                                    <f:selectItems itemValue="#{acc.codeCombinationId}" value="#{subInvDetailsController.accounts}" 
+                                                                                   var="acc" itemLabel="#{acc.codeCombinationShortName}" />
+                                                                </h:selectOneMenu>
+
+                                                                <h:message for="encumbrance" style="color:red;"  />
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                </div>
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                        <div class="uk-width-medium-1-5">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="lpnControlled" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.lpnControlled}" />
+                                                                <h:outputLabel value=" Lpn Controlled " for="lpnControlled"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-5">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="cartonization" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.cartonization}" />
+                                                                <h:outputLabel value=" Enabled Cartonization " for="cartonization"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-1-5">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="bulkPick" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.bulkPick}" />
+                                                                <h:outputLabel value=" Enable Bulk Pick " for="bulkPick"/>
+                                                            </div>
+                                                        </div> 
+                                                        <div class="uk-width-medium-2-5">
+                                                            <div class="uk-margin-small-top">
+
+                                                                <h:selectBooleanCheckbox id="opportunisticCycleCount" class="icheckbox_md" 
+                                                                                         value="#{subInvDetailsController.currentSubInventory.opportunisticCycleCount}" />
+                                                                <h:outputLabel value=" Enable Opportunistic Cycle Count " for="opportunisticCycleCount"/>
+                                                            </div>
+                                                        </div> 
+                                                    </div>
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true"></div>
+                                                    <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h:messages/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{subInvDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+
+    </ui:define>
+</ui:composition>

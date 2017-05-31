@@ -1,0 +1,175 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="custinvoiceview" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{customerInvoiceDetailsController.currentInvoiceId}" />
+            <f:viewAction action="#{customerInvoiceDetailsController.loadInvoice()}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Details
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{customerInvoiceDetailsController.currentInvoice.invoiceId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel for="org" value="Operating Unit" />
+                                    <p:inputText id="org" class="md-input" readonly="true"
+                                                 value="#{customerInvoiceDetailsController.currentInvoice.operatingUnit.orgUnitName}">
+                                    </p:inputText>       
+                                </div>
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel for="invoiceAmount" value="Amount" />
+                                    <p:inputText id="invoiceAmount" class="md-input" readonly="true"
+                                                 value="#{customerInvoiceDetailsController.currentInvoice.invoiceAmount}">
+                                    </p:inputText>       
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel for="curr" value="Currency" />
+                                    <p:inputText id="curr" class="md-input" readonly="true"
+                                                 value="#{customerInvoiceDetailsController.currentInvoice.invoiceCurrency.currencyCode}">
+                                    </p:inputText>       
+                                </div>
+                                <div class="uk-width-medium-2-4">
+                                    <p:outputLabel for="status" value="Status" />
+                                    <p:inputText id="status" class="md-input" readonly="true"
+                                                 value="#{customerInvoiceDetailsController.currentInvoice.invoiceStatus}">
+                                    </p:inputText>       
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-toolbar">
+                <h3 class="md-card-toolbar-heading-text">
+                    Lines
+                </h3>              
+            </div>
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="linesTable"
+                                     rowIndexVar="index"
+                                     var="line" 
+                                     value="#{customerInvoiceDetailsController.currentInvoice.invoiceLines.stream().filter(t -> ! t.additionalExpensesFlag).toList()}" 
+                                     tableStyleClass="uk-table uk-table-striped uk-table-condensed">
+                            <p:column headerText="No" styleClass="uk-text-center uk-width-1-10" >
+                                #{index + 1}
+                            </p:column>
+                            <p:column headerText="System Item" styleClass="uk-text-center uk-width-2-10">
+                                #{line.salesOrderLine.inventoryItem.description}
+                            </p:column>
+                            <p:column headerText="Amount" styleClass="uk-text-center uk-width-2-10">
+                                #{line.amount}
+                            </p:column> 
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-toolbar">
+                <div class="md-card-toolbar-actions">
+                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                    <p:commandLink id="addButton" process="newTable @this" update="newTable" 
+                                   action="#{customerInvoiceDetailsController.addLine}" >
+                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                    </p:commandLink>  
+                </div>
+                <h3 class="md-card-toolbar-heading-text">
+                    Additional Lines
+                </h3>              
+            </div>
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="newTable"
+                                     var="line" 
+                                     rowIndexVar="index"
+                                     value="#{customerInvoiceDetailsController.newLines}" 
+                                     tableStyleClass="uk-table uk-table-striped uk-table-condensed">
+                            <p:column headerText="No" styleClass="uk-text-center uk-width-1-10" >
+                                #{index + 1}
+                            </p:column>
+                            <p:column headerText="Type" styleClass="uk-text-center uk-width-2-10">
+                                <p:selectOneMenu id="type" value="#{line.lineType}" 
+                                                 binding="#{type}"
+                                                 required="true" 
+                                                 styleClass="#{type.valid ? '' : 'ui-state-error'} uk-width-1-1 uk-height-1-1 ">
+                                    <f:selectItem noSelectionOption="true" itemValue="#{null}" 
+                                                  itemLabel="Select Type" />
+                                    <f:selectItems var="#{c}" value="#{customerInvoiceDetailsController.lineTypes}" 
+                                                   itemValue="#{c}" itemLabel="#{c}" />
+                                    <p:ajax update="@this t3"/>
+                                </p:selectOneMenu>
+                                <p:tooltip id="t3" for="type" position="right">
+                                    <h:message for="type" />
+                                </p:tooltip>  
+                            </p:column>
+                            <p:column headerText="Description" styleClass="uk-text-center uk-width-5-10" >
+                                <p:inputText id="desc" required="true" class="uk-width-1-1"
+                                             value="#{line.description}" >
+                                    <p:ajax update="@this t1"/>
+                                </p:inputText>
+                                <p:tooltip id="t1" for="desc" position="right">
+                                    <h:message for="desc" />
+                                </p:tooltip>                                
+                            </p:column>
+                            <p:column headerText="Amount" styleClass="uk-text-center uk-width-2-10">
+                                <p:inputText id="amount" value="#{line.amount}"
+                                             validator="#{customerInvoiceDetailsController.validateAmount}"
+                                             required="true">
+                                    <p:ajax update="@this t2 :invoiceAmount" 
+                                            listener="#{customerInvoiceDetailsController.onAmountChange(line)}"/>
+                                    <p:keyFilter for="amount" mask="num" />
+                                </p:inputText>
+                                <p:tooltip id="t2" for="amount" position="right">
+                                    <h:message for="amount" />
+                                </p:tooltip>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  type="submit" update="@form" process="@form" class="md-fab md-fab-primary" 
+                            action="#{customerInvoiceDetailsController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+    </ui:define>
+</ui:composition>

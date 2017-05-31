@@ -1,0 +1,105 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="dep" />
+    
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('dept:read')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Departments
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <h:outputLabel value="Code" for="departmentCode" />
+                        <h:inputText id="departmentCode" class="md-input" value="#{departmentController.departmentCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Name" for="depn" />
+                        <h:inputText id="depn" class="md-input" value="#{departmentController.departmentname}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{departmentController.status}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItem itemLabel="Active" itemValue="1" />
+                                <f:selectItem itemLabel="Inactive" itemValue="0" />                                
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{departmentController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="dep" value="#{departmentController.departmentslist}" 
+                                     paginator="#{not empty departmentController.departmentslist}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" 
+                                     sortBy="#{dep.departmentCode}" 
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Code" styleClass="uk-width-1-10 uk-text-left">
+                                #{dep.departmentCode}
+                            </p:column>
+
+                            <p:column headerText="Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{dep.departmentName}
+                            </p:column>
+
+                            <p:column headerText="Manager" styleClass="uk-width-3-10 uk-text-left">
+                                #{dep.manager.fullName}
+                            </p:column>
+
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{dep.status ?  'uk-badge-success':'uk-badge-danger' }">
+                                    #{dep.status ? 'Active':'InActive' }
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link 
+                                    rendered="#{currentUser.hasPermission('dept:create')}" 
+                                    outcome="departmentDetails?id=#{dep.departmentId}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="departmentDetails" 
+                    rendered="#{currentUser.hasPermission('dept:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

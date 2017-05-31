@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="ledger" />
+
+    <ui:define name="title">
+        Ledger Accounts
+    </ui:define>
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{ledgerAccountController.currentLedgerId}" />
+            <f:viewAction action="#{ledgerAccountController.loadLedger}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('ledgers:create')}" />
+        </f:metadata>   
+    </ui:define>
+
+    <ui:define name="main">
+
+        <h2 class="heading_b uk-margin-bottom">#{ledgerAccountController.currentLedger.name}</h2>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="name" value="Ledger Name" />
+                        <p:inputText id="name" class="md-input" required="true"
+                                     value="#{ledgerAccountController.currentLedger.name}" readonly="true" >
+
+                        </p:inputText>
+                        <h:message id="m1" for="name" style="color:red;" />
+                    </div>
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="coa" value="COA" />       
+                        <h:inputText value="#{ledgerAccountController.currentLedger.coa.coaName}" 
+                                     id="coa" class="md-input" readonly="true" />
+                    </div>
+
+                </div>
+
+                <div class="uk-grid">
+                    <div class="uk-width-medium-2-6">
+                        <p:autoComplete id="retainEarningsAccount" value="#{ledgerAccountController.currentLedger.retainEarningsAccountId}" 
+                                        completeMethod="#{ledgerAccountController.completeAccounts}" 
+                                        emptyMessage="No Records.." converter="#{accountConverter}"
+                                        var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                        inputStyleClass="md-input" 
+                                        placeholder="Retain Earnings Account" 
+                                        forceSelection="true" required="true"  >                                                         
+                        </p:autoComplete>                                                              
+                        <h:message for="retainEarningsAccount" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:autoComplete id="suspenseAccount" value="#{ledgerAccountController.currentLedger.suspenseAccountId}" 
+                                        completeMethod="#{ledgerAccountController.completeAccounts}" 
+                                        emptyMessage="No Records.." converter="#{accountConverter}"
+                                        var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                        inputStyleClass="md-input" 
+                                        placeholder="Suspense Accountt" 
+                                        forceSelection="true" required="true"  >                                                         
+                        </p:autoComplete>                                                              
+                        <h:message for="suspenseAccount" style="color:red;"  /> 
+                    </div> 
+                    <div class="uk-width-medium-2-6">
+                        <p:autoComplete id="roundingCodeCombination" value="#{ledgerAccountController.currentLedger.roundingCodeCombinationId}" 
+                                        completeMethod="#{ledgerAccountController.completeAccounts}" 
+                                        emptyMessage="No Records.." converter="#{accountConverter}"
+                                        var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                        inputStyleClass="md-input" 
+                                        placeholder="Rounding Account" 
+                                        forceSelection="true" required="true"  >                                                         
+                        </p:autoComplete>                                                              
+                        <h:message for="roundingCodeCombination" style="color:red;"  />          
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  update="@form" process="@form"
+                           action="#{ledgerAccountController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>      
+        
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

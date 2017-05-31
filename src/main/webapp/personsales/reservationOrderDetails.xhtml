@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8' ?>  
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="reservationorder" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{reservationOrderDetailsController.orderId}" />
+            <f:viewAction action="#{reservationOrderDetailsController.loadOrder}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('reservaionorder:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Reservation Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+
+            Reservation Order No :   #{reservationOrderDetailsController.currentOrder.reservationId == null ? ' New Reservation' :reservationOrderDetailsController.currentOrder.reservationId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="pageHead">
+
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-1-1">
+                            <div class="uk-form-row">
+                                <div class="uk-grid">
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Operating Unit" class="uk-form-label" for="org"/>
+                                        <p:autoComplete id="org" value="#{reservationOrderDetailsController.currentOrder.operatingUnitId}" 
+                                                        completeMethod="#{reservationOrderDetailsController.completeOperatingUnit}"  
+                                                        emptyMessage="No Records.."  readonly="#{reservationOrderDetailsController.orderId!=null}"
+                                                        converter="#{organizationUnitConverter}"
+                                                        var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                                        placeholder="Search Operating Unit" inputStyleClass="md-input"
+                                                        forceSelection="true" required="true"  >
+                                            <p:ajax process="@this" event="itemSelect"   />
+                                        </p:autoComplete>
+                                        <h:message for="org" style="color:red" />                                 
+                                    </div>
+
+                                    <div class="uk-width-medium-2-10">
+
+                                    </div>
+                                    <div class="uk-width-medium-2-10">
+                                        <p:outputLabel for="orderDate" value="Order date" />
+                                        <h:inputText class="md-input" id="orderDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true"
+                                                     disabled="#{reservationOrderDetailsController.orderId!=null}"
+                                                     validator="#{reservationOrderDetailsController.validateDate}"
+                                                     value="#{reservationOrderDetailsController.currentOrder.reservationDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                            <p:ajax process="@this"/>
+                                        </h:inputText>
+                                        <h:message for="orderDate" style="color:red;"  />
+
+                                    </div>
+                                    <div class="uk-width-medium-2-10">
+                                        <h:outputLabel for="status" value="Status" />
+                                        <h:inputText id="status" class="md-input" readonly="true" 
+                                                     value="#{reservationOrderDetailsController.currentOrder.status}" />
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <div class="uk-grid">
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Main Inventory" class="uk-form-label" for="mainInv"/>
+                                        <p:autoComplete id="mainInv" value="#{reservationOrderDetailsController.currentOrder.mainInvId}" 
+                                                        completeMethod="#{reservationOrderDetailsController.completeMainInventory}"  
+                                                        emptyMessage="No Records.." readonly="#{reservationOrderDetailsController.orderId!=null}"
+                                                        converter="#{mainInvConverter}"
+                                                        var="main" itemLabel="#{main.organizationName}" itemValue="#{main}"
+                                                        placeholder="Search Main Inv" inputStyleClass="md-input"
+                                                        forceSelection="true" required="true"  >
+                                            <p:ajax process="@this" event="itemSelect"   />
+                                        </p:autoComplete>
+                                        <h:message for="mainInv" style="color:red" />                                 
+                                    </div>
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Sub Inventory" class="uk-form-label" for="subInv"/>
+                                        <p:autoComplete id="subInv" value="#{reservationOrderDetailsController.currentOrder.subInvId}" 
+                                                        completeMethod="#{reservationOrderDetailsController.completeSubInventory}"  
+                                                        emptyMessage="No Records.."  
+                                                        readonly="#{reservationOrderDetailsController.currentOrder.status=='CLOSED'}"
+                                                        converter="#{subInvConverter}"
+                                                        var="sub" itemLabel="#{sub.secondaryInventoryName}" itemValue="#{sub}"
+                                                        placeholder="Search Sub Inv" inputStyleClass="md-input"
+                                                        forceSelection="true" >
+                                            <p:ajax process="@this" event="itemSelect"   />
+                                        </p:autoComplete>
+                                        <h:message for="subInv" style="color:red" />                                 
+                                    </div>
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Person" class="uk-form-label" for="person"/>
+                                        <p:autoComplete id="person" value="#{reservationOrderDetailsController.currentOrder.salesPersonId}" 
+                                                        completeMethod="#{reservationOrderDetailsController.completePerson}"  
+                                                        emptyMessage="No Records.." converter="#{peopleConverter}"
+                                                        inputStyleClass="md-input" readonly="#{reservationOrderDetailsController.orderId!=null}"
+                                                        var="person" itemLabel="#{person.fullName}" itemValue="#{person}"
+                                                        placeholder="Search Invoice Site"
+                                                        forceSelection="true" required="true"  >
+                                        </p:autoComplete>
+                                        <h:message for="person"  style="color:red" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </h:panelGroup>
+            </div>
+        </div>
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="linesTable" process="linesTable @this" action="#{reservationOrderDetailsController.addLine}"
+                                           disabled="#{reservationOrderDetailsController.currentOrder.status=='CLOSED'}" >
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{reservationOrderDetailsController.currentOrder.reservationLines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                <p:column headerText="Sub Inventory" styleClass="uk-text-center">
+
+                                    <p:autoComplete id="subInve" value="#{line.subInvId}" readonly="#{line.id != null}"
+                                                    completeMethod="#{reservationOrderDetailsController.completeSubInventory}"  
+                                                    emptyMessage="No Records.."  converter="#{subInvConverter}"
+                                                    var="sub" itemLabel="#{sub.secondaryInventoryName}" itemValue="#{sub}"
+                                                    placeholder="Search Inventory" inputStyleClass="uk-width-1-1"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax event="itemSelect" process="@this" update="systemitem uom balance quantity" 
+                                                listener="#{reservationOrderDetailsController.resetLine(line)}" resetValues="true"/>
+                                    </p:autoComplete>
+                                    <p:tooltip id="subInveTip" for="subInve" position="right">
+                                        <h:message for="subInve" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Product" styleClass="uk-text-center">
+
+                                    <p:autoComplete id="systemitem" value="#{line.inventoryItemId}" readonly="#{line.id != null}"
+                                                    completeMethod="#{reservationOrderDetailsController.completeProducts}"  
+                                                    emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                    var="item" itemLabel="#{item.description}" itemValue="#{item}"
+                                                    placeholder="Search Products" inputStyleClass="uk-width-1-1"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax event="itemSelect" process="@this" update="uom balance quantity" 
+                                                listener="#{reservationOrderDetailsController.setBalance(line)}"  resetValues="true"/>
+                                    </p:autoComplete>
+                                    <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                        <h:message for="systemitem" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="UOM" styleClass="uk-text-center">
+                                    <h:outputText id="uom" value="#{line.inventoryItemId.primaryUomCode}"/>
+                                </p:column>    
+                                <p:column headerText="Inventory Qty" styleClass="uk-text-center">
+                                    <h:outputText id="balance" value="#{line.itemBalance}"/>
+                                </p:column>   
+                                <p:column headerText="Quantity" styleClass="uk-text-center">
+                                    <p:inputText id="quantity" value="#{line.reservedQty}" required="true" style="width: 100px" 
+                                                 validator="#{reservationOrderDetailsController.validateQtyGtZeroOrNotAvailableInInv}"
+                                                 readonly="#{line.id != null}">
+                                        <p:ajax event="change" process="@this" update="@this quantityTip"/>
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="quantity" />
+                                    <p:tooltip id="quantityTip" for="quantity" position="left">
+                                        <h:message for="quantity" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Process Qty" styleClass="uk-text-center">
+                                    <h:outputText id="pro" value="#{line.processedQty}"/>
+                                </p:column>       
+                                <p:column headerText="Return Qty" styleClass="uk-text-center">
+                                    <h:outputText id="ret" value="#{line.returnedQty}"/>
+                                </p:column>
+
+                                <p:column headerText="Action" styleClass="uk-text-center">
+                                    <p:commandLink action="#{reservationOrderDetailsController.removeLine(line)}"
+                                                   immediate="true"  update="linesTable" rendered="#{line.status == 'NEW'}">
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                    <p:commandLink action="#{reservationOrderDetailsController.releaseLine(line)}"
+                                                   immediate="true"  update="linesTable" rendered="#{line.status == 'RESERVED'}">
+                                        <i class="material-icons md-24">replay</i>
+                                    </p:commandLink>
+                                </p:column>  
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink update="@this linesTable pageHead" process="@this linesTable pageHead" 
+                           class="md-fab md-fab-primary" action="#{reservationOrderDetailsController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:remoteCommand name="updateQuantities" process="@this" 
+                         action="#{reservationOrderDetailsController.onMessageRecieved}" 
+                         oncomplete="processTable()" />
+
+        <p:remoteCommand name="processTable" process="linesTable" update="linesTable" />
+
+
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <p:socket widgetVar="subscriber" channel="/subInvs" onMessage="onMessage" />
+        <script>
+            function onMessage(data) {
+                updateQuantities([{name: "data", value: data}]);  // remote Command
+            }
+            Pace.options.ajax.trackWebSockets = false;
+        </script>
+    </ui:define>
+</ui:composition>

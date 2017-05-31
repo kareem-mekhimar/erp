@@ -1,0 +1,258 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="clients" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{clientDetailsController.currentClientId}" />
+            <f:viewAction action="#{clientDetailsController.loadClient()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('clients:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Client Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{clientDetailsController.currentClient.clientId == null ? 'New Client' : 
+              clientDetailsController.currentClient.clientName }
+        </h4>
+
+        <div class="uk-grid uk-grid-medium" data-uk-grid-margin="true">
+            <div class="uk-width-medium-8-10">
+                <div class="md-card">
+                    <div class="md-card-content">
+                        <h:panelGroup layout="block" id="pageHead">
+                            <div class="uk-grid" data-uk-grid-margin="true">
+
+                                <div class="uk-width-medium-2-10">
+                                    <h:outputLabel value="Client Code" for="clientNumber" />
+                                    <h:inputText id="clientNumber" class="md-input" value="#{clientDetailsController.currentClient.clientNumber}"  
+                                                 required="true"  />
+                                    <h:message for="clientNumber" style="color:red;"  />
+                                </div>
+
+
+                                <div class="uk-width-medium-5-10">
+                                    <h:outputLabel value="Client Name" for="clientName" />
+                                    <h:inputText id="clientName" class="md-input" value="#{clientDetailsController.currentClient.clientName}"  
+                                                 required="true"  />
+                                    <h:message for="clientName" style="color:red;" />
+                                </div>
+                                <div class="uk-width-medium-3-10">
+                                    <h:outputLabel value="Client Alias" for="clientAlias" />
+                                    <h:inputText id="clientAlias" class="md-input" value="#{clientDetailsController.currentClient.aliasName}" />
+                                    <h:message for="clientAlias" style="color:red;" />
+                                </div>
+
+                            </div>
+
+                            <div class="uk-grid" data-uk-grid-margin="true">
+
+                                <div class="uk-width-4-10">
+                                    <p:outputLabel for="ledger" value="Ledger" />
+                                    <h:selectOneMenu id="ledger" value="#{clientDetailsController.currentClient.glId}"
+                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                     pt:data-placeholder="Ledger" required="true" >
+                                        <f:selectItem itemLabel="Ledger" noSelectionOption="true"/>
+                                        <f:selectItems value="#{clientDetailsController.ledgerList}" 
+                                                       var="led"  itemLabel="#{led.name}" itemValue="#{led.ledgerId}" />
+                                    </h:selectOneMenu>
+                                    <h:message for="ledger" style="color:red;" />
+                                </div>
+
+                                <div class="uk-width-medium-3-10 uk-margin-small-top">
+                                    <p:outputLabel for="disabledOn" value="End Active Date" />
+                                    <h:inputText class="md-input" id="disabledOn" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                                 value="#{clientDetailsController.currentClient.disabledOn}">
+                                        <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                    </h:inputText>
+                                    <h:message for="disabledOn" style="color:red;"  />
+                                </div>
+
+
+                            </div> 
+                        </h:panelGroup>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-width-medium-2-10">
+                <div class="md-card">
+                    <h:panelGroup layout="block" id="flags">
+                        <div class="md-card-content">
+                            <div class="uk-grid uk-margin-small-bottom">
+
+
+                                <div class="uk-grid" data-uk-grid-margin="true">
+
+                                    <div class="uk-width-medium-1-1">
+                                        <h:selectBooleanCheckbox  id="supplier" class="icheckbox_md"
+                                                                  value="#{clientDetailsController.currentClient.supplierFlag}"/>
+                                        <h:outputLabel for="supplier" value=" Supplier"/>
+                                    </div>
+                                    <div class="uk-width-medium-1-1">
+                                        <h:selectBooleanCheckbox  id="customer" class="icheckbox_md"
+                                                                  value="#{clientDetailsController.currentClient.customerFlag}"/>
+                                        <h:outputLabel for="customer" value=" Customer"/>
+                                    </div>
+                                    <div class="uk-width-medium-1-1">
+                                        <h:selectBooleanCheckbox  id="status" class="icheckbox_md"
+                                                                  value="#{clientDetailsController.currentClient.status}"/>
+                                        <h:outputLabel for="status" value=" Enabled"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li id="siteTab" class="uk-active"><a href="#">Sites</a></li>
+                            <ui:remove> <li><a href="#" >Information</a></li></ui:remove>
+
+                        </ul> 
+
+
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                <div class="md-card-toolbar-actions">
+                                                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+
+                                                    <p:commandLink action="#{clientDetailsController.createSite()}" process="@this pageHead flags"
+                                                                   update="pageHead">
+                                                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                    </p:commandLink >     
+
+                                                </div>                                            
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+                                                    <h:panelGroup layout="block" id="tab1">
+
+
+                                                        <p:dataTable id="accountTable" var="aline" value="#{clientDetailsController.currentClient.siteList}" 
+                                                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                                            <p:column headerText="Code" styleClass="uk-width-1-10 uk-text-center">    
+                                                                #{aline.siteId}
+                                                            </p:column>                                 
+                                                            <p:column headerText="Name" styleClass="uk-width-2-10 uk-text-center">    
+                                                                #{aline.siteName}
+                                                            </p:column>                                 
+                                                            <p:column headerText="Alias" styleClass="uk-width-2-10 uk-text-center">    
+                                                                #{aline.aliasName}
+                                                            </p:column>                                 
+                                                            <p:column headerText="Enabled" styleClass="uk-width-2-10 uk-text-center">  
+                                                                <i class="material-icons">#{aline.status==true?"done":"close"}</i>
+
+                                                            </p:column>                                 
+                                                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">    
+
+
+                                                                <p:commandLink action="#{clientDetailsController.openSite(aline)}" process="@this pageHead flags"
+                                                                               update="pageHead">
+                                                                    <i class="material-icons md-24">mode_edit</i>  
+                                                                </p:commandLink >  
+                                                            </p:column>                                 
+                                                        </p:dataTable>
+                                                    </h:panelGroup>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="uk-modal" id="saveDialog1">
+                <div class="uk-modal-dialog">
+                    <div class="uk-modal-header">
+                        <h3 class="uk-modal-title">Save before create site</h3>
+                    </div>
+                    <div class="uk-modal-footer uk-text-right">
+                        <p:commandLink  class="md-btn md-btn-flat uk-modal-close" 
+                                        action="#{clientDetailsController.dialog1Action(0)}" value="No"  />
+                        <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary" update="pageHead" process="@this"
+                                       oncomplete="saveModal1.hide()"
+                                       action="#{clientDetailsController.dialog1Action(1)}" value="Yes" />
+                    </div>
+                </div>
+            </div>
+            <div class="uk-modal" id="saveDialog2">
+                <div class="uk-modal-dialog">
+                    <div class="uk-modal-header">
+                        <h3 class="uk-modal-title">Save before view site </h3>
+                    </div>
+                    <div class="uk-modal-footer uk-text-right">
+                        <p:commandLink  class="md-btn md-btn-flat uk-modal-close" 
+                                        action="#{clientDetailsController.dialog2Action(0)}" value="No"  />
+                        <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary" update="pageHead" process="@this "
+                                       oncomplete="saveModal2.hide()"
+                                       action="#{clientDetailsController.dialog2Action(1)}" value="Yes" />
+                    </div>
+                </div>
+            </div>
+
+
+            <h:messages/>
+            <div class="md-fab-wrapper">
+                <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" update="pageHead tab1" process="@form" action="#{clientDetailsController.save()}" >
+                    <i class="material-icons">&#xE161;</i>
+                </p:commandLink>
+            </div>
+
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+            var saveModal1 = UIkit.modal('#saveDialog1', {keyboard: false, bgclose: false, center: true});
+            var saveModal2 = UIkit.modal('#saveDialog2', {keyboard: false, bgclose: false, center: true});
+        </script>
+    </ui:define>
+</ui:composition>
+

@@ -1,0 +1,109 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="receipt" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{poReceiveController.startConversation}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('po:recieve')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Receipt
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Po No" for="pocode" />
+                        <h:inputText id="pocode" class="md-input" value="#{poReceiveController.selectedPoCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+
+                        <p:autoComplete value="#{poReceiveController.currentSelectedClientId}"  
+                                        forceSelection="true" converter="javax.faces.Integer"
+                                        emptyMessage="No Records Found..!" 
+                                        completeMethod="#{poReceiveController.completeClientByName}"
+                                        inputStyleClass="md-input" placeholder="Supplier" var="cl" 
+                                        itemLabel="#{cl.clientName}" itemValue="#{cl.clientId}" />
+
+                    </div>
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu value="#{poReceiveController.poLineType}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItems var="t" value="#{poReceiveController.lineTypes}" 
+                                               itemLabel="#{t}" itemValue="#{t}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{poReceiveController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="line" value="#{poReceiveController.polines}" 
+                                     selection="#{poReceiveController.selectedLines}" 
+                                     rowSelectMode="checkbox"
+                                     rowKey="#{line.poLineId}" tableStyleClass="uk-table">
+
+                            <p:ajax event="toggleSelect" update=":fabBtns" />
+                            <p:ajax event="rowSelectCheckbox" update=":fabBtns" />
+                            <p:ajax event="rowUnselectCheckbox" update=":fabBtns" />
+
+                            <p:column selectionMode="multiple" styleClass="uk-width-1-10 uk-text-left" />
+
+                            <p:column headerText="Po No" styleClass="uk-width-1-10 uk-text-left">
+                                #{line.poHeader.poCode}
+                            </p:column>
+                            <p:column headerText="Supplier" styleClass="uk-width-2-10 uk-text-left">
+                                #{line.poHeader.client.clientName}
+                            </p:column>
+                            <p:column headerText="Item" styleClass="uk-width-2-10 uk-text-left">
+                                
+                                #{line.poLineType == 'ITEM' ? line.systemItem.description : line.itemName}
+                            </p:column>
+                            <p:column headerText="Requested" styleClass="uk-width-1-10 uk-text-center">
+                                #{line.quantityOrdered}
+                            </p:column>
+                            <p:column headerText="Recieved" styleClass="uk-width-1-10 uk-text-center">
+                                #{line.quantityReceived}
+                            </p:column>
+                            <p:column headerText="Remain" styleClass="uk-width-1-10 uk-text-center">
+                                #{line.quantityOrdered - line.quantityReceived}
+                            </p:column>
+                            
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup id="fabBtns" class="md-fab-wrapper" layout="block">
+            <p:commandLink class="md-fab md-fab-success" ajax="false" disabled="#{empty poReceiveController.selectedLines}"
+                           action="#{poReceiveController.createReciepts}">
+                <i class="material-icons">input</i>
+            </p:commandLink>
+        </h:panelGroup>
+
+    </ui:define>
+</ui:composition>

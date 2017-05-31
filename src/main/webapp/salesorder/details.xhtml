@@ -1,0 +1,245 @@
+<?xml version='1.0' encoding='UTF-8' ?>  
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="so" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{salesOrderDetailsController.currentId}" />
+            <f:viewAction action="#{salesOrderDetailsController.loadOrder}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('so:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Sales Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+
+            #{salesOrderDetailsController.currentOrder == null ? 'New Sales Order' : salesOrderDetailsController.currentOrder.headerId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-3-5">
+                                    <p:outputLabel value="Operating Unit" class="uk-form-label" for="org"/>
+                                    <p:autoComplete id="org" value="#{salesOrderDetailsController.currentOrder.org}" 
+                                                    disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                    completeMethod="#{salesOrderDetailsController.completeOperatingUnitsByName}"  
+                                                    emptyMessage="No Records.."  
+                                                    converter="#{organizationUnitConverter}"
+                                                    var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                                    placeholder="Search Operating Unit" inputStyleClass="md-input"
+                                                    forceSelection="true" required="true"  
+                                                    validator="#{salesOrderDetailsController.validateOperatingUnitReceivableConfiguration}"
+                                                    >
+                                        <p:ajax update="@this m1 cur" event="itemSelect"  listener="#{salesOrderDetailsController.loadCurrencies()}" />
+                                    </p:autoComplete>
+                                    <h:message for="org" id="m1" style="color:red" />                                 
+                                </div>
+                                <div class="uk-width-medium-2-5">
+                                    <h:outputLabel for="status" value="Status" />
+                                    <h:inputText id="status" class="md-input" readonly="true" 
+                                                 value="#{salesOrderDetailsController.currentOrder.flowStatusCode}" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-3-10">
+                                    <p:outputLabel value="Customer" class="uk-form-label" for="cust"/>
+                                    <p:autoComplete id="cust" value="#{salesOrderDetailsController.currentOrder.soldToCustomers}"
+                                                    disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                    completeMethod="#{salesOrderDetailsController.completeCustomerByName}"  
+                                                    emptyMessage="No Records.."  converter="#{clientConverter}"
+                                                    var="cust" itemLabel="#{cust.clientName}" itemValue="#{cust}"
+                                                    placeholder="Search Customer" inputStyleClass="md-input"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax process="@this" update="ship invoice @this m2" event="itemSelect"
+                                                listener="#{salesOrderDetailsController.resetSites}"/>
+                                    </p:autoComplete>
+                                    <h:message for="cust" id="m2" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-3-10">
+                                    <p:outputLabel value="Shipping Site" class="uk-form-label" for="ship"/>
+                                    <p:autoComplete id="ship" value="#{salesOrderDetailsController.currentOrder.shipToSite}"
+                                                    validator="#{salesOrderDetailsController.validateSite}"
+                                                    disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                    completeMethod="#{salesOrderDetailsController.completeSitesForCustomer}"  
+                                                    emptyMessage="No Records.." converter="#{clientSiteConverter}" 
+                                                    var="ship" itemLabel="#{ship.siteName}" itemValue="#{ship}"
+                                                    placeholder="Search Ship Site" inputStyleClass="md-input"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update=" @this m3 invoice" event="itemSelect"/>
+                                    </p:autoComplete>
+                                    <h:message for="ship" id="m3" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-3-10">
+                                    <p:outputLabel value="Invoice Site" class="uk-form-label" for="invoice"/>
+                                    <p:autoComplete id="invoice" value="#{salesOrderDetailsController.currentOrder.invoiceToSite}" 
+                                                    validator="#{salesOrderDetailsController.validateSite}"
+                                                    disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                    completeMethod="#{salesOrderDetailsController.completeSitesForCustomer}"  
+                                                    emptyMessage="No Records.." converter="#{clientSiteConverter}"
+                                                    inputStyleClass="md-input"
+                                                    var="invoice" itemLabel="#{invoice.siteName}" itemValue="#{invoice}"
+                                                    placeholder="Search Invoice Site"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax process="@this" update="invoice @this m4" event="itemSelect" 
+                                                listener="#{salesOrderDetailsController.loadPriceList()}" />
+                                    </p:autoComplete>
+                                    <h:message for="invoice" id="m4" style="color:red" />
+                                </div>
+
+                            </div>
+                            <h:panelGroup layout="block" id="cur">
+                                <div class="uk-grid uk-margin-medium-top">
+                                    <div class="uk-width-medium-2-6">
+                                        <p:outputLabel value="Payment Term" class="uk-form-label" for="term"/>
+                                        <h:selectOneMenu id="term" value="#{salesOrderDetailsController.currentOrder.paymentTerm}"
+                                                         disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                         pt:data-md-selectize="true" required="true"
+                                                         pt:data-placeholder="Payment Term">
+                                            <f:selectItem noSelectionOption="true" itemLabel="Payment Term"/>
+                                            <f:selectItems itemLabel="#{t.label}" itemValue="#{t}" 
+                                                           var="t" value="#{salesOrderDetailsController.paymentTerms}" />
+                                        </h:selectOneMenu> 
+                                        <h:message for="term" style="color:red" />   
+                                    </div>
+                                    <div class="uk-width-medium-2-6">
+                                        <h:outputLabel for="totalAmount" value="Amount" />
+                                        <h:inputText id="totalAmount" class="md-input label-fixed" readonly="true" 
+                                                     value="#{salesOrderDetailsController.currentOrder.totalAmount}" />
+                                    </div>
+                                    <div class="uk-width-medium-2-6">
+                                        <p:outputLabel value="Currency" class="uk-form-label" for="currency"/>
+                                        <h:selectOneMenu id="currency" value="#{salesOrderDetailsController.currentOrder.currency}"
+                                                         disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                                         pt:data-md-selectize="true" converter="#{fndCurrencyConverter}"
+                                                         pt:data-placeholder="Currency" required="true">
+                                            <f:selectItem noSelectionOption="true" itemLabel="Currency"/>
+                                            <f:selectItems  value="#{salesOrderDetailsController.currencies}"
+                                                            var="c" itemLabel="#{c.currencyCode}" itemValue="#{c}"/>
+                                        </h:selectOneMenu>  
+                                    </div>   
+                                </div>
+                            </h:panelGroup>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="linesTable" process="linesTable @this"
+                                           disabled="#{salesOrderDetailsController.currentOrder.flowStatusCode != 'NEW'}"
+                                           action="#{salesOrderDetailsController.addLine}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{salesOrderDetailsController.currentOrder.lines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="No." >
+                                    #{line.lineNumber}
+                                </p:column>
+
+                                <p:column headerText="Product" styleClass="uk-text-center">
+
+                                    <p:autoComplete id="systemitem" value="#{line.inventoryItem}" 
+                                                    disabled="#{line.status != 'NEW'}"
+                                                    completeMethod="#{salesOrderDetailsController.completeProducts}"  
+                                                    emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                    var="item" itemLabel="#{item.description}" itemValue="#{item}"
+                                                    placeholder="Search Products" inputStyleClass="uk-width-1-1"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update="uom systemitemTip unitprice amount totalAmount @this" 
+                                                listener="#{salesOrderDetailsController.onItemChange(line)}" event="itemSelect" />
+                                    </p:autoComplete>
+                                    <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                        <h:message for="systemitem" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="UOM" styleClass="uk-text-center">
+                                    <h:outputText id="uom" value="#{line.orderQuantityUom}"/>
+                                </p:column>       
+                                <p:column headerText="Quantity" styleClass="uk-text-center">
+                                    <p:inputText id="quantity" value="#{line.orderedQuantity}" 
+                                                 readonly="#{line.status != 'NEW'}" required="true">
+                                        <p:ajax listener="#{salesOrderDetailsController.onUnitPriceOrQuantityChange(line)}" 
+                                                process="@this"
+                                                update="amount totalAmount quantityTip @this" />
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="quantity" />
+                                    <p:tooltip id="quantityTip" for="quantity" position="right">
+                                        <h:message for="quantity" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Shipped Qty" styleClass="uk-text-center">
+                                    <h:outputText  id="shippedQuantity" value="#{line.shippedQuantity}" />
+                                </p:column>                         
+                                <p:column headerText="Delivered Qty" styleClass="uk-text-center">
+                                    <h:outputText  id="deliveredQuantity" value="#{line.deliveredQuantity}" />
+                                </p:column>                         
+                                <p:column headerText="Returned Qty" styleClass="uk-text-center">
+                                    <h:outputText  id="returnedQuantity" value="#{line.returnedQuantity}" />
+                                </p:column>                         
+                                <p:column headerText="Unit Price" styleClass="uk-text-center">
+                                    <h:outputText  id="unitprice" value="#{line.unitListPrice}" />
+                                </p:column>                         
+                                <p:column headerText="Amount" styleClass="uk-text-center">
+                                    <h:outputText value="#{line.amount}" id="amount" />
+                                </p:column>  
+                                <p:column headerText="Action" styleClass="uk-text-center">
+                                    <p:commandLink action="#{salesOrderDetailsController.removeLine(line)}"
+                                                   rendered="#{line.status =='NEW'}"
+                                                   immediate="true" update="linesTable">
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                </p:column>  
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  type="submit" update="@form" process="@form" class="md-fab md-fab-primary" action="#{salesOrderDetailsController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+</ui:composition>

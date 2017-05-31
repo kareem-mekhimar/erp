@@ -1,0 +1,568 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="batch" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{batchDetailsController.currentBatchId}" />
+            <f:viewAction action="#{batchDetailsController.loadBatch}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('batch:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Batches
+    </ui:define> 
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{batchDetailsController.currentBatch.batchName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">#{batchDetailsController.currentBatch.batchId}</span>
+                </div>
+                <div class="uk-width-medium-1-2">
+                    <h:panelGroup class="uk-button-dropdown uk-float-right" pt:data-uk-dropdown="true" id="dropdown">
+                        <p:commandButton type="button" id="btn"
+                                         disabled="#{batchDetailsController.currentBatch.batchStatus == 'CLOSED'}" 
+                                         class="uk-button uk-button-large uk-button-primary" value="Actions..">
+                        </p:commandButton>
+                        <h:panelGroup rendered="#{batchDetailsController.currentBatch.batchStatus != 'CLOSED'}" class="uk-dropdown">
+                            <h:panelGroup layout="block" id="group" class="uk-nav uk-nav-dropdown">
+                                <li>
+                                    <p:commandLink class="state-link" value="Release" update="btn group status sDateGrid @(.md-card-toolbar-actions)"
+                                                   oncomplete="$('#sDate').focus()"
+                                                   rendered="#{batchDetailsController.currentBatch.batchStatus == 'PENDING'}" >
+
+                                        <f:setPropertyActionListener target="#{batchDetailsController.needToSave}" value="true" />
+                                        <f:setPropertyActionListener value="WIP" 
+                                                                     target="#{batchDetailsController.currentBatch.batchStatus}"/>
+                                    </p:commandLink>
+                                </li>
+                                <li>
+                                    <p:commandLink class="state-link" value="Complete" update="btn group status cDateGrid sDateGrid @(.md-card-toolbar-actions)"
+                                                   process="sDate @this"
+                                                   rendered="#{batchDetailsController.currentBatch.batchStatus == 'WIP'}"
+                                                   oncomplete="if(! args.validationFailed) $('#cDate').focus()" >
+                                        <f:setPropertyActionListener target="#{batchDetailsController.needToSave}" value="true" />
+                                        <f:setPropertyActionListener value="COMPLETED" 
+                                                                     target="#{batchDetailsController.currentBatch.batchStatus}"/>
+                                    </p:commandLink>
+                                </li>
+                                <li>
+                                    <p:commandLink class="state-link" value="Close" process="@this cDate"
+                                                   update="btn group :status dropdown @(.md-card-toolbar-actions) cDateGrid"
+                                                   rendered="#{batchDetailsController.currentBatch.batchStatus != 'CLOSED'}">
+
+                                        <f:setPropertyActionListener value="CLOSED" 
+                                                                     target="#{batchDetailsController.currentBatch.batchStatus}"/>
+                                    </p:commandLink>
+                                </li>
+                            </h:panelGroup>
+                        </h:panelGroup>
+
+                    </h:panelGroup>
+
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+    <ui:define name="main">        
+        <div class="uk-grid uk-grid-medium" data-uk-grid-margin="true">
+            <div class="uk-width-xLarge-2-10 uk-width-large-3-10">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <h3 class="md-card-toolbar-heading-text">
+                            Formula
+                        </h3>
+                    </div>
+                    <div class="md-card-content">
+                        <div class="uk-margin-bottom uk-text-center">
+                            <p:inputText id="formula" value="#{batchDetailsController.currentBatch.formula.formulaName}" 
+                                         class="md-input" readonly="true"/>
+                        </div>
+
+                        <h:panelGroup id="fData" class="md-list">
+                            <li>
+                                <div class="md-list-content">
+                                    <span class="uk-text-small uk-text-muted uk-display-block">Version</span>
+                                    <span class="md-list-heading uk-text-large">
+                                        #{batchDetailsController.currentBatch.formula.formulaVers}
+                                    </span>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="md-list-content">
+                                    <span class="uk-text-small uk-text-muted uk-display-block">No</span>
+                                    <span class="md-list-heading uk-text-large">
+                                        #{batchDetailsController.currentBatch.formula.formulaId}
+                                    </span>
+                                </div>
+                            </li>
+                        </h:panelGroup>
+                    </div>
+
+                </div>
+            </div>
+            <div class="uk-width-xLarge-8-10  uk-width-large-7-10">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <h3 class="md-card-toolbar-heading-text">
+                            Details
+                        </h3>
+                    </div>
+                    <div class="md-card-content large-padding">
+                        <div class="uk-grid uk-grid-divider uk-grid-medium">
+                            <div class="uk-width-large-1-2">
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                        <p:outputLabel for="name" value="Batch Name" />
+                                        <p:inputText id="name" value="#{batchDetailsController.currentBatch.batchName}"
+                                                     readonly="true" styleClass="md-input"/>
+
+                                    </div>
+                                </div>
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                    </div>
+                                </div>
+
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                        <p:outputLabel for="qty" value="Plan Quantity" />
+                                        <p:inputText id="qty" value="#{batchDetailsController.currentBatch.batchPlanQty}" 
+                                                     required="true" class="md-input" readonly="true" >
+                                        </p:inputText>
+                                    </div>
+                                </div>
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1"> 
+                                        <p:outputLabel for="status" value="Current status" />
+                                        <p:inputText id="status" readonly="true"
+                                                     styleClass="md-input #{batchDetailsController.currentBatch.batchStatus == 'CLOSED' ? 'uk-text-danger' : batchDetailsController.currentBatch.batchStatus == 'WIP' ? 'uk-text-warning' : batchDetailsController.currentBatch.batchStatus == 'PENDING' ? 'uk-text-primary': 'uk-text-success'}" 
+                                                     value="#{batchDetailsController.currentBatch.batchStatus}" /> 
+                                    </div>
+                                </div>
+                                <h:panelGroup id="sDateGrid" class="uk-grid uk-grid-small" layout="block">
+                                    <h:panelGroup rendered="#{batchDetailsController.currentBatch.batchStatus == 'COMPLETED' or batchDetailsController.currentBatch.batchStatus == 'WIP' or batchDetailsController.currentBatch.batchStatus == 'CLOSED'}"
+                                                  layout="block" class="uk-width-1-1" id="startDate">
+                                        <p:outputLabel for="sDate" value="Actual Start Date" />
+                                        <p:inputText id="sDate" class="md-input" required="true" 
+                                                     pt:data-uk-datepicker="{format:'DD-MM-YYYY',pos:'bottom'}"
+                                                     value="#{batchDetailsController.currentBatch.actualStartDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+
+                                            <p:ajax update="@this m1" />
+                                        </p:inputText>
+                                        <h:message id="m1" for="sDate" style="color:red"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </div>
+                            <hr class="uk-grid-divider uk-hidden-large" />
+
+                            <div class="uk-width-large-1-2">
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                        <p:outputLabel for="start" value="Plan Start Date" />
+                                        <p:inputText id="start" class="md-input" readonly="true"
+                                                     value="#{batchDetailsController.currentBatch.planStartDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+                                        </p:inputText>
+
+                                    </div>
+                                </div>
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                        <p:outputLabel for="comp" value="Plan Complete Date" />
+                                        <p:inputText id="comp" class="md-input" readonly="true"
+                                                     value="#{batchDetailsController.currentBatch.planCmpltDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+                                        </p:inputText>
+
+                                    </div>
+                                </div>
+                                <div class="uk-grid uk-grid-small">
+                                    <div class="uk-width-1-1">
+                                        <p:outputLabel for="due" value="Require Completion" />
+                                        <p:inputText id="due" class="md-input" readonly="true"
+                                                     value="#{batchDetailsController.currentBatch.requireComplDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+                                        </p:inputText>
+
+                                    </div>
+                                </div>
+                                <h:panelGroup id="cDateGrid" class="uk-grid uk-grid-small" layout="block">
+                                    <h:panelGroup rendered="#{batchDetailsController.currentBatch.batchStatus == 'COMPLETED' or batchDetailsController.currentBatch.actualCmpltDate != null}"
+                                                  layout="block" class="uk-width-1-1">
+                                        <p:outputLabel for="cDate" value="Actual Complete Date" />
+                                        <p:inputText id="cDate" class="md-input" required="true" 
+                                                     pt:data-uk-datepicker="{format:'DD-MM-YYYY',pos:'bottom'}"
+                                                     value="#{batchDetailsController.currentBatch.actualCmpltDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+                                            <p:ajax update="@this m2" />
+                                        </p:inputText>
+                                        <h:message  id="m2" for="cDate" style="color:red"/>
+                                    </h:panelGroup>
+                                </h:panelGroup>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <h3 class="md-card-toolbar-heading-text">
+                            Batch Lines
+                        </h3>
+                    </div>
+                    <h:panelGroup layout="block" id="lines" class="md-card-content">
+                        <div class="uk-grid">
+                            <div class="uk-width-1-1">
+                                <ul id="user_edit_tabs" class="uk-tab" 
+                                    data-uk-tab="{connect:'#tab',animation: 'slide-horizontal'}">
+                                    <li id="l1" class="uk-active"><a class="tab-btn" id="p1" href="#">Products</a></li>
+                                    <li id="l2"><a class="tab-btn"  id="p2" href="#">By-Products</a></li>
+                                    <li id="l3"><a class="tab-btn"  id="p3" href="#">Ingredients</a></li>
+                                </ul>
+                                <ul id="tab" class="uk-switcher uk-margin-small-top">
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <div class="md-card-toolbar">
+                                                        <h:panelGroup id="productsAction" layout="block" styleClass="md-card-toolbar-actions">
+                                                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                            <p:commandLink update="productsTable" process="productsTable @this"
+                                                                           id="add1"
+                                                                           disabled="#{empty batchDetailsController.currentBatch.formula}"
+                                                                           action="#{batchDetailsController.addProductLine}">
+                                                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                            </p:commandLink> 
+                                                            <h:panelGroup layout="block" rendered="#{batchDetailsController.currentBatch.batchStatus == 'WIP'}"
+                                                                          styleClass="md-card-dropdown" pt:data-uk-dropdown="{pos:'bottom-right'}">
+                                                                <i class="md-icon material-icons">&#xE5D4;</i>
+                                                                <div layout="block" class="uk-dropdown"> 
+                                                                    <ul class="uk-nav">
+
+                                                                        <li>
+                                                                            <p:commandLink value="Transact" process="@this productsTable sDate"
+                                                                                           update="productsTable sDateGrid"
+                                                                                           action="#{batchDetailsController.transact('PRODUCT')}"/>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </h:panelGroup>
+                                                        </h:panelGroup>
+                                                    </div>
+                                                    <div class="md-card-content"> 
+                                                        <div class="uk-overflow-container">
+                                                            <p:dataTable id="productsTable" var="line" value="#{batchDetailsController.productsLines}" 
+                                                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                                <p:column headerText="Line No." styleClass="uk-width-1-6 uk-text-center">
+                                                                    #{line.lineNo}
+                                                                </p:column>
+                                                                <p:column headerText="Item" styleClass="uk-width-2-6 uk-text-center">
+                                                                    <ui:fragment rendered="#{line.editable}">
+                                                                        <p:autoComplete id="formulaLine" value="#{line.formulaLine}" 
+                                                                                        completeMethod="#{batchDetailsController.completeProductFormulaLinesBySystemItem}"  
+                                                                                        emptyMessage="No Records.."  converter="#{formulaLineConverter}"
+                                                                                        var="formulaLine" inputStyleClass="uk-width-1-1"
+                                                                                        itemLabel="#{formulaLine.systemItem.description}" 
+                                                                                        itemValue="#{formulaLine}"
+                                                                                        placeholder="Search System Item"
+                                                                                        forceSelection="true" required="true"  >
+                                                                            <p:ajax update="uom systemitemTip @this" 
+                                                                                    listener="#{batchDetailsController.onProductItemSelectChange(line)}" event="itemSelect" />
+                                                                        </p:autoComplete>
+                                                                        <p:tooltip id="systemitemTip" for="formulaLine" position="right">
+                                                                            <h:message for="formulaLine" />
+                                                                        </p:tooltip>
+                                                                    </ui:fragment>
+
+                                                                    <ui:fragment rendered="#{not line.editable}">
+                                                                        #{line.inventoryItem.description}
+                                                                    </ui:fragment>
+
+                                                                </p:column>
+                                                                <p:column headerText="UOM" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText id="uom" value="#{line.dtlUm}" />
+                                                                </p:column>
+                                                                <p:column headerText="Formula Quantity" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText value="#{line.formulaQty}" />
+                                                                </p:column>     
+                                                                <p:column headerText="Plan Quantity" styleClass="uk-width-1-6 uk-text-center">                                
+                                                                    <p:inputText id="pQty" required="true" value="#{line.planQty}" >
+                                                                        <p:ajax update="pQtyTip @this" 
+                                                                                listener="#{batchDetailsController.setNeedToSave(true)}"/>
+                                                                    </p:inputText>
+                                                                    <p:keyFilter mask="num" for="pQty" />
+                                                                    <p:tooltip id="pQtyTip" for="pQty" position="left">
+                                                                        <h:message for="pQty" />
+                                                                    </p:tooltip>
+                                                                </p:column>                                 
+
+                                                            </p:dataTable>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <div class="md-card-toolbar">
+                                                        <h:panelGroup id="byActions" layout="block" styleClass="md-card-toolbar-actions">
+                                                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                            <p:commandLink update="byTable" process="byTable @this" id="add2"
+                                                                           disabled="#{empty batchDetailsController.currentBatch.formula}"
+                                                                           action="#{batchDetailsController.addByProductLine}">
+                                                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                            </p:commandLink>   
+                                                            <h:panelGroup layout="block" rendered="#{batchDetailsController.currentBatch.batchStatus == 'WIP'}"
+                                                                          styleClass="md-card-dropdown" pt:data-uk-dropdown="{pos:'bottom-right'}">
+                                                                <i class="md-icon material-icons">&#xE5D4;</i>
+                                                                <div class="uk-dropdown">
+                                                                    <ul class="uk-nav">
+                                                                        <li>                           
+                                                                            <p:commandLink value="Transact" process="@this byTable sDate"
+                                                                                           update="byTable sDateGrid"
+                                                                                           action="#{batchDetailsController.transact('BYPRODUCT')}"/>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </h:panelGroup>
+
+                                                        </h:panelGroup>
+                                                    </div>
+                                                    <div class="md-card-content"> 
+                                                        <div class="uk-overflow-container">
+                                                            <p:dataTable id="byTable" var="line" value="#{batchDetailsController.byProductsLines}" 
+                                                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                                <p:column headerText="Line No." styleClass="uk-width-1-6 uk-text-center">
+                                                                    #{line.lineNo}
+                                                                </p:column>
+                                                                <p:column headerText="Item" styleClass="uk-width-2-6 uk-text-center">
+                                                                    <ui:fragment rendered="#{line.editable}">
+                                                                        <p:autoComplete id="systemitem" value="#{line.inventoryItem}" 
+                                                                                        completeMethod="#{batchDetailsController.completeSystemItemByTypeAndName}"  
+                                                                                        emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                                                        var="systemItem" itemLabel="#{systemItem.description}" 
+                                                                                        itemValue="#{systemItem}" inputStyleClass="uk-width-1-1"
+                                                                                        placeholder="Search System Item"
+                                                                                        forceSelection="true" required="true"  >
+                                                                            <p:ajax update="uom systemitemTip @this" 
+                                                                                    listener="#{batchDetailsController.onSystemItemSelectChange(line)}" event="itemSelect" />
+                                                                        </p:autoComplete>
+                                                                        <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                                                            <h:message for="systemitem" />
+                                                                        </p:tooltip>
+                                                                    </ui:fragment>
+
+                                                                    <ui:fragment rendered="#{not line.editable}">
+                                                                        #{line.inventoryItem.description}
+                                                                    </ui:fragment>
+                                                                </p:column>
+                                                                <p:column headerText="UOM" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText id="uom" value="#{line.dtlUm}" />
+
+                                                                </p:column>
+                                                                <p:column headerText="Formula Quantity" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText value="#{line.formulaQty}" />
+                                                                </p:column>     
+                                                                <p:column headerText="Plan Quantity" styleClass="uk-width-1-6 uk-text-center">                                
+                                                                    <p:inputText id="pQty" required="true" value="#{line.planQty}" >
+                                                                        <p:ajax update="pQtyTip @this" 
+                                                                                listener="#{batchDetailsController.setNeedToSave(true)}" />
+                                                                    </p:inputText>
+                                                                    <p:keyFilter mask="num" for="pQty" />
+                                                                    <p:tooltip id="pQtyTip" for="pQty" position="left">
+                                                                        <h:message for="pQty" />
+                                                                    </p:tooltip>
+                                                                </p:column>                                 
+
+                                                            </p:dataTable>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </li>
+                                    <li>
+                                        <div class="uk-grid">
+                                            <div class="uk-width-1-1">
+                                                <div class="md-card">
+                                                    <div class="md-card-toolbar">
+                                                        <h:panelGroup id="ingActions" layout="block" styleClass="md-card-toolbar-actions">
+                                                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                            <p:commandLink update="ingTable" process="ingTable @this" id="add3"
+                                                                           disabled="#{empty batchDetailsController.currentBatch.formula}"
+                                                                           action="#{batchDetailsController.addIngLine}">
+                                                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                            </p:commandLink>  
+                                                            <h:panelGroup layout="block" rendered="#{batchDetailsController.currentBatch.batchStatus == 'WIP' or batchDetailsController.currentBatch.batchStatus == 'PENDING'}"
+                                                                          styleClass="md-card-dropdown" pt:data-uk-dropdown="{pos:'bottom-right'}">
+                                                                <i class="md-icon material-icons">&#xE5D4;</i>
+                                                                <div class="uk-dropdown">
+                                                                    <ul class="uk-nav">
+                                                                        <li>                           
+                                                                            <p:commandLink value="Pick" process="@this ingTable sDate" ajax="false"
+                                                                                           update="ingTable sDateGrid"
+                                                                                           action="#{batchDetailsController.pick('INGREDIENT')}" />
+                                                                        </li>
+                                                                        <li>                                     
+                                                                            <p:commandLink value="Transact" 
+                                                                                           rendered="#{batchDetailsController.currentBatch.batchStatus == 'WIP'}"
+                                                                                           process="@this ingTable sDate"
+                                                                                           update="ingTable sDateGrid"
+                                                                                           action="#{batchDetailsController.transact('INGREDIENT')}"/>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </h:panelGroup>
+                                                        </h:panelGroup>
+                                                    </div>
+                                                    <div class="md-card-content"> 
+                                                        <div class="uk-overflow-container">
+                                                            <p:dataTable id="ingTable" var="line" value="#{batchDetailsController.ingLines}" 
+                                                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                                <p:column headerText="Line No." styleClass="uk-width-1-6 uk-text-center">
+                                                                    #{line.lineNo}
+                                                                </p:column>
+                                                                <p:column headerText="Item" styleClass=" uk-width-2-6 uk-text-center">
+                                                                    <ui:fragment rendered="#{line.editable}">
+                                                                        <p:autoComplete id="systemitem" value="#{line.inventoryItem}" 
+                                                                                        completeMethod="#{batchDetailsController.completeSystemItemByTypeAndName}"  
+                                                                                        emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                                                        var="systemItem" itemLabel="#{systemItem.description}" 
+                                                                                        itemValue="#{systemItem}" inputStyleClass="uk-width-1-1"
+                                                                                        placeholder="Search System Item"
+                                                                                        forceSelection="true" required="true"  >
+                                                                            <p:ajax update="uom systemitemTip @this" 
+                                                                                    listener="#{batchDetailsController.onSystemItemSelectChange(line)}" event="itemSelect" />
+                                                                        </p:autoComplete>
+                                                                        <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                                                            <h:message for="systemitem" />
+                                                                        </p:tooltip>
+                                                                    </ui:fragment>
+
+                                                                    <ui:fragment rendered="#{not line.editable}">
+                                                                        #{line.inventoryItem.description}
+                                                                    </ui:fragment>
+                                                                </p:column>
+                                                                <p:column headerText="UOM" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText id="uom" value="#{line.dtlUm}" />
+                                                                </p:column>
+                                                                <p:column headerText="Formula Quantity" styleClass="uk-width-1-6 uk-text-center">
+                                                                    <h:outputText value="#{line.formulaQty}" />
+                                                                </p:column>     
+                                                                <p:column headerText="Plan Quantity" styleClass="uk-width-1-6 uk-text-center">                                
+                                                                    <p:inputText id="pQty" required="true" value="#{line.planQty}" >
+                                                                        <p:ajax update="pQtyTip @this" 
+                                                                                listener="#{batchDetailsController.setNeedToSave(true)}" />
+                                                                    </p:inputText>
+                                                                    <p:keyFilter mask="num" for="pQty" />
+                                                                    <p:tooltip id="pQtyTip" for="pQty" position="left">
+                                                                        <h:message for="pQty" />
+                                                                    </p:tooltip>
+                                                                </p:column>                                 
+
+                                                            </p:dataTable>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  update="cDateGrid sDateGrid productsTable byTable ingTable" process="@form"
+                           action="#{batchDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:remoteCommand name="processProducts" process=" @this productsTable" update="productsTable"
+                         action="#{batchDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)" />
+        <p:remoteCommand name="processByProducts" process="@this byTable" update="byTable"
+                         action="#{batchDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)" />
+        <p:remoteCommand name="processIngs" process="@this ingTable" update="ingTable"
+                         action="#{batchDetailsController.switchTab}" oncomplete="onComplete(xhr,status,args)"/>
+
+        <div class="uk-modal" id="modal">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h3 class="uk-modal-title">Confirm</h3>
+                </div>
+                <p>Save...? </p>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Close</button>
+                    <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{batchDetailsController.saveBatchThenDoAction}" value="Save" />
+                </div>
+            </div>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#modal', {keyboard: false, bgclose: false, center: true});
+            $("a.tab-btn").click(function (e) {
+                e.preventDefault();
+                var newId = $(e.target).attr('id');
+                var id = $('#user_edit_tabs li.uk-active a').attr('id');
+                if (id !== newId)
+                {
+                    if (id === 'p1')
+                        processProducts([{name: 'tabId', value: newId}]);
+                    else if (id === 'p2')
+                        processByProducts([{name: 'tabId', value: newId}]);
+                    else
+                        processIngs([{name: 'tabId', value: newId}]);
+                    return false;
+                }
+            });
+            function onComplete(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    $('#user_edit_tabs li.uk-active').removeClass("uk-active");
+                    $("#" + args.tabId + "").parent().addClass("uk-active");
+                    $("#" + args.tabId + "").click();
+                }
+            }
+        </script>
+    </ui:define>
+</ui:composition>

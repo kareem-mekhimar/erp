@@ -1,0 +1,220 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="jentry" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{journalEntryDetailsController.currentHeaderId}" />
+            <f:viewParam name="batch" value="#{journalEntryDetailsController.currentBatchId}" />
+            <f:viewAction action="#{journalEntryDetailsController.loadHeader}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('journal_entries:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Journal Entry
+    </ui:define>
+    <ui:define name="main">
+
+        <h2 class="heading_b uk-margin-bottom">
+            #{journalEntryDetailsController.currentHeaderId == null ? 'New Entry' : journalEntryDetailsController.currentHeader.jeHeaderName }
+        </h2>
+
+        <div class="md-card">
+            <h:panelGroup layout="block" id="header" class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-medium-2-3">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText id="name" class="md-input" required="true"
+                                     value="#{journalEntryDetailsController.currentHeader.jeHeaderName}" >
+                            <p:ajax update="name @this m1" />
+                        </p:inputText>
+                        <h:message id="m1" for="name" style="color:red;" />
+                    </div>
+                    <div class="uk-width-medium-1-3">
+                        <h:panelGrid rendered="#{journalEntryDetailsController.currentBatch.batchType == 'RECURRING'}" columns="2" cellpadding="5" class="uk-margin-top">
+                            <h:selectBooleanCheckbox id="dist" class="icheckbox_md"
+                                                     value="#{journalEntryDetailsController.currentHeader.distributedFlag}">
+                                <p:ajax update="table" listener="#{journalEntryDetailsController.onDistributedCheck}" />
+                            </h:selectBooleanCheckbox>
+                            <p:outputLabel for="dist" value="Distributed" />
+                        </h:panelGrid>
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-1-1">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText id="desc" class="md-input" 
+                                     value="#{journalEntryDetailsController.currentHeader.description}">
+                            <p:ajax update="desc @this m3" />
+                        </p:inputText>
+                        <h:message id="m3" for="desc" style="color:red;" />
+                    </div>
+                </div>
+                <div class="uk-grid">
+                    <div class="uk-width-medium-3-6">
+                        <p:outputLabel  value="Batch" />
+                        <p:inputText class="md-input" readonly="true"
+                                     value="#{journalEntryDetailsController.currentBatch.batchName}"/>
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="approve" value="Approve Status" />
+                        <p:inputText id="approve" class="md-input" readonly="true"
+                                     value="#{journalEntryDetailsController.currentHeader.approveStatus}"/>                     
+                    </div>
+                    <div class="uk-width-medium-1-6">
+                        <p:outputLabel for="post" value="Post Status" />
+                        <p:inputText id="post" class="md-input" readonly="true"
+                                     value="#{journalEntryDetailsController.currentHeader.postStatus}"/>
+                    </div>                  
+                </div>
+            </h:panelGroup>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-toolbar">
+                <div class="md-card-toolbar-actions">
+                    <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                    <p:commandLink id="addButton" update="table" process="@this table"
+                                   action="#{journalEntryDetailsController.addLine}">
+                        <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                    </p:commandLink>                         
+                </div>
+                <h3 class="md-card-toolbar-heading-text">
+                    Entry Lines
+                </h3>
+            </div>
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="line" value="#{journalEntryDetailsController.currentHeader.lines}" 
+                                     paginator="true" sortBy=" #{1}"
+                                     paginatorAlwaysVisible="false" reflow="true"
+                                     rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover uk-table-condensed" 
+                                     paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="No" styleClass="uk-width-1-10">
+                                #{line.jeLineNum}
+                            </p:column>
+                            <p:column headerText="Account" styleClass="uk-width-5-10">
+                                <p:autoComplete id="account" value="#{line.account}"  
+                                                inputStyleClass="uk-width-1-1"
+                                                completeMethod="#{journalEntryDetailsController.completeAccounts}"  
+                                                emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                var="acc" itemLabel="#{acc.codeCombinationShortName}" 
+                                                itemValue="#{acc}"
+                                                placeholder="Search Accounts"
+                                                forceSelection="true" required="true"  >
+                                    <p:ajax update="accountTip @this" event="itemSelect" />
+                                </p:autoComplete>
+                                <p:tooltip id="accountTip" for="account" position="right">
+                                    <h:message for="account" />
+                                </p:tooltip>
+                            </p:column>
+                            <p:column headerText="Debit" styleClass="uk-width-2-10">
+                                <p:inputText id="depit" value="#{line.accountedDr}">
+                                    <p:keyFilter for="depit" mask="num" />
+                                    <p:ajax listener="#{journalEntryDetailsController.onDebitChange(line)}" 
+                                            update="table" />
+                                </p:inputText>
+                            </p:column>
+                            <p:column id="normCol" headerText="Credit" 
+                                      rendered="#{not journalEntryDetailsController.currentHeader.distributedFlag}" 
+                                      styleClass="uk-width-2-10">
+                                <p:inputText id="credit" value="#{line.accountedCr}">
+                                    <p:keyFilter for="credit" mask="num" />
+                                    <p:ajax listener="#{journalEntryDetailsController.onCreditChange(line)}" 
+                                            update="table" />
+                                </p:inputText>
+                            </p:column>
+
+                            <p:column id="distCol" headerText="Credit" 
+                                      rendered="#{journalEntryDetailsController.currentHeader.distributedFlag}" 
+                                      styleClass="uk-width-2-10 uk-text-center">
+
+                                <h:selectBooleanCheckbox class="icheckbox_md" value="#{line.creditFlag}">
+                                    <p:ajax update="table" listener="#{journalEntryDetailsController.onCreditCheck(line)}"  />
+                                </h:selectBooleanCheckbox>
+                            </p:column>
+
+                            <p:summaryRow id="row">
+                                <p:column colspan="2" style="text-align:right">
+                                    <h:outputText value="Total : " style="font-weight: bold; font-size:18px" />
+                                </p:column>
+                                <p:column headerText="" style="text-align:center">
+                                    <h:outputText id="totalDr" 
+                                                  value="#{journalEntryDetailsController.currentHeader.runningTotalDr > 0 ? journalEntryDetailsController.currentHeader.runningTotalDr : '' }"/>
+                                    #{' '}
+                                    <ui:fragment rendered="#{not journalEntryDetailsController.currentHeader.distributedFlag}">
+                                        #{journalEntryDetailsController.currentBatch.ledger.currency.currencyCode}                          
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{journalEntryDetailsController.currentHeader.distributedFlag}">
+                                        %
+                                    </ui:fragment>
+                                </p:column>
+                                <p:column style="text-align:center">
+                                    <ui:fragment rendered="#{not journalEntryDetailsController.currentHeader.distributedFlag}">                             
+                                        <h:outputText id="totalCr" 
+                                                      value="#{journalEntryDetailsController.currentHeader.runningTotalCr > 0 ? journalEntryDetailsController.currentHeader.runningTotalCr : ''}"/>
+                                        #{' '}
+                                        #{journalEntryDetailsController.currentBatch.ledger.currency.currencyCode}
+                                    </ui:fragment>
+                                </p:column>
+                            </p:summaryRow>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" update="@this header table" process="@form"
+                           action="#{journalEntryDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="dialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        <span class="uk-text-warning">Warning</span>
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:outputText id="warn" value="#{journalEntryDetailsController.warningText}" />
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink  process="@this"
+                                    class="md-btn md-btn-flat md-btn-flat-primary"
+                                    action="#{journalEntryDetailsController.onDialogOk}">Save</p:commandLink>
+                </div>    
+            </div>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false, center: true});
+        </script>
+    </ui:define>
+</ui:composition>

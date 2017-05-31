@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="assets" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{assetDetailsController.assetId}" />
+            <f:viewParam name="adId" value="#{assetDetailsController.additionId}" />
+            <f:viewAction action="#{assetDetailsController.loadAsset()}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Add Asset
+    </ui:define>
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom"></h3>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-4">
+                        <p:outputLabel for="code" value="Code" />
+                        <h:inputText class="md-input" id="code" required="true"
+                                     validator="#{assetDetailsController.validateCode}"
+                                     value="#{assetDetailsController.currentAsset.assetCode}">
+                        </h:inputText>
+                        <h:message for="code" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-4">
+                        <p:outputLabel for="name" value="Name" />
+                        <h:inputText class="md-input" id="name" required="true"
+                                     validator="#{assetDetailsController.validateName}"
+                                     value="#{assetDetailsController.currentAsset.assetName}">
+                        </h:inputText>
+                        <h:message for="name" style="color:red;"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-4">
+                        <div class="uk-margin-medium-top">
+                            <h:selectBooleanCheckbox  id="sub"  styleClass="icheckbox_md"
+                                                      disabled="#{!assetDetailsController.newState}"
+                                                      value="#{assetDetailsController.currentAsset.subAsset}">
+                                <p:ajax process="@this" update="data" listener="#{assetDetailsController.resetForm()}"/>
+                            </h:selectBooleanCheckbox>
+                            <h:outputLabel for="sub" value=" Sub Component"/>    
+                        </div>
+                    </div>
+
+                </div>
+                <h:panelGroup layout="block" id="data">
+                    <div class="md-card-content">
+                        <div class="uk-grid" data-uk-grid-margin="true">
+                            <div class="uk-width-medium-1-3">
+                                <p:outputLabel value="Type" for="type" class="uk-form-label" />
+                                <h:selectOneMenu id="type" pt:data-md-selectize="true"
+                                                 disabled="#{!assetDetailsController.typeState}"
+                                                 required="#{assetDetailsController.typeState}"
+                                                 value="#{assetDetailsController.currentAsset.assetType}"
+                                                 pt:data-md-selectize-bottom="true">
+                                    <f:selectItem noSelectionOption="true" itemLabel="Select Type" />
+                                    <f:selectItems itemLabel="#{type}" itemValue="#{type}" var="type" 
+                                                   value="#{assetDetailsController.assetTypes}"/>
+                                    <p:ajax process="@this" update="data" listener="#{assetDetailsController.resetOnService()}"/>
+                                </h:selectOneMenu>
+                                <h:message for="type" style="color:red;" />                        
+                            </div>
+
+                            <div class="uk-width-medium-1-3" style="margin-top: 12px">
+                                <p:outputLabel for="addDate" value="Add Date" />
+                                <h:inputText class="md-input" id="addDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                             required="true"
+                                             disabled="#{!assetDetailsController.newState}"
+                                             validator="#{assetDetailsController.validateDate}"
+                                             value="#{assetDetailsController.currentAsset.additionDate}">
+                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                </h:inputText>
+                                <h:message for="addDate" id="dateMsg" style="color:red;"  />
+                            </div>
+
+                            <div class="uk-width-medium-1-3" style="margin-top: 12px">
+                                <p:outputLabel id="serviceDatelable" for="serviceDate" value="OnService Date"/>
+                                <h:inputText class="md-input" id="serviceDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}"
+                                             required="#{assetDetailsController.preservState}"
+                                             disabled="#{!assetDetailsController.preservState}"
+                                             validator="#{assetDetailsController.validateServiceDate}"
+                                             value="#{assetDetailsController.currentAsset.onserviceDate}">
+                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                </h:inputText>
+                                <h:message for="serviceDate" id="sdateMsg" style="color:red;"  />
+                            </div>
+
+                        </div>
+
+
+                        <div class="uk-grid" data-uk-grid-margin="true">
+
+                            <div class="uk-width-medium-2-6">
+
+                                <p:outputLabel value="Category" class="uk-form-label" for="category"/>
+                                <p:autoComplete id="category" value="#{assetDetailsController.currentAsset.assetCategory}" 
+                                                disabled="#{!assetDetailsController.catState}"
+                                                required="#{assetDetailsController.catState}"
+                                                completeMethod="#{assetDetailsController.completeCategory}"  
+                                                emptyMessage="No Records.."  
+                                                converter="#{faCategoryConverter}"
+                                                var="ca" itemLabel="#{ca.categoryName}" itemValue="#{ca}"
+                                                placeholder="Search Category" inputStyleClass="md-input"
+                                                forceSelection="true" >
+                                </p:autoComplete>
+                                <h:message for="category" style="color:red" /> 
+
+                            </div>
+
+                            <div class="uk-width-medium-2-6">
+
+                                <p:outputLabel value="Location" class="uk-form-label" for="location"/>
+                                <p:autoComplete id="location" value="#{assetDetailsController.currentAsset.assetLocation}"
+                                                disabled="#{!assetDetailsController.newState}"
+                                                completeMethod="#{assetDetailsController.completeLocation}"  
+                                                emptyMessage="No Records.."  
+                                                converter="#{physicalLocationConverter}"
+                                                var="loc" itemLabel="#{loc.locationDescription}" itemValue="#{loc}"
+                                                placeholder="Search Location" inputStyleClass="md-input"
+                                                forceSelection="true" required="true"  >
+                                    <p:ajax event="itemSelect" update="parent" listener="#{assetDetailsController.resetParent()}"/>
+                                </p:autoComplete>
+                                <h:message for="location" style="color:red" /> 
+
+                            </div>
+
+                            <div class="uk-width-medium-2-6" >
+
+                                <p:outputLabel value="Parent" class="uk-form-label" for="parent" />
+                                <p:autoComplete id="parent" value="#{assetDetailsController.currentAsset.mainAsset}" 
+                                                disabled="#{!assetDetailsController.parentState}"
+                                                required="#{assetDetailsController.parentState}"
+                                                completeMethod="#{assetDetailsController.completeParent}"  
+                                                emptyMessage="No Records.."  
+                                                converter="#{assetConverter}"
+                                                var="pa" itemLabel="#{pa.assetName}" itemValue="#{pa}"
+                                                placeholder="Search Parent" inputStyleClass="md-input"
+                                                forceSelection="true" >
+                                    <p:ajax event="itemSelect" process="@this"/>
+                                </p:autoComplete>
+                                <h:message for="parent"  style="color:red" /> 
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="uk-grid" data-uk-grid-margin="true">
+
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="assetLifeMonths" value="Asset Life Months"/>
+                                <h:inputText class="md-input" id="assetLifeMonths" required="true"
+                                             readonly="#{!assetDetailsController.newState}"
+                                             value="#{assetDetailsController.currentAsset.assetLifeMonths}">
+                                    <f:validateLongRange minimum="1"/>
+                                </h:inputText>
+                                <p:keyFilter for="assetLifeMonths" mask="num" />
+                                <h:message for="assetLifeMonths" style="color:red;"  />
+                            </div>
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="salvageCost" value="Salvage Cost"/>
+                                <h:inputText class="md-input" id="salvageCost" required="true"
+                                             readonly="#{!assetDetailsController.newState}"
+                                             value="#{assetDetailsController.currentAsset.salvageCost}">
+                                    <f:validateLongRange minimum="1"/>
+                                </h:inputText>
+                                <p:keyFilter for="salvageCost" mask="num" />
+                                <h:message for="salvageCost" style="color:red;"  />
+                            </div>
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="originalcost" value="Original Cost"/>
+                                <h:inputText class="md-input" id="originalcost" readonly="true"
+                                             value="#{assetDetailsController.currentAsset.originalCost}">
+
+                                </h:inputText>
+                                <p:keyFilter for="originalcost" mask="num" />
+                                <h:message for="originalcost" style="color:red;"  />
+                            </div>
+                        </div>
+                        <div class="uk-grid" data-uk-grid-margin="true">
+
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="remainingMonths" value="Remaining Months"/>
+                                <h:inputText class="md-input" id="remainingMonths" readonly="true"
+                                             value="#{assetDetailsController.currentAsset.remainingMonths}">
+                                </h:inputText>
+                                <p:keyFilter for="remainingMonths" mask="num" />
+                                <h:message for="remainingMonths" style="color:red;"  />
+                            </div>
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="premiumDepreciation" value="Premium Depreciation"/>
+                                <h:inputText class="md-input" id="premiumDepreciation" readonly="true"
+                                             value="#{assetDetailsController.currentAsset.premiumDepreciation}">
+                                </h:inputText>
+                                <p:keyFilter for="premiumDepreciation" mask="num" />
+                                <h:message for="premiumDepreciation" style="color:red;"  />
+                            </div>
+                            <div class="uk-width-medium-2-6 uk-margin-small-top">
+                                <p:outputLabel for="currentcost" value="Current Cost"/>
+                                <h:inputText class="md-input" id="currentcost" readonly="true"
+                                             value="#{assetDetailsController.currentAsset.currentCost}">
+                                </h:inputText>
+                                <p:keyFilter for="currentcost" mask="num" />
+                                <h:message for="currentcost" style="color:red;"  />
+                            </div>
+                        </div>
+                    </div>
+                </h:panelGroup>
+            </div>
+
+        </div>
+
+        <h:messages id="mm"/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit"
+                           process="@form" update="@form" action="#{assetDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

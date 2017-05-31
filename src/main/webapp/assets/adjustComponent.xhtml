@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="adjustcomponent" />
+
+    <ui:define name="title">
+        Adjust Component
+    </ui:define>
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom">Adjust Component</h3>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+
+                        <p:outputLabel value="Component" class="uk-form-label" for="component"/>
+                        <p:autoComplete id="component" value="#{adjustComponentController.currentComponent}" 
+                                        completeMethod="#{adjustComponentController.completeComponent}"  
+                                        emptyMessage="No Records.."  required="true"
+                                        converter="#{assetConverter}"
+                                        var="co" itemLabel="#{co.assetName}" itemValue="#{co}"
+                                        placeholder="Search Component" inputStyleClass="md-input"
+                                        forceSelection="true" > 
+                            <p:ajax event="itemSelect" update="@form" listener="#{adjustComponentController.resetForm()}"/>
+                        </p:autoComplete>
+                        <h:message for="component" id="assetm"  style="color:red" /> 
+
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="adjustDate" value="Date" />
+                        <h:inputText class="md-input" id="adjustDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true"
+                                     validator="#{adjustComponentController.validateDate}"
+                                     value="#{adjustComponentController.eventDate}">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+                        </h:inputText>
+                        <h:message for="adjustDate" style="color:red;"  />
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-2-6 uk-margin-small-top">
+                        <p:outputLabel for="oldLocation" value="From Location"/>
+                        <h:inputText class="md-input label-fixed" id="oldLocation" readonly="true"
+                                     value="#{adjustComponentController.currentComponent.assetLocation.locationDescription}">
+                        </h:inputText>
+                    </div>
+                    <div class="uk-width-medium-2-6 uk-margin-small-top">
+                        <p:outputLabel for="oldAsset" value="From Asset"/>
+                        <h:inputText class="md-input label-fixed" id="oldAsset" readonly="true"
+                                     value="#{adjustComponentController.currentComponent.mainAsset.assetName}">
+                        </h:inputText>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+
+                              <p:outputLabel value="Location" class="uk-form-label" for="newLocation"/>
+                              <p:autoComplete id="newLocation" value="#{adjustComponentController.newLocation}"
+                                        completeMethod="#{adjustComponentController.completeLocation}"  
+                                        emptyMessage="No Records.."  
+                                        converter="#{physicalLocationConverter}"
+                                        var="loc" itemLabel="#{loc.locationDescription}" itemValue="#{loc}"
+                                        placeholder="Search Location" inputStyleClass="md-input"
+                                        forceSelection="true" required="true"  >
+                            <p:ajax event="itemSelect" update="newAsset" listener="#{adjustComponentController.resetParent()}"/>
+                        </p:autoComplete>
+                        <h:message for="newLocation" style="color:red" /> 
+
+                    </div>
+                    <div class="uk-width-medium-2-6">
+
+                        <p:outputLabel value="To Asset" class="uk-form-label" for="newAsset"/>
+                        <p:autoComplete id="newAsset" value="#{adjustComponentController.newAsset}" 
+                                        completeMethod="#{adjustComponentController.completeAsset}"  
+                                        emptyMessage="No Records.."
+                                        converter="#{assetConverter}"
+                                        var="fa" itemLabel="#{fa.assetName}" itemValue="#{fa}"
+                                        placeholder="Search Asset" inputStyleClass="md-input"
+                                        forceSelection="true" >
+                            <p:ajax event="itemSelect"/>
+                        </p:autoComplete>
+                        <h:message for="newAsset" style="color:red" /> 
+
+                    </div>
+
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="newcost" value="New Cost"/>
+                        <h:inputText class="md-input" id="newcost" 
+                                     value="#{adjustComponentController.addedCost}">
+                            
+                            <f:validateLongRange minimum="1" />
+                        </h:inputText>
+                        <p:keyFilter for="newcost" mask="num" />
+                        <h:message for="newcost" style="color:red;"  />
+                    </div>
+
+
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="newlife" value="Added Life Months"/>
+                        <h:inputText class="md-input" id="newlife"
+                                     value="#{adjustComponentController.addedLife}">
+                              <f:validateLongRange minimum="1" />
+                        </h:inputText>
+                        <p:keyFilter for="newlife" mask="num" />
+                        <h:message for="newlife" style="color:red;"  />
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit"
+                           process="@form" update="@form" action="#{adjustComponentController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>
+

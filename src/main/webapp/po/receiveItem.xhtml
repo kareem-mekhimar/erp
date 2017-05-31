@@ -1,0 +1,106 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="receipt" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('po:recieve')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Receive Items
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h2 class="heading_b uk-margin-medium-bottom">Receive Items</h2>
+
+                <div class="uk-overflow-container">
+                    <p:dataTable id="table" var="line" value="#{poReceiveController.selectedLines}" tableStyleClass="uk-table uk-table-condensed uk-table-striped"  >
+                        <p:column headerText="Po No" styleClass="uk-width-1-10 uk-text-center">
+                            #{line.poHeader.poCode}
+                        </p:column>
+                        <p:column headerText="Item" styleClass="uk-width-2-10 uk-text-left">
+                            #{line.systemItem.description}
+                        </p:column>
+                        <p:column headerText="Quantity" styleClass="uk-width-1-10 uk-text-center">
+                            #{line.quantityOrdered}
+                        </p:column>
+                        <p:column headerText="Recieved" styleClass="uk-width-1-10 uk-text-center">
+                            <h:outputText id="committed" 
+                                          value="#{line.quantityReceived == null ? 'Zero' : line.quantityReceived}" />
+                        </p:column>
+                        <p:column headerText="Main Inv" styleClass="uk-width-2-10 uk-text-left">
+                            <p:autoComplete value="#{line.tagertMainInv}" 
+                                            completeMethod="#{poReceiveController.completeMainInvByName}"  
+                                            emptyMessage="No Records.."  id="mainInv" converter="#{mainInvConverter}"
+                                            var="inv" itemLabel="#{inv.organizationName}" itemValue="#{inv}"
+                                            placeholder="Search Main Inventory"
+                                            forceSelection="true" required="true"  >
+                                <p:ajax update="subInv @this m1" event="itemSelect"
+                                        listener="#{poReceiveController.resetSubInv}"/>
+                            </p:autoComplete>
+                            <p:tooltip id="m1" for="mainInv" position="right">
+                                <h:message for="mainInv" />
+                            </p:tooltip>
+                        </p:column>
+                        <p:column headerText="Secondary Inv" styleClass="uk-width-2-10 uk-text-left">
+                            <p:autoComplete id="subInv" value="#{line.targetSecInv}" 
+                                            completeMethod="#{poReceiveController.completeSubInvForItem}"  
+                                            emptyMessage="No Records.." converter="#{subInvConverter}"
+                                            var="inv" itemLabel="#{inv.secondaryInventoryName}" 
+                                            itemValue="#{inv}"
+                                            placeholder="Search Sub Inv"
+                                            forceSelection="true"  required="true">       
+                                <p:ajax event="itemSelect" update="m2 @this" />
+                            </p:autoComplete>
+                            <p:tooltip id="m2" for="subInv" position="right">
+                                <h:message for="subInv" />
+                            </p:tooltip>
+                        </p:column>
+
+
+                        <p:column headerText="Transaction" styleClass="uk-width-1-10 uk-text-left">
+                            <p:inputText id="txQuantity" value="#{line.txQuantity}" required="true" style="width: 80px" >
+                                <p:ajax update="@this m3" />
+                            </p:inputText>
+                            <p:keyFilter for="txQuantity" mask="num" />
+                            <p:tooltip id="m3" for="txQuantity" position="left">
+                                <h:message for="txQuantity" />
+                            </p:tooltip>
+                        </p:column>
+
+                        <p:column headerText="Date" styleClass="uk-width-1-10 uk-text-left">
+                            <p:calendar id="date" value="#{line.txDate}" pattern="dd-MM-yyyy" size="7" 
+                                        validator="#{poReceiveController.validateTxDateIsInOpenPeriod}">                                
+                                <p:ajax event="change" update="@this m4" />
+                                <p:ajax event="dateSelect" update="@this m4"  />
+                            </p:calendar>
+                            <p:tooltip id="m4" for="date" position="left">
+                                <h:message for="date" />
+                            </p:tooltip>
+                        </p:column>
+
+                    </p:dataTable>
+                </div>
+            </div>
+        </div>
+        <ui:debug hotkey="d" />
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" 
+                           update="@form" process="@form" action="#{poReceiveController.save('item')}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

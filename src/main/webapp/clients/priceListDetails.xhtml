@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="priceListsView" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{priceListDetailsController.currentListHeaderId}" />
+            <f:viewAction action="#{priceListDetailsController.loadCurrentPriceList}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('pricelist:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Pricing List
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{priceListDetailsController.currentPriceList.listHeaderName == null ? 'New Pricing List' : priceListDetailsController.currentPriceList.listHeaderName }
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <div class="uk-form-row">
+                            <div class="uk-grid">
+                                <div class="uk-width-medium-2-6">
+                                    <p:autoComplete id="org" value="#{priceListDetailsController.currentPriceList.org}" 
+                                                    completeMethod="#{priceListDetailsController.completeOperatingUnitsByName}"  
+                                                    emptyMessage="No Records.."  
+                                                    converter="#{organizationUnitConverter}"
+                                                    var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                                    placeholder="Search Operating Unit" inputStyleClass="md-input"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update="@this m1" event="itemSelect"   />
+                                    </p:autoComplete>
+                                    <h:message for="org" id="m1" style="color:red" />                                 
+                                </div>                                
+                                <div class="uk-width-medium-2-6">
+                                    <p:outputLabel for="name" value="Pricing List Name" />
+                                    <p:inputText class="md-input" id="name"  value="#{priceListDetailsController.currentPriceList.listHeaderName}" >
+                                        <f:validateRequired/>
+                                    </p:inputText>
+                                    <h:message for="name" style="color:red;"  />
+                                </div>
+
+                            </div>
+                            <div class="uk-grid" data-uk-grid-margin="true">
+                                <div class="uk-width-medium-5-6">
+                                    <p:outputLabel for="desc" value="Description" />
+                                    <p:inputText class="md-input" id="desc"  value="#{priceListDetailsController.currentPriceList.description}" >
+                                    </p:inputText>
+                                    <h:message for="desc" style="color:red;"  />
+                                </div>
+                            </div>                            
+                            <div class="uk-grid" data-uk-grid-margin="true">
+                                <div class="uk-width-medium-1-4">
+                                    <p:outputLabel for="roundTo" value="Round To" />
+                                    <p:inputText class="md-input" id="roundTo"  value="#{priceListDetailsController.currentPriceList.roundingFactor}" />
+                                    <h:message for="roundTo" style="color:red;"  />
+                                </div>
+                                <ui:remove>
+                                    <div class="uk-width-medium-1-4">
+                                        <p:outputLabel for="startActiveDate" value="Start Active Date" />
+                                        <p:inputText id="startActiveDate"   class="md-input" required="true" pt:data-uk-datepicker="{format:'DD-MM-YYYY' ,pos:'bottom'}"
+                                                     value="#{priceListDetailsController.currentPriceList.startDateActive}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy" />
+                                        </p:inputText>
+                                        <h:message id="m6" for="startActiveDate" style="color:red" />
+                                    </div>
+                                </ui:remove>
+                                <div class="uk-width-medium-1-4">
+                                    <p:outputLabel for="endActiveDate" value="End Active Date" />
+                                    <p:inputText id="endActiveDate"   class="md-input" pt:data-uk-datepicker="{format:'DD-MM-YYYY' ,pos:'bottom'}"
+                                                 value="#{priceListDetailsController.currentPriceList.endDateActive}">
+                                        <f:convertDateTime pattern="dd-MM-yyyy" />
+                                    </p:inputText>
+                                    <h:message id="m7" for="endActiveDate" style="color:red" />
+                                </div>
+                                <div class="uk-width-medium-1-6">
+                                    <h:selectBooleanCheckbox id="activeFlag"     class="icheckbox_md"
+                                                             value="#{priceListDetailsController.currentPriceList.activeFlag}" />
+                                    <h:outputLabel for="activeFlag" value=" Active"/>
+                                </div>                                
+                            </div>  
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="linesTable" process="linesTable @this" action="#{priceListDetailsController.addLine}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{priceListDetailsController.currentPriceList.priceListLines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+
+                                <p:column headerText="Product Type" styleClass="uk-text-center" >
+                                    <h:selectOneMenu value="#{line.lineType}" style="height: 27px;">
+                                        <f:selectItems var="sc" itemLabel="#{sc}" itemValue="#{sc}"
+                                                       value="#{priceListDetailsController.lineTypes}" />
+                                        <f:ajax execute="@this" render="linesTable"/>
+                                    </h:selectOneMenu>
+                                </p:column>
+                                <p:column headerText="Product" styleClass="uk-text-left" class="uk-width-medium-1-3">
+                                    <p:autoComplete id="systemitem" value="#{line.systemItem}" class="uk-grid-width-medium-1-1"
+                                                    completeMethod="#{priceListDetailsController.completeSystemItems}"  
+                                                    emptyMessage="No Records.."  converter="#{systemItemConverter}"
+                                                    var="item" itemLabel="#{item.description}" itemValue="#{item}"
+                                                    placeholder="Search System Item"
+                                                    forceSelection="true" required="true"  >
+                                        <p:ajax update="uom systemitemTip @this" 
+                                                listener="#{priceListDetailsController.onItemSelectChange(line)}" event="itemSelect" />
+                                    </p:autoComplete>
+                                    <p:tooltip id="systemitemTip" for="systemitem" position="right">
+                                        <h:message for="systemitem" />
+                                    </p:tooltip>
+                                </p:column>                                
+                                <p:column headerText="UOM" styleClass="uk-text-center">
+                                    <h:outputText id="uom" value="#{line.listPriceUOM.uomCode}"/>
+                                </p:column> 
+
+                                <p:column headerText="Price" styleClass="uk-text-left">
+                                    <h:inputText id="pValue" style="height: 21px;width: 100px" value="#{line.listPrice}" required="true"  >
+
+                                    </h:inputText>
+                                    <h:message for="pValue" style="color:red;"  />
+                                </p:column>
+                                <p:column headerText="Start Active Date" styleClass="uk-text-left">
+                                    <h:inputText id="lineStartActiveDate" style="height: 21px" required="true" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}"
+                                                 value="#{line.startDateActive}">
+                                        <f:convertDateTime pattern="dd-MM-yyyy" />
+                                    </h:inputText>
+                                </p:column>
+                                <p:column headerText="End Active Date" styleClass="uk-text-left">
+                                    <h:inputText id="lineEndActiveDate" style="height: 21px" required="true" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}"
+                                                 value="#{line.endDateActive}">
+                                        <f:convertDateTime pattern="dd-MM-yyyy" />
+                                    </h:inputText>
+                                </p:column>
+                                <p:column headerText="#" styleClass="uk-text-left">
+                                    <p:commandLink action="#{priceListDetailsController.removeLine(line)}" 
+                                                   immediate="true" update="linesTable">
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                </p:column>
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  type="submit" update="@form" process="@form" class="md-fab md-fab-primary" action="#{priceListDetailsController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+
+        </script>
+    </ui:define>
+</ui:composition>

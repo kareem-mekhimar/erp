@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="bank" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{bankDetailsController.currentBankId}" />
+            <f:viewAction action="#{bankDetailsController.loadBank()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('bank:create')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Bank Details
+    </ui:define>
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{bankDetailsController.currentBank.bankId == null ? 'New Bank' : bankDetailsController.currentBank.bankName }
+        </h4>
+        <div class="md-card">
+            <h:panelGroup id="pageHead"  layout="block" class="md-card-content">
+                <div class="md-card-content">
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-medium-4-10">
+                            <p:outputLabel for="name" value="Name" />
+                            <p:inputText class="md-input" id="name" value="#{bankDetailsController.currentBank.bankName}"  required="true">
+                            </p:inputText>
+                            <h:message id="nameMsg" for="name" style="color:red;"  />
+
+                        </div>
+
+                        <div class="uk-width-medium-6-10">
+                            <p:outputLabel for="desc" value="Description" />
+                            <p:inputText class="md-input" id="desc"  value="#{bankDetailsController.currentBank.description}" >
+                            </p:inputText>
+                            <h:message for="desc" style="color:red;"  />
+
+                        </div>
+                    </div>
+                </div>
+            </h:panelGroup>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink  process="@this" update="dialogContent" oncomplete="modal.show();" action="#{bankDetailsController.loadDialog(null)}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Branches
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+
+                            <p:dataTable id="linesTable" var="branch" value="#{bankDetailsController.currentBank.branchList}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="Name" styleClass="uk-text-center">
+                                    <h:outputText value="#{branch.bankBranchName}"/>
+                                </p:column>
+
+                                <p:column headerText="Alias" styleClass="uk-text-center">
+                                    <h:outputText value="#{branch.bankBranchNameAlt}"/>
+
+                                </p:column>                                
+                                <p:column headerText="Type" styleClass="uk-text-center">
+                                    <h:outputText value="#{branch.bankBranchType}"/>
+
+                                </p:column>                                
+                                <p:column headerText="#" styleClass="uk-text-center">
+                                    <p:commandLink process="@this" action="#{bankDetailsController.loadDialog(branch)}" 
+                                                   oncomplete="modal.show();" update="dialogContent">
+                                        <i class="material-icons md-24">edit</i>
+                                    </p:commandLink>
+
+                                    <p:commandLink process="@this" action="#{bankDetailsController.removeLine(branch)}"
+                                                   immediate="true" update="linesTable" >
+                                        <i class="material-icons md-24">close</i>
+                                    </p:commandLink>
+                                </p:column>                                
+
+                            </p:dataTable>
+
+                            <div class="uk-modal" id="dialog">
+
+                                <div class="uk-modal-dialog">
+                                    <div class="uk-modal-header">
+                                        <h5 class="uk-modal-title">Branch</h5>
+                                    </div>
+                                    <h:panelGroup layout="block" id="dialogContent">
+
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-2-4">
+                                                <h:outputLabel value="Branch Name" for="dname"/>
+                                                <h:inputText id="dname" class="md-input" value="#{bankDetailsController.curreBranch.bankBranchName}" required="true">
+                                                </h:inputText>
+
+                                                <h:message for="dname" style="color: red" />
+
+                                            </div>
+                                            <div class="uk-width-medium-2-4">
+                                                <h:outputLabel value="Branch Alias" for="dalias"/>
+                                                <h:inputText id="dalias" class="md-input" value="#{bankDetailsController.curreBranch.bankBranchNameAlt}">
+                                                </h:inputText>
+                                                <h:message for="dalias" style="color: red" />
+                                            </div>
+
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+
+
+
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="ead" value="End Active Date" />
+                                                <h:inputText class="md-input" id="ead" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                                             value="#{bankDetailsController.curreBranch.endDate}" >
+                                                    <f:convertDateTime pattern="dd-MM-yyyy"/>
+                                                </h:inputText>
+                                                <h:message  for="ead" style="color:red;"  />
+
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+                                                <p:outputLabel for="type" value="Type" />
+                                                <h:selectOneMenu id="type" value="#{bankDetailsController.curreBranch.bankBranchType}" required="true"
+                                                                 pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                                    <f:selectItem noSelectionOption="true" itemLabel="Type" />
+                                                    <f:selectItem itemLabel="Type 1" itemValue="Type1" />
+                                                    <f:selectItem itemLabel="Type 2" itemValue="type2" />
+                                                </h:selectOneMenu>
+                                                <h:message  for="type" style="color:red;"  />
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-2-6">
+                                                <p:autoComplete id="country" value="#{bankDetailsController.curreBranch.country}" 
+                                                                completeMethod="#{bankDetailsController.completeCountry}" 
+                                                                emptyMessage="No Records.." converter="#{countryConverter}"
+                                                                var="item" itemLabel="#{item.countryName}" itemValue="#{item}"
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Country"
+                                                                forceSelection="true">
+                                                    <p:ajax event="itemSelect" />
+                                                </p:autoComplete>
+                                                <h:message for="country" style="color:red;"  />
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+                                                <p:autoComplete id="state" value="#{bankDetailsController.curreBranch.state}" 
+                                                                completeMethod="#{bankDetailsController.completeState}" 
+                                                                emptyMessage="No Records.."
+                                                                var="item" itemLabel="#{item}" itemValue="#{item}"
+                                                                inputStyleClass="md-input"
+                                                                placeholder="State"
+                                                                forceSelection="true">
+                                                </p:autoComplete>
+                                                <h:message for="state" style="color:red;"  />
+                                            </div>
+                                            <div class="uk-width-medium-2-6">
+                                                <h:outputLabel value="City" for="city"/>
+                                                <h:inputText id="city" class="md-input" value="#{bankDetailsController.curreBranch.city}">
+                                                </h:inputText>
+                                                <h:message for="city" style="color: red" />
+
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                            <div class="uk-width-medium-3-5">
+
+                                                <h:outputLabel value="Address" for="address"/>
+                                                <h:inputText id="address" class="md-input" value="#{bankDetailsController.curreBranch.addressLine1}">
+                                                </h:inputText>
+                                                <h:message for="address" style="color: red" />
+
+                                            </div>
+                                            <div class="uk-width-medium-2-5">
+                                                <h:outputLabel value="Contact" for="contact"/>
+                                                <h:inputText id="contact" class="md-input" value="#{bankDetailsController.curreBranch.contactName}">
+                                                </h:inputText>
+                                                <h:message for="contact" style="color: red" />
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid" data-uk-grid-margin="true">
+
+                                            <div class="uk-width-medium-2-5">
+                                                <h:outputLabel value="Phone" for="phone"/>
+                                                <h:inputText id="phone" class="md-input" value="#{bankDetailsController.curreBranch.phone}">
+                                                    <f:validateRegex pattern="[0-9]*"/>
+                                                </h:inputText>
+                                                <h:message for="phone" style="color: red" />
+                                            </div>
+                                            <div class="uk-width-medium-3-5">
+                                                <h:outputLabel value="E-Mail" for="email"/>
+                                                <h:inputText id="email" class="md-input" value="#{bankDetailsController.curreBranch.email}">
+                                                    <f:validateRegex pattern="([^.@]+)(\.[^.@]+)*@([^.@]+\.)+([^.@]+)"/>
+                                                </h:inputText>
+                                                <h:message for="email" style="color: red" />
+                                            </div>
+                                        </div>
+
+                                    </h:panelGroup>
+                                    <div class="uk-modal-footer uk-text-right">
+                                        <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                                        <p:commandLink update="dialogContent linesTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                                       class="md-btn md-btn-flat md-btn-flat-primary"
+                                                       action="#{bankDetailsController.onDialogOk()}">OK</p:commandLink>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" update="pageHead linesTable" process="@this pageHead linesTable" action="#{bankDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>
+

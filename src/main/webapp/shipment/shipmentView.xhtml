@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="shipment" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('so:read_shipments')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Shipment
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="SalesOrder NO" for="sno" />
+                        <h:inputText id="sno" class="md-input" value="#{shipmentController.salesOrderId}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="MoveOrder NO" for="mno" />
+                        <h:inputText id="mno" class="md-input" value="#{shipmentController.moveOrderId}"  />
+                    </div>
+
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{shipmentController.filter}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="line" value="#{shipmentController.shepmentHeaders}"
+                                     paginatorAlwaysVisible="false" rows="20"
+                                     paginatorPosition="bottom"  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     tableStyleClass="uk-table uk-table-hover" 
+                                     sortBy="#{line.headerId}" 
+                                     >
+                            <p:column headerText="Shipment No" styleClass="uk-width-1-5">
+                                #{line.headerId}
+                            </p:column>
+
+                            <p:column headerText="Sales Order No" styleClass="uk-width-1-5">
+                                #{line.salesOrderId}
+                            </p:column>
+                            <p:column headerText="Move Order No" styleClass="uk-width-1-5">
+                                #{line.moveOrderId}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-5 uk-text-center">
+                                <span class="uk-badge #{line.status=='NEW' ? 'uk-badge-primary' : 'uk-badge-success'}">
+                                    #{line.status}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-5 uk-text-center">
+                                <h:link outcome="shipmentDetails?id=#{line.headerId}" 
+                                        rendered="#{currentUser.hasPermission('so:deliver_shipments')}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+
+</ui:composition>
+

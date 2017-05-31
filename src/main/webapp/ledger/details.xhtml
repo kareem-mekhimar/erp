@@ -1,0 +1,260 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="ledger" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{ledgerDetailsController.currentLedgerId}" />
+            <f:viewAction action="#{ledgerDetailsController.loadLedger}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('ledgers:create')}" />
+
+        </f:metadata>   
+    </ui:define>
+
+    <ui:define name="title">
+        #{ledgerDetailsController.currentLedger.name}
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{ledgerDetailsController.currentLedger.name}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        #{ledgerDetailsController.currentLedger.shortName}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink  id="addLegalButton" 
+                                            process="@this" 
+                                            disabled="#{not ledgerDetailsController.legalEntities.isEmpty()}"
+                                            action="#{ledgerDetailsController.onAddLegal}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Legal Entities
+                        </h3>
+                    </div>
+
+                    <div class="md-card-content"> 
+                        <p:dataTable id="legalTable" var="line" value="#{ledgerDetailsController.legalEntities}" 
+                                     emptyMessage="No Legal Entites" 
+                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                            <p:column headerText="Name" styleClass="uk-text-left uk-width-10-10">
+                                <h:outputText class="uk-text-left" value="#{line.objectName}" />
+                            </p:column>
+                        </p:dataTable>                       
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <h3 class="md-card-toolbar-heading-text">
+                            Basic Config
+                        </h3>      
+                    </div>
+                    <div class="md-card-content"> 
+                        <p:dataTable id="configTable" var="line" rowIndexVar="index"
+                                     sortBy="#{line.id}"
+                                     value="#{ledgerDetailsController.basicConfigurations}" 
+                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                            <p:column headerText="Key" styleClass="uk-text-left uk-width-3-10">
+                                #{line.setupStepShortDesc}
+                            </p:column>
+                            <p:column headerText="Decription" styleClass="uk-text-left uk-width-5-10">
+                                #{line.setupStepFullDesc}
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-text-center uk-width-1-10">
+                                <span class="uk-badge  #{line.statusCode == 'IN_PROGRESS' ? 'uk-badge-primary' : 'uk-badge-success'}">
+                                    #{line.statusCode}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-text-center uk-width-1-10">
+                                <ui:fragment rendered="#{index eq 0}">
+                                    <p:commandLink process="@this" action="#{ledgerDetailsController.editAction}" >
+                                        <f:setPropertyActionListener target="#{ledgerDetailsController.lastClickedType}" value="OPTIONS" />
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{index eq 1}">
+                                    <p:commandLink process="@this" action="#{ledgerDetailsController.editAction}">
+                                        <f:setPropertyActionListener target="#{ledgerDetailsController.lastClickedType}" value="CURRENCY" />
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+                                </ui:fragment>                               
+                                <ui:fragment rendered="#{index eq 2}">
+                                    <p:commandLink process="@this" action="#{ledgerDetailsController.editAction}">
+                                        <f:setPropertyActionListener target="#{ledgerDetailsController.lastClickedType}" value="ACCOUNTS" />
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+                                </ui:fragment>       
+
+                                <ui:fragment rendered="#{index eq 3}">
+                                    <p:commandLink process="@this" action="#{ledgerDetailsController.editAction}">
+                                        <f:setPropertyActionListener target="#{ledgerDetailsController.lastClickedType}" value="CALENDAR" />
+                                        <i class="material-icons md-24">mode_edit</i>
+                                    </p:commandLink>
+                                </ui:fragment>                                
+                            </p:column>
+                        </p:dataTable>                       
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  update="legalTable" process="legalTable @this"
+                           action="#{ledgerDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <div class="uk-modal" id="legalDialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Legal Entity
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="legalDialogContent" styleClass="uk-width-1-1">
+                        <p:autoComplete id="legal"
+                                        required="true" inputStyleClass="md-input"
+                                        value="#{ledgerDetailsController.currentLegalEntity}"
+                                        completeMethod="#{ledgerDetailsController.completeLegalEntites}"
+                                        var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                        forceSelection="true" converter="#{organizationUnitConverter}"
+                                        placeholder="Search Legal Entities"> 
+                            <p:ajax event="itemSelect" update="@this msg"  />
+                        </p:autoComplete>
+                        <h:message style="color:red;" for="legal" id="msg" />
+                    </h:panelGroup>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="legalDialogContent addLegalButton legalTable" process="@this legalDialogContent" oncomplete="onLegalDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{ledgerDetailsController.onLegalDialogOk}">OK</p:commandLink>
+                </div>                
+            </div>
+        </div>
+        
+        <div class="uk-modal" id="saveDialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Save ..?
+                    </h5>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink process="@this"  class="md-btn md-btn-flat md-btn-flat-primary" value="Save"
+                                   action="#{ledgerDetailsController.onSaveDialogOk}" />
+                </div>
+
+            </div>
+        </div>
+
+        <div class="uk-modal" id="calendarDialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Calendar 
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="calendarDialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-medium-1-2">
+                                <p:outputLabel for="name" value="Calendar Name" />
+                                <p:inputText id="name" class="md-input" required="true"
+                                             value="#{ledgerDetailsController.currentCalendar.periodSetName}" >
+                                    <p:ajax update="@this m1" />
+                                </p:inputText>
+                                <h:message id="m1" for="name" style="color:red;" />
+                            </div>
+                            <div class="uk-width-medium-1-2">
+                                <p:autoComplete id="type" value="#{ledgerDetailsController.currentCalendar.periodType}" 
+
+                                                completeMethod="#{ledgerDetailsController.completePeriods}"  
+                                                emptyMessage="No Records.."  
+                                                converter="#{glPeroidTypeConverter}"
+                                                var="type" itemLabel="#{type.periodTypeName}" 
+                                                itemValue="#{type}"
+                                                inputStyleClass="md-input" required="true"
+                                                placeholder="Search Period Type" 
+                                                forceSelection="true"  >
+                                    <p:ajax update="@this m2" event="itemSelect" />
+                                </p:autoComplete>
+                                <h:message id="m2" for="type" style="color:red;"  />
+                            </div>
+                        </div>
+                    </h:panelGroup>
+
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="calendarDialogContent" process="@this calendarDialogContent" oncomplete="onCalendarDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{ledgerDetailsController.onCalendarDialogOk}">OK</p:commandLink>
+                </div>
+            </div>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var legalModal = UIkit.modal('#legalDialog', {keyboard: false, bgclose: false, center: true});
+            var calendarModal = UIkit.modal('#calendarDialog', {keyboard: false, bgclose: false, center: true});
+            function onLegalDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    legalModal.hide();
+                }
+            }
+            function onCalendarDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    calendarModal.hide();
+                }
+            }
+            var saveModal = UIkit.modal('#saveDialog', {keyboard: false, bgclose: false, center: true});
+        </script>
+    </ui:define>
+</ui:composition>

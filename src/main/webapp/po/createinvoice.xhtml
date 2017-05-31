@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+
+    <ui:param name="active" value="suppinvoicecreate" />
+
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('supplier_invoices:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Create Invoices
+    </ui:define>
+
+    <ui:define name="main">
+        <h2 class="heading_b uk-margin-medium-bottom">#{poSupplierInvoicesController.currentClient.clientName} Invoices</h2>
+
+        <ui:repeat var="invoice" id="repeat" value="#{poSupplierInvoicesController.currentInvoices}" varStatus="status">
+            <div class="md-card">
+                <div class="md-card-content">
+
+                    <h2 class="heading_b uk-margin-medium-bottom">
+                        Invoice No.#{status.index + 1} - #{invoice.clientSite.siteName}
+                        <h:outputText class="uk-float-right" id="allAmount" value="#{invoice.invoiceAmount +=' '+= invoice.invoiceCurrency.currencyCode}" />
+                    </h2>
+                    <p:dataTable var="line" value="#{invoice.lines}" 
+                                 expandableRowGroups="true"
+                                 sortBy="#{line.poLine.poHeader.poHeaderId}"
+                                 tableStyleClass="uk-table uk-table-condensed uk-table-striped" >
+                        <p:headerRow>
+                            <p:column colspan="4">
+                                <h:outputText styleClass="uk-text-bold uk-margin-left" value="PO (#{line.poLine.poHeader.poHeaderId})" />
+                            </p:column>
+                        </p:headerRow>
+                        <p:column headerText="Item" styleClass="uk-width-2-10 uk-text-center">
+                            <h:outputText id="item" value="#{line.poLine.systemItem.description}" />
+                        </p:column>
+                        <p:column headerText="Quantity Invoiced" styleClass="uk-width-2-10 uk-text-center">
+                            <h:outputText id="invoicedQuantity" value="#{line.quantityInvoiced}" />
+                        </p:column>
+
+                        <p:column headerText="Unit Price" styleClass="uk-width-2-10 uk-text-center">
+                            <p:inputText id="unitPrice" value="#{line.unitPrice}" required="true" 
+                                         validator="#{poSupplierInvoicesController.validateUnitPriceGtZero}">
+                                <p:ajax update="@this m1 invoicedAmount :repeat:#{status.index}:allAmount" 
+                                        listener="#{poSupplierInvoicesController.onUnitPriceChange(line)}" />
+                                <p:keyFilter for="unitPrice" mask="num" />
+                            </p:inputText>
+                            <p:tooltip id="m1" for="unitPrice" position="left">
+                                <h:message for="unitPrice" />
+                            </p:tooltip>
+                        </p:column>
+                        <p:column headerText="Invoiced Amount" styleClass="uk-width-2-10 uk-text-center">
+                            <h:outputText id="invoicedAmount" value="#{line.amount}" />
+                        </p:column>
+
+                    </p:dataTable>
+                </div>
+            </div>
+        </ui:repeat>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" 
+                           update="@form" process="@form" action="#{poSupplierInvoicesController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+
+</ui:composition>

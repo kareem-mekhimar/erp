@@ -1,0 +1,169 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="modules" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="operating" value="#{recievablesController.currentOperatingUnitId}" />
+            <f:viewAction action="#{recievablesController.loadModuleConfig()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('receivables:read')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Recievables
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{recievablesController.currentModuleConfug.operatingUnit.orgUnitName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        Recievables
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card uk-margin-medium-bottom">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="lines" class="md-card-content">
+                    <div class="uk-grid">
+                        <div class="uk-width-1-1">
+                            <ul id="user_edit_tabs" class="uk-tab" 
+                                data-uk-tab="{connect:'#tab',animation: 'slide-horizontal'}">
+                                <li id="l1" class="uk-active"><a class="tab-btn" id="p1" href="#">Accounting</a></li>
+                            </ul>
+                            <ul id="tab" class="uk-switcher uk-margin-small-top">
+                                <li>
+                                    <h:panelGroup styleClass="tabContent" id="t1">
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="round" value="Cross Currency Rounding Account" class="uk-form-label" />
+                                                <p:autoComplete id="round" value="#{recievablesController.currentModuleConfug.crossCurrencyRoundingAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" 
+                                                                >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="round" style="color:red;"  />         
+
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="gain" value="Realized Gains Account" class="uk-form-label" />
+                                                <p:autoComplete id="gain" value="#{recievablesController.currentModuleConfug.realizedGainsAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >
+                                                </p:autoComplete>                                                              
+                                                <h:message for="gain" style="color:red;"  />                                               
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="loss" value="Realized Loss Account" class="uk-form-label" />
+                                                <p:autoComplete id="loss" value="#{recievablesController.currentModuleConfug.realizedLossesAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}"  
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="loss" style="color:red;"  />                                               
+                                            </div>
+                                        </div>
+                                        <div class="uk-grid uk-margin-top">
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="tax" value="Tax Account" class="uk-form-label" />
+                                                <p:autoComplete id="tax" value="#{recievablesController.currentModuleConfug.taxAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="tax" style="color:red;"  />         
+
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="allocated" value="Unallocated Revenue Account" class="uk-form-label" />
+                                                <p:autoComplete id="allocated" value="#{recievablesController.currentModuleConfug.unallocatedRevenueAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="allocated" style="color:red;"  />                                               
+                                            </div>
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="cashAccount" value="Cash Account" class="uk-form-label" />
+                                                <p:autoComplete id="cashAccount" value="#{recievablesController.currentModuleConfug.cashAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="cashAccount" style="color:red;"  />                                               
+                                            </div>
+
+                                            <div class="uk-width-medium-1-3">
+                                                <p:outputLabel for="revenueAcc" value="Revenue Acc" class="uk-form-label" />
+                                                <p:autoComplete id="revenueAcc" value="#{recievablesController.currentModuleConfug.revenueAcc}" 
+                                                                completeMethod="#{recievablesController.completeAccounts}" 
+                                                                emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                inputStyleClass="md-input" 
+                                                                placeholder="Search Accounts" 
+                                                                forceSelection="true" required="true" >                                                         
+                                                </p:autoComplete>                                                              
+                                                <h:message for="revenueAcc" style="color:red;"  />                                               
+                                            </div>
+
+
+
+
+                                        </div>
+
+                                    </h:panelGroup>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink
+                 rendered="#{currentUser.hasPermission('receivables:create')}"
+                class="md-fab md-fab-primary" process="@form"
+                           action="#{recievablesController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+
+</ui:composition>

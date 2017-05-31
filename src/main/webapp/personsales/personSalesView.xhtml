@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' ?>  
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:oou="http://omnifaces.org/ui">
+
+    <ui:param name="active" value="reservationorder" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{personSalesController.orderId}" />
+            <f:viewAction action="#{personSalesController.loadOrder}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('reservationorder:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+
+    <ui:define name="title">
+        Sales Orders
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+
+            New Sales Order For Reservation Order No :   #{personSalesController.currentReservation.reservationId}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="pageHead">
+                    <div class="uk-grid" data-uk-grid-margin="true">
+                        <div class="uk-width-1-1">
+                            <div class="uk-form-row">
+                                <div class="uk-grid">
+                                    <div class="uk-width-medium-3-10">
+                                        <h:outputLabel for="agent" value="Agent" />
+                                        <h:inputText id="agent" class="md-input" readonly="true" 
+                                                     value="#{personSalesController.currentSalesOrder.salesPerson.fullName}" />
+                                    </div>
+                                    <div class="uk-width-medium-2-10">
+
+                                    </div>
+                                    <div class="uk-width-medium-2-10">
+                                        <h:outputLabel for="type" value="Type" />
+                                        <h:inputText id="type" class="md-input" readonly="true" 
+                                                     value="#{personSalesController.currentSalesOrder.salesOrderType}" />
+                                    </div>
+                                    <div class="uk-width-medium-2-10">
+                                        <h:outputLabel for="totalAmount" value="Amount" />
+                                        <h:inputText id="totalAmount" class="md-input label-fixed" readonly="true" 
+                                                     value="#{personSalesController.currentSalesOrder.totalAmount}" />
+                                    </div>
+                                </div>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Customer" class="uk-form-label" for="cust"/>
+                                        <p:autoComplete id="cust" value="#{personSalesController.currentSalesOrder.soldToCustomers}" 
+                                                        completeMethod="#{personSalesController.completeCustomerByName}"  
+                                                        emptyMessage="No Records.."  converter="#{clientConverter}"
+                                                        var="cust" itemLabel="#{cust.clientName}" itemValue="#{cust}"
+                                                        placeholder="Search Customer" inputStyleClass="md-input"
+                                                        forceSelection="true" required="true"  >
+                                            <p:ajax process="@this" update="ship" event="itemSelect"
+                                                    listener="#{personSalesController.resetSite()}"/>
+                                        </p:autoComplete>
+                                        <h:message for="cust" style="color:red" />
+                                    </div>
+
+                                    <div class="uk-width-medium-3-10">
+                                        <p:outputLabel value="Site" class="uk-form-label" for="ship"/>
+                                        <p:autoComplete id="ship" value="#{personSalesController.currentSalesOrder.invoiceToSite}" 
+                                                        completeMethod="#{personSalesController.completeSitesForCustomer}"  
+                                                        emptyMessage="No Records.." converter="#{clientSiteConverter}" 
+                                                        var="ship" itemLabel="#{ship.siteName}" itemValue="#{ship}"
+                                                        placeholder="Search Site" inputStyleClass="md-input"
+                                                        forceSelection="true" required="true"  >
+                                            <p:ajax process="@this" update="linesTable" event="itemSelect"
+                                                    listener="#{personSalesController.setItemsPrice()}"/>
+                                        </p:autoComplete>
+                                        <h:message for="ship" style="color:red" />
+                                    </div>
+
+
+
+                                    <div class="uk-width-medium-2-10 uk-margin-small-top">
+                                        <p:outputLabel for="orderDate" value="Order date" />
+                                        <h:inputText class="md-input" id="orderDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true"
+                                                     validator="#{personSalesController.validateDate}"
+                                                     value="#{personSalesController.currentSalesOrder.orderedDate}">
+                                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                                        </h:inputText>
+                                        <h:message for="orderDate" style="color:red;"  />
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+
+                        <h3 class="md-card-toolbar-heading-text">
+                            Lines
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+                            <p:dataTable id="linesTable" var="line" value="#{personSalesController.currentSalesOrder.lines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="No." >
+                                    #{line.lineNumber}
+                                </p:column>
+
+                                <p:column headerText="Product" styleClass="uk-text-center">
+                                    <h:outputText value="#{line.inventoryItem.description}"/>
+                                </p:column>
+                                <p:column headerText="UOM" styleClass="uk-text-center">
+                                    <h:outputText id="uom" value="#{line.inventoryItem.primaryUomId.uomCode}"/>
+                                </p:column>      
+
+                                <p:column headerText="Available Qty" styleClass="uk-text-center">
+                                    <h:outputText  value="#{line.qtyToPick}"/>
+                                </p:column>       
+                                <p:column headerText="Quantity" styleClass="uk-text-center">
+                                    <p:inputText id="quantity" value="#{line.orderedQuantity}" validator="#{personSalesController.validateQuantity}"
+                                                 readonly="#{line.unitListPrice==0}">
+
+                                        <p:ajax process="@this" update="linesTable totalAmount" listener="#{personSalesController.calcAmount(line)}"/>
+                                    </p:inputText>
+                                    <p:keyFilter mask="num" for="quantity"/>
+                                    <p:tooltip id="quantityTip" for="quantity" position="right">
+                                        <h:message for="quantity" />
+                                    </p:tooltip>
+                                </p:column>
+                                <p:column headerText="Unit Price" styleClass="uk-text-center">
+                                    <h:outputText  id="unitprice" value="#{line.unitListPrice}" />
+                                </p:column>                         
+                                <p:column headerText="Amount" styleClass="uk-text-center">
+                                    <h:outputText value="#{line.amount}" id="amount" />
+                                </p:column>  
+
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink  type="submit" update="@form" process="@form" class="md-fab md-fab-primary" action="#{personSalesController.save}">
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

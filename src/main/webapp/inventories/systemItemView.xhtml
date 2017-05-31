@@ -1,0 +1,168 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="SysItem" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('systemitems:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        System Items
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-10">
+                        <h:outputLabel value="Item Code" for="itemid" />
+                        <h:inputText id="itemid" class="md-input" value="#{systemItemController.code}"  />
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <h:outputLabel value="Item Name" for="itemn" />
+                        <h:inputText id="itemn" class="md-input" value="#{systemItemController.name}"  />
+                    </div>
+
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="itemtype" value="#{systemItemController.itemType}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Type" itemValue="#{null}" />
+                                <f:selectItems value="#{systemItemController.itemTypes}" var="typ" itemLabel="#{typ}" itemValue="#{typ}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{systemItemController.status}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Status" itemValue="#{null}" />
+                                <f:selectItem itemLabel="Active" itemValue="true" />
+                                <f:selectItem itemLabel="Inactive" itemValue="false" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-10 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@parent" 
+                                       update="table" action="#{systemItemController.filter()}"/>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="row" value="#{systemItemController.systemItems}" 
+                                     paginator="#{not empty systemItemController.systemItems}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Code" styleClass="uk-width-2-10 uk-text-left">
+                                #{row.inventoryItemCode}
+                            </p:column>
+
+                            <p:column headerText="Name" styleClass="uk-width-4-10 uk-text-left">
+                                #{row.description}
+                            </p:column>
+                            <p:column headerText="Type" styleClass="uk-width-2-10 uk-text-left">
+
+                                #{row.systemItemType}
+
+                            </p:column>
+                            <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{row.enabledFlag ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{row.enabledFlag ? 'Active' : 'Inactive'}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="systemItemDetails?id=#{row.inventoryItemId}" 
+                                        rendered="#{currentUser.hasPermission('systemitems:create')}">
+
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="uk-modal" id="dialog">
+
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">Create Item From Template</h5>
+                </div>
+                <h:panelGroup layout="block" id="dialogContent">
+                    <div class="uk-width-medium-1-1">
+                        <div class="uk-margin-small-top">
+                            <p:autoComplete id="template" value="#{systemItemController.itemTemplate}" 
+                                            completeMethod="#{systemItemController.completeTemplate}" 
+                                            emptyMessage="No Records.." converter="#{templateConverter}"
+                                            var="item" itemLabel="#{item.templateName}" itemValue="#{item}"
+                                            inputStyleClass="md-input" 
+                                            placeholder="select item template" 
+                                            forceSelection="true" >
+                            </p:autoComplete>
+                            <ui:remove><h:message for="template" style="color:red;"  /></ui:remove>
+                        </div>
+                    </div>
+                </h:panelGroup>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <h:link class="md-btn md-btn-flat" outcome="systemItemDetails">No</h:link>
+                    <p:commandLink update="dialogContent" process="dialogContent @this" oncomplete="onDialogSubmit(xhr,status,args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{systemItemController.redirect()}">Yes</p:commandLink>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-accent" 
+                           rendered="#{currentUser.hasPermission('systemitems:create')}" update="dialogContent" process="@this" oncomplete="modal.show();">
+                <i class="material-icons">&#xE145;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+</ui:composition>

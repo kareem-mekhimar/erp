@@ -1,0 +1,174 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="emp" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{employeeDetailsController.currentEmpId}" /> 
+            <f:viewAction action="#{employeeDetailsController.loadEmployee}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('emp:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Employee Details
+    </ui:define>
+
+    <ui:define name="main">
+
+        <div class="uk-grid" data-uk-grid-margin="true">
+            <div class="uk-width-large-1-1">
+                <div class="md-card">
+                    <div class="user_heading" data-uk-sticky="{ top: 48, media: 960 }">
+                        <div class="user_heading_avatar fileinput fileinput-new" data-provides="fileinput">
+                            <div class="fileinput-new thumbnail">
+                                <h:graphicImage library="imgs" name="blank.png" />
+                            </div>
+                            <div class="fileinput-preview fileinput-exists thumbnail"></div>
+                            <div class="user_avatar_controls">
+                                <span class="btn-file">
+                                    <span class="fileinput-new"><i class="material-icons">&#xE2C6;</i></span>
+                                    <span class="fileinput-exists"><i class="material-icons">&#xE86A;</i></span>
+                                    <input type="file" name="user_edit_avatar_control" id="user_edit_avatar_control" />
+                                </span>
+                                <a href="#" class="btn-file fileinput-exists" data-dismiss="fileinput"><i class="material-icons">&#xE5CD;</i></a>
+                            </div>
+                        </div>
+                        <div class="user_heading_content">
+                            <h2 class="heading_b">
+                                <span class="uk-text-truncate" id="user_edit_uname">
+                                    #{employeeDetailsController.currentEmpId == null ? 'New Employee':employeeDetailsController.currentEmployee.firstNameEn}
+                                </span>
+                                <span class="sub-heading" id="user_edit_position">
+                                    #{employeeDetailsController.currentEmpId == null ? '' :employeeDetailsController.currentEmployee.job.jobName}  
+                                </span>
+                            </h2>
+                        </div>
+                        <div class="md-fab-wrapper">
+                            <div class="md-fab md-fab-toolbar md-fab-small md-fab-accent">
+                                <i class="material-icons">&#xE8BE;</i>
+                                <div class="md-fab-toolbar-actions">
+                                    <p:commandLink ajax="false" action="#{employeeDetailsController.save}"><i class="material-icons md-color-white">save</i></p:commandLink>
+                                    <p:link outcome="view"><i class="material-icons md-color-white">cancel</i></p:link>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user_content">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Personal</a></li>
+                            <li><a href="#">Job</a></li>
+
+                        </ul>
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin">
+                            <li>
+                                <div class="uk-margin-top">
+
+                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="fnameEn" value="First Name En" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.firstNameEn}" id="fnameEn" class="md-input" />
+                                            <h:message for="fnameEn" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="snameEn" value="Seconed Name En" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.secondNameEn}" id="snameEn"  class="md-input"/>
+                                            <h:message for="snameEn" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="thnameEn" value="Third Name En" />
+                                            <p:inputText id="thnameEn" value="#{employeeDetailsController.currentEmployee.thirdNameEn}" class="md-input" />
+                                            <h:message for="thnameEn" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="frnameEn" value="Fourth Name En" />
+                                            <p:inputText class="md-input" value="#{employeeDetailsController.currentEmployee.lastNameEn}" id="frnameEn" />
+                                            <h:message for="frnameEn" style="color:red;" />
+                                        </div>
+                                    </div>
+                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="fnameAr" value="First Name Ar" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.firstNameAr}" id="fnameAr" class="md-input" />
+                                            <h:message for="fnameAr" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="snameAr" value="Seconed Name Ar" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.secondNameAr}" id="snameAr"  class="md-input"/>
+                                            <h:message for="snameAr" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="thnameAr" value="Third Name Ar" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.thirdNameAr}" id="thnameAr" class="md-input" />
+                                            <h:message for="thnameAr" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-4">
+                                            <p:outputLabel for="frnameAr" value="Fourth Name Ar" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.lastNameAr}" class="md-input" id="frnameAr" />
+                                            <h:message for="frnameAr" style="color:red;" />
+                                        </div>
+                                    </div>
+                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                        <div class="uk-width-medium-1-2">
+                                            <p:outputLabel for="phone" value="Phone" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.phoneNumber}" class="md-input" id="phone"/>
+                                            <h:message for="phone" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-1-2">
+                                            <p:outputLabel for="email" value="Email" />
+                                            <p:inputText value="#{employeeDetailsController.currentEmployee.email}" class="md-input" id="email" />
+                                            <h:message for="email" style="color:red;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-margin-top">
+                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                        <div class="uk-width-medium-2-6">
+                                            <h:selectOneMenu id="bs" pt:data-md-selectize="true" converter="omnifaces.SelectItemsIndexConverter"
+                                                             value="#{employeeDetailsController.currentEmployee.businessGroup}">
+                                                <f:selectItem noSelectionOption="true" itemLabel="Select Business Group" itemValue="#{null}" /> 
+                                                <f:selectItems var="org" value="#{employeeDetailsController.businessGroups}" 
+                                                               itemLabel="#{org.orgUnitName}" itemValue="#{org}" />
+                                            </h:selectOneMenu>
+                                            <h:message for="bs" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-2-6">
+                                            <h:selectOneMenu id="job" pt:data-md-selectize="true" converter="omnifaces.SelectItemsIndexConverter"
+                                                             value="#{employeeDetailsController.currentEmployee.job}" >
+                                                <f:selectItem noSelectionOption="true" itemLabel="Select Job" itemValue="#{null}" /> 
+                                                <f:selectItems var="job" value="#{employeeDetailsController.jobs}" itemLabel="#{job.jobName}" itemValue="#{job}" />
+                                            </h:selectOneMenu>
+                                            <h:message for="job" style="color:red;" />
+                                        </div>
+                                        <div class="uk-width-medium-2-6">
+                                            <h:selectOneMenu id="dept" pt:data-md-selectize="true" converter="omnifaces.SelectItemsIndexConverter"
+                                                             value="#{employeeDetailsController.currentEmployee.department}" >
+                                                <f:selectItem noSelectionOption="true" itemLabel="Select Job" itemValue="#{null}" /> 
+                                                <f:selectItems var="d" value="#{employeeDetailsController.departments}" 
+                                                               itemLabel="#{d.departmentName}" itemValue="#{d}" />
+                                            </h:selectOneMenu>
+                                            <h:message for="dept" style="color:red;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </ui:define>
+</ui:composition>

@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="assets" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{initAssetController.adId}" />
+            <f:viewAction action="#{initAssetController.loadAddition()}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Create Asset
+    </ui:define>
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom">Create Asset</h3>
+        <div class="md-card">
+            <div class="md-card-content">
+
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+
+                    <div class="uk-width-medium-2-6">
+
+                        <p:outputLabel value="Operating Unit" class="uk-form-label" for="operating"/>
+                        <p:autoComplete id="operating" value="#{initAssetController.currentAddition.operatingUnit}"
+                                        completeMethod="#{initAssetController.completeOperatingUnit}"  
+                                        emptyMessage="No Records.."  
+                                        converter="#{organizationUnitConverter}"
+                                        var="org" itemLabel="#{org.orgUnitName}" itemValue="#{org}"
+                                        placeholder="Search Operating Unit" inputStyleClass="md-input"
+                                        forceSelection="true" required="true"  >
+                            <p:ajax update="currency @this" event="itemSelect" />
+                        </p:autoComplete>
+                        <h:message for="operating" style="color:red" /> 
+
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="itemName" value="Item Name"/>
+                        <h:inputText class="md-input" id="itemName" required="true"
+                                     value="#{initAssetController.currentAddition.itemName}">
+                        </h:inputText>
+                        <h:message for="itemName" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="addDate" value="Add Date" />
+                        <h:inputText class="md-input" id="addDate" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" required="true"
+                                     value="#{initAssetController.currentAddition.receivingDate}">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+                        </h:inputText>
+                        <h:message for="addDate" style="color:red;"  />
+                    </div>
+
+                </div>   
+
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="unitQty" value="Item Units"/>
+                        <h:inputText class="md-input" id="unitQty" required="true"
+                                     value="#{initAssetController.currentAddition.receivedQuantity}">
+                            <f:validateLongRange minimum="1"/>
+                        </h:inputText>
+                        <p:keyFilter for="unitQty" mask="num" />
+                        <h:message for="unitQty" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="itemPrice" value="Unit Price"/>
+                        <h:inputText class="md-input" id="itemPrice" required="true"
+                                     value="#{initAssetController.currentAddition.unitPrice}">
+                            <f:validateDoubleRange minimum="1.0"/>
+                        </h:inputText>
+                        <p:keyFilter for="itemPrice" mask="num" />
+                        <h:message for="itemPrice" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:selectOneMenu id="currency" value="#{initAssetController.currentAddition.currency}"
+                                         pt:data-md-selectize="true" 
+                                         pt:data-placeholder="Payment Currency"
+                                         converter="#{fndCurrencyConverter}"
+                                         >
+                            <f:selectItem noSelectionOption="true" itemLabel="Currency" itemValue="#{null}" />
+                            <f:selectItems  value="#{initAssetController.currencys}"
+                                            var="c" itemLabel="#{c.currencyCode}" itemValue="#{c}"  />
+                        </h:selectOneMenu> 
+                    </div>  
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+        <h:messages id="mm"/>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  id="page_settings_submit"
+                           process="@form" update="@form" action="#{initAssetController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                if(altair_md) altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_md.inputs();
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

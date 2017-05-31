@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="people" />   
+    
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('emp:read')}" />
+        </f:metadata>
+    </ui:define>
+    
+    <ui:define name="title">
+        Employees
+    </ui:define>
+
+    <ui:define name="main">
+        <h3 class="heading_b uk-margin-bottom">Employees</h3>
+        <div class="md-card uk-margin-medium-bottom">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Code" for="personCode" />
+                        <h:inputText id="personCode" class="md-input" value="#{peopleController.personCode}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Name" for="fullName" />
+                        <h:inputText id="fullName" class="md-input" value="#{peopleController.fullName}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="grid"  action="#{peopleController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h:panelGroup layout="block"  id="grid" pt:data-uk-grid="{gutter:10}">
+
+            <!-- CARD -->
+            <ui:repeat var="person" value="#{peopleController.peopleList}">
+
+                <div class="uk-width-small-1-2 uk-width-medium-1-4 uk-margin-medium-top">
+                    <div class="md-card md-card-hover">
+                        <div class="md-card-head">
+                            <div class="md-card-head-menu">
+                                <h:link outcome="peopleDetails?id=#{person.personId}"
+                                        rendered="#{currentUser.hasPermission('emp:create')}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                            </div>
+                            <div class="uk-text-center">
+                                <ui:fragment rendered="#{empty person.imageFileName}">
+                                    <h:graphicImage class="md-card-head-avatar" library="imgs" name="avatars/user.png" />
+                                </ui:fragment>
+                                <ui:fragment rendered="#{not empty person.imageFileName}">
+                                    <h:graphicImage class="md-card-head-avatar" value="/images/#{person.imageFileName}" />
+                                </ui:fragment>
+                            </div>
+                            <h3 class="md-card-head-text uk-text-center">
+                                #{person.firstName} #{person.lastName}
+                                <span class="uk-text-truncate"> #{person.position.positionName} </span>
+                            </h3>
+                        </div>
+                        <div class="md-card-content">
+                            <ul class="md-list">
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Code</span>
+                                        <span class="uk-text-small uk-text-muted">#{person.personCode}</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Email</span>
+                                        <span class="uk-text-small uk-text-muted uk-text-truncate">#{person.primaryEmail}</span>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="md-list-content">
+                                        <span class="md-list-heading">Phone</span>
+                                        <span class="uk-text-small uk-text-muted">#{person.primaryPhone}</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </ui:repeat>
+
+        </h:panelGroup>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="peopleDetails"
+                    rendered="#{currentUser.hasPermission('emp:create')}"> 
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+        <p:outputPanel autoUpdate="true">
+            <h:outputScript>
+                UIkit.grid("#grid", {gutter:10});
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+</ui:composition>

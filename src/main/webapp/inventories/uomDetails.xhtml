@@ -1,0 +1,181 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="uomclass" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{uomDetailsController.currentUomClassId}" />
+            <f:viewAction action="#{uomDetailsController.loadUomClass()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('uom:create')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        UOM Class Details
+    </ui:define>
+
+    <ui:define name="main">
+        <h4 class="heading_a uk-margin-bottom">
+            #{uomDetailsController.currentClass.classId == null ? 'New UOM Class' : uomDetailsController.currentClass.className }
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-10">
+                        <p:outputLabel for="code" value="Code" />
+                        <p:inputText class="md-input" id="code" value="#{uomDetailsController.currentClass.classCode}"  required="true"
+                                     >
+                        </p:inputText>
+                        <h:message id="nameMsgForCode" for="code" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-6-10">
+                        <p:outputLabel for="name" value="Name" />
+                        <p:inputText class="md-input" id="name" value="#{uomDetailsController.currentClass.className}"  required="true"
+                                     validator="#{uomDetailsController.validateNameExist}">
+                        </p:inputText>
+                        <h:message id="nameMsg" for="name" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-2-10">
+                        <div class="uk-margin-small-top">
+                            <h:selectBooleanCheckbox  id="enabledFlagId" class="icheckbox_md"
+                                                      value="#{uomDetailsController.currentClass.classStatus}"/>
+                            <h:outputLabel for="enabledFlagId" value=" Enabled"/>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-3-10">
+                        <p:outputLabel for="sad" value="Start Active Date" />
+                        <h:inputText class="md-input" id="sad" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{uomDetailsController.currentClass.activeOn}" required="true">
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                        </h:inputText>
+                        <h:message id="dateMsg1" for="sad" style="color:red;"  />
+                    </div>
+                    <div class="uk-width-medium-3-10">
+                        <p:outputLabel for="ead" value="End Active Date" />
+                        <h:inputText class="md-input" id="ead" pt:data-uk-datepicker="{format:'DD-MM-YYYY'}" 
+                                     value="#{uomDetailsController.currentClass.inactiveOn}" 
+                                     validator="#{uomDetailsController.validateDate}" required="true"  >
+
+                            <f:convertDateTime pattern="dd-MM-yyyy"/>
+
+                            <p:ajax process=" sad @this" update="dateMsg2" />
+                        </h:inputText>
+                        <h:message id="dateMsg2" for="ead" style="color:red;"  />
+
+                    </div>
+                    <div class="uk-width-medium-4-10">
+                        <div class="uk-margin-small-top">
+                            <h:selectOneMenu value="#{uomDetailsController.currentClass.classType}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Class Type" itemValue="#{null}" />
+                                <f:selectItems var="s" value="#{uomDetailsController.classType}" 
+                                               itemLabel="#{s}" itemValue="#{s}" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-6-6">
+                        <p:outputLabel for="desc" value="Description" />
+                        <p:inputText class="md-input" id="desc"  value="#{uomDetailsController.currentClass.classDescription}" >
+                        </p:inputText>
+                        <h:message for="desc" style="color:red;"  />
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="linesTable" process="linesTable @this" action="#{uomDetailsController.addLine()}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Units
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+
+                            <p:dataTable id="linesTable" var="line" value="#{uomDetailsController.currentClass.uomLines}" 
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                <p:column headerText="Code" styleClass="uk-text-center">
+                                    <p:inputText id="lcode" value="#{line.uomCode}" required="true" 
+                                                 validator="#{uomDetailsController.validateUomCodeExist}">
+                                    </p:inputText>
+                                    <p:tooltip id="codetip" for="lcode" position="right">
+                                        <h:message for="lcode" />
+                                    </p:tooltip>
+                                </p:column>
+
+                                <p:column headerText="Name" styleClass="uk-text-center">
+                                    <p:inputText id="lname" value="#{line.uomName}" required="true" 
+                                                 validator="#{uomDetailsController.validateUomNameExist}">
+                                    </p:inputText>
+                                    <p:tooltip id="nametip" for="lname" position="right">
+                                        <h:message for="lname" />
+                                    </p:tooltip>
+                                </p:column>
+
+                                <p:column headerText="Description" styleClass="uk-text-center">
+                                    <p:inputText id="ldesc" value="#{line.uomDescription}">
+                                    </p:inputText>
+                                </p:column>
+
+                                <p:column headerText="Value by base" styleClass="uk-text-center">
+                                    <p:inputText id="lval" value="#{line.valuebybase}" readonly="#{line.baseUomFlagId==true}" required="true"> 
+                                        <f:validateDoubleRange minimum="0.000000001" />
+                                    </p:inputText>
+                                    <p:tooltip id="valtip" for="lval" position="left">
+                                        <h:message for="lval" />
+                                    </p:tooltip>
+                                </p:column>        
+                                <p:column headerText="Base" styleClass="uk-text-center" id="baseCol">
+                                    <p:selectBooleanCheckbox  id="bas" value="#{line.baseUomFlagId}">
+                                        <p:ajax listener="#{uomDetailsController.selectChange(line)}" process="@this linesTable" update="linesTable" />
+                                    </p:selectBooleanCheckbox>    
+
+                                </p:column>  
+                                <p:column headerText="Inactive" styleClass="uk-text-center">                                
+                                    <p:selectBooleanCheckbox id="lstat" value="#{line.disableFlagId}" disabled="#{line.baseUomFlagId==true}" />
+                                </p:column>                                 
+
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" id="page_settings_submit" update="@form" process="@form" action="#{uomDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

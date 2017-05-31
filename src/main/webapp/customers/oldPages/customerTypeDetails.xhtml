@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="customerTypes" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{customerTypeDetailsController.currentTypeId}" />
+            <f:viewAction action="#{customerTypeDetailsController.loadType}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+       Customer Type Details
+    </ui:define>
+    <ui:define name="main">
+          <h4 class="heading_a uk-margin-bottom">
+            #{customerTypeDetailsController.hzPartiesTypes.typeId == null ? 'New Customer Type' : customerTypeDetailsController.hzPartiesTypes.typeEnName}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="typeEnName" value="Type En Name" />
+                        <p:inputText class="md-input" id="typeEnName" validator="#{customerTypeDetailsController.validateNameExist}" value="#{customerTypeDetailsController.hzPartiesTypes.typeEnName}">
+                          <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="typeEnName" style="color:red;"  />
+                        
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="typeArName" value="Type Ar Name" />
+                        <p:inputText class="md-input" id="typeArName" validator="#{customerTypeDetailsController.validateNameExist}" value="#{customerTypeDetailsController.hzPartiesTypes.typeArName}">
+                          <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="typeArName" style="color:red;"  />
+                        
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <div class="uk-margin-small-top">
+                           <p:outputLabel for="code" value="Code" />
+                           <p:inputText class="md-input" id="code" value="#{customerTypeDetailsController.hzPartiesTypes.typeCode}">
+                              <f:validateRequired/>
+                            </p:inputText>
+                            <h:message for="code" style="color:red;"  />
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div class="uk-grid" data-uk-grid-margin="true" >
+                    <div class="uk-width-medium-1-2">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{customerTypeDetailsController.hzPartiesTypes.typeStatus}" converter="javax.faces.Boolean"
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                             pt:data-placeholder="Status">
+                                <f:selectItem  itemValue="#{null}" />
+                                <f:selectItem itemLabel="Active" itemValue="true" />
+                                <f:selectItem itemLabel="Inactive" itemValue="false" />
+                            </h:selectOneMenu>
+                            
+                        </div>
+                    </div>
+                </div>
+                -->
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="enabledFlag" value="#{customerTypeDetailsController.hzPartiesTypes.enabledFlagId}" converter="javax.faces.Boolean"
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                             pt:data-placeholder="Status">
+                                <f:selectItem  itemValue="#{null}" />
+                                <f:selectItem itemLabel="Enabled" itemValue="true" />
+                                <f:selectItem itemLabel="Disabled" itemValue="false" />
+                            </h:selectOneMenu>
+                            
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{customerTypeDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+</ui:composition>

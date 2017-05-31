@@ -1,0 +1,304 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="ledger" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{calendarDetailsController.currentCalendarId}" />
+            <f:viewAction action="#{calendarDetailsController.loadCalendar}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('ledgers:create')}" />
+
+        </f:metadata>   
+    </ui:define>
+
+    <ui:define name="title">
+        Calendar
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{calendarDetailsController.currentCalendar.periodSetName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        #{calendarDetailsController.currentCalendar.periodType.periodTypeName}
+                    </span>
+                </div>
+                <h:panelGroup layout="block" id="menuWrapper" class="uk-width-medium-1-2">
+                    <h:selectOneMenu id="yearMenu" binding="#{calendarDetailsController.yearMenu}" 
+                                     class="uk-margin-top" value="#{calendarDetailsController.currentYear}"
+                                     valueChangeListener="#{calendarDetailsController.onYearValueChange}"
+                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                        <f:selectItem itemLabel="Choose Year" noSelectionOption="true" itemValue="#{null}" />
+                        <f:selectItems  value="#{calendarDetailsController.allYears}"/>
+                        <p:ajax update="menuWrapper addNormalButton addAdjustButton" />
+                    </h:selectOneMenu>
+
+                </h:panelGroup>
+            </div>
+        </div>
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandButton update="normalTable @this" id="addNormalButton" class="md-icon"
+                                             disabled="#{calendarDetailsController.maxNormalNo == calendarDetailsController.currentCalendar.periodType.accountingPeriods}"
+                                             process="normalTable @this" action="#{calendarDetailsController.addNormalPeriod}">
+                                <f:attribute name="materialIcon" value="add" />
+                                <f:attribute name="iconClasses" value="md-color-light-blue-500" />
+                            </p:commandButton>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Periods
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+                            <p:dataTable id="normalTable" var="period" value="#{calendarDetailsController.normalPeriods}"
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped"  >
+                                <p:column headerText="No." styleClass="uk-width-1-10 uk-text-left">
+                                    #{period.periodNum}
+                                </p:column> 
+                                <p:column headerText="Period Name" styleClass="uk-width-3-10 uk-text-center">
+                                    <p:inputText id="periodName" value="#{period.periodName}" required="true" >
+                                        <p:ajax update="m3 @this" />
+                                    </p:inputText>
+                                    <p:tooltip id="m3" for="periodName" position="right">
+                                        <h:message for="periodName" />
+                                    </p:tooltip>
+                                </p:column> 
+                                <p:column headerText="From" styleClass="uk-width-2-10 uk-text-center">
+                                    <h:outputText id="startDate" value="#{period.startDate}" />
+                                </p:column> 
+                                <p:column headerText="To" styleClass="uk-width-2-10 uk-text-center">
+                                    <p:inputText value="#{period.endDate}" id="toDate" 
+                                                 validator="#{calendarDetailsController.validateNormalToDate}"  
+                                                 pt:data-uk-datepicker="{format:'DD-MM-YYYY' ,pos:'auto'}" 
+                                                 required="true">
+                                        <p:ajax update="@this m1 normalTable" 
+                                                listener="#{calendarDetailsController.onToDateChange(period)}" />
+                                    </p:inputText>
+                                    <p:tooltip id="m1" for="toDate" position="left">
+                                        <h:message for="toDate" />
+                                    </p:tooltip>
+                                </p:column> 
+                                <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                    <span class="uk-badge  #{period.periodStatus == 'NOT_OPENED' ? 'md-bg-pink-400' : period.periodStatus == 'OPENED' ? 'uk-text-primary' : period.periodStatus == 'POSTED' ? 'uk-text-warning' : 'uk-text-success'}">
+                                        <span style="color:white;">#{period.periodStatus}</span>
+                                    </span>                               
+                                </p:column>
+                                <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                    <ui:fragment rendered="#{period.periodStatus == 'NOT_OPENED'}">
+                                        <p:commandLink title="Open" action="#{calendarDetailsController.onOpenPeriod(period)}" 
+                                                       process="@this">
+                                            <i class="material-icons">check_circle</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{period.periodStatus == 'OPENED'}">
+                                        <p:commandLink title="Post">
+                                            <i class="material-icons">trending_up</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{period.periodStatus == 'POSTED'}">
+                                        <p:commandLink title="Close">
+                                            <i class="material-icons">lock</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                </p:column>                          
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-grid">
+            <div class="uk-width-1-1">
+                <div class="md-card">
+                    <div class="md-card-toolbar">
+                        <div class="md-card-toolbar-actions">
+                            <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                            <p:commandLink update="adjustTable @this" id="addAdjustButton"
+                                           disabled="#{calendarDetailsController.maxAdjustNo == calendarDetailsController.currentCalendar.periodType.noOfAdjusts}"
+                                           process="adjustTable @this" action="#{calendarDetailsController.addAdjustPeriod}">
+                                <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                            </p:commandLink>                         
+                        </div>
+                        <h3 class="md-card-toolbar-heading-text">
+                            Adjust Periods
+                        </h3>
+                    </div>
+                    <div class="md-card-content"> 
+                        <div class="uk-overflow-container">
+
+                            <p:dataTable id="adjustTable" var="period" value="#{calendarDetailsController.adjustPeriods}"
+                                         tableStyleClass="uk-table uk-table-condensed uk-table-striped"  >
+                                <p:column headerText="No." styleClass="uk-width-1-10 uk-text-left">
+                                    #{period.periodNum}
+                                </p:column> 
+                                <p:column headerText="Period Name" styleClass="uk-width-3-10 uk-text-center">
+                                    <p:inputText id="periodName" value="#{period.periodName}" required="true" >
+                                        <p:ajax update="m3 @this" />
+                                    </p:inputText>
+                                    <p:tooltip id="m3" for="periodName" position="right">
+                                        <h:message for="periodName" />
+                                    </p:tooltip>
+                                </p:column>                                 
+                                <p:column headerText="From" styleClass="uk-width-2-10 uk-text-center">
+                                    <p:inputText value="#{period.startDate}" id="fromDate"
+                                                 validator="#{calendarDetailsController.validateAdjustFromDate}"
+                                                 pt:data-uk-datepicker="{format:'DD-MM-YYYY' ,pos:'auto'}" required="true">
+                                        <p:ajax update="@this m1" listener="#{calendarDetailsController.setNeedToSave(true)}" />
+                                    </p:inputText>
+                                    <p:tooltip id="m1" for="fromDate" position="right">
+                                        <h:message for="fromDate" />
+                                    </p:tooltip>
+                                </p:column> 
+                                <p:column headerText="To" styleClass="uk-width-2-10 uk-text-center">
+                                    <p:inputText value="#{period.endDate}" id="toDate" 
+                                                 validator="#{calendarDetailsController.validateAdjustToDate}"
+                                                 pt:data-uk-datepicker="{format:'DD-MM-YYYY' ,pos:'auto'}" 
+                                                 required="true">
+                                        <p:ajax update="@this m2" listener="#{calendarDetailsController.setNeedToSave(true)}" />
+                                    </p:inputText>
+                                    <p:tooltip id="m2" for="toDate" position="left">
+                                        <h:message for="toDate" />
+                                    </p:tooltip>
+                                </p:column> 
+                                <p:column headerText="Status" styleClass="uk-width-1-10 uk-text-center">
+                                    <span class="uk-badge  #{period.periodStatus == 'NOT_OPENED' ? 'md-bg-pink-400' : period.periodStatus == 'OPENED' ? 'uk-text-primary' : period.periodStatus == 'POSTED' ? 'uk-text-warning' : 'uk-text-success'}">
+                                        <span style="color:white;">#{period.periodStatus}</span>
+                                    </span>                               
+                                </p:column>
+                                <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                    <ui:fragment rendered="#{period.periodStatus == 'NOT_OPENED'}">
+                                        <p:commandLink title="Open" action="#{calendarDetailsController.onOpenPeriod(period)}" 
+                                                       process="@this">
+                                            <i class="material-icons">check_circle</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{period.periodStatus == 'OPENED'}">
+                                        <p:commandLink title="Post">
+                                            <i class="material-icons">trending_up</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{period.periodStatus == 'POSTED'}">
+                                        <p:commandLink title="Close">
+                                            <i class="material-icons">lock</i>
+                                        </p:commandLink>
+                                    </ui:fragment>
+                                </p:column>  
+                            </p:dataTable>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="uk-modal" id="saveDialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h3 class="uk-modal-title">Confirm</h3>
+                </div>
+                <p>Save...? </p>
+                <div class="uk-modal-footer uk-text-right">
+                    <p:commandLink update="menuWrapper" class="md-btn md-btn-flat uk-modal-close" value="Close" 
+                                   action="#{calendarDetailsController.test}" />
+                    <p:commandLink class="md-btn md-btn-flat md-btn-flat-primary" update="menuWrapper normalTable adjustTable" process="@this normalTable adjustTable"
+                                   oncomplete="saveModal.hide()"
+                                   action="#{calendarDetailsController.onSaveDialogOk}" value="Save" />
+                </div>
+            </div>
+        </div>
+
+
+        <div class="uk-modal" id="batchesDialog">
+            <div class="uk-modal-dialog">
+                <div class="uk-modal-header">
+                    <h5 class="uk-modal-title">
+                        Choose From Recurring Batches
+                    </h5>
+                </div>
+                <div class="uk-grid">
+                    <h:panelGroup layout="block" id="batchesDialogContent" styleClass="uk-width-1-1">
+                        <div class="uk-grid">
+                            <div class="uk-width-2-3">
+                                <p:inputText styleClass="md-input" 
+                                             placeholder="Search"
+                                             value="#{calendarDetailsController.searchName}"
+                                             />
+                            </div>
+                            <div class="uk-width-1-3">
+                                <p:commandLink value="Filter" id="filter" class="md-btn md-btn-small md-btn-primary uk-margin-small-top" process="@this"
+                                               update="batchTable" action="#{calendarDetailsController.filterBatches}"/>
+                            </div>
+                        </div>
+                        <div class="uk-grid">
+                            <div class="uk-width-1-1">
+
+                                <p:treeTable id="batchTable" rendered="#{not empty calendarDetailsController.currentRecurringBatches}" 
+                                             value="#{calendarDetailsController.currentRecurringBatches}" 
+                                             selection="#{calendarDetailsController.selectedBatchOrJournals}" 
+                                             var="doc" selectionMode="checkbox">
+                                    <p:column headerText="Name">
+                                        #{doc['class'].simpleName == 'GlJeBatch' ? doc.batchName : doc.jeHeaderName}
+                                    </p:column>
+                                </p:treeTable>
+                            </div>
+                        </div>
+                    </h:panelGroup>
+                </div>
+                <div class="uk-modal-footer uk-text-right">
+                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                    <p:commandLink update="batchesDialogContent" process="@this batchesDialogContent" 
+                                   oncomplete="onDialogSubmit(xhr, status, args)"
+                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                   action="#{calendarDetailsController.onBatchesDialogOk}">OK</p:commandLink>
+                </div>                
+            </div>
+        </div>    
+
+
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary"  update="normalTable adjustTable" process="normalTable adjustTable @this"
+                           action="#{calendarDetailsController.save}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                altair_forms.select_elements();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+
+    <ui:define name="pageJs">
+        <script>
+            var saveModal = UIkit.modal('#saveDialog', {keyboard: false, bgclose: false, center: true});
+            var batchesModal = UIkit.modal('#batchesDialog', {keyboard: false, bgclose: false, center: true});
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    batchesModal.hide();
+                }
+            }
+        </script>
+    </ui:define>
+</ui:composition>

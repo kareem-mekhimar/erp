@@ -1,0 +1,247 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="customersSetup" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="id" value="#{arCustomerDetailsController.currentCustomerId}" />
+            <f:viewAction action="#{arCustomerDetailsController.loadCustomer()}" />
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+       Customer Details
+    </ui:define>
+    <ui:define name="main">
+          <h4 class="heading_a uk-margin-bottom">
+            #{arCustomerDetailsController.currentCustomer.partyId == null ? 'New Customer Type' : arCustomerDetailsController.currentCustomer.partyName}
+        </h4>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <div class="uk-margin-small-top">
+                            <h:selectOneMenu value="#{arCustomerDetailsController.currentCustomer.partyTypeId}" id="customerType" pt:data-md-selectize="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Customer Type" itemDisabled="true" itemValue="#{null}" />
+                                <f:selectItems var="ct" itemLabel="#{ct.val}" itemValue="#{ct}" 
+                                               value="#{arCustomerController.customerTypes}" />
+                                <f:validateRequired/>
+                            </h:selectOneMenu>
+                            <h:message for="customerType" style="color:red;"  /> 
+                        </div>
+                    </div>
+                    <div class="uk-width-medium-1-2">
+                        <div class="uk-margin-small-top">
+                            <h:outputLabel for="activeFlag" value="Active"/>
+                            <h:selectBooleanCheckbox id="activeFlag"  
+                                                     value="#{arCustomerDetailsController.currentCustomer.status}" />
+                        </div>
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="customerName" value="Customer Name" />
+                        <p:inputText class="md-input" id="customerName" validator="#{arCustomerDetailsController.validateNameExist}" 
+                                     value="#{arCustomerDetailsController.currentCustomer.partyName}">
+                          <f:validateRequired/>
+                        </p:inputText>
+                        <h:message for="customerName" style="color:red;"  />                        
+                    </div>
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="aliasName" value="Alias" />
+                        <p:inputText class="md-input" id="aliasName" value="#{arCustomerDetailsController.currentCustomer.aliasName}" />                      
+                    </div>
+                </div>
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="url" value="URL" />
+                        <p:inputText class="md-input" id="url" value="#{arCustomerDetailsController.currentCustomer.url}"/>                     
+                    </div>
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="email" value="E-Mail Address" />
+                        <p:inputText class="md-input" id="email" value="#{arCustomerDetailsController.currentCustomer.emailAddress}" />                      
+                    </div>
+                    <div class="uk-width-medium-1-2">
+                        <p:outputLabel for="customerNo" value="Customer No." />
+                        <p:inputText class="md-input" id="customerNo" value="#{arCustomerDetailsController.currentCustomer.partyNumber}" >                      
+                            <f:validateRequired/>
+                            <h:message for="customerNo" style="color:red;"  /> 
+                        </p:inputText>    
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div class="md-card">
+            <div class="md-card-content">
+                
+                
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            <li class="uk-active"><a href="#">Customer Sites</a></li>
+                            <li><a href="#">Tab 2</a></li>
+                            <li><a href="#">Tab 3</a></li>
+                        </ul> 
+                      
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+                            <li>
+                                    <div class="uk-grid">
+                                        <div class="uk-width-1-1">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>
+                                                        <p:commandLink update="dialogContent" oncomplete="modal.show();" process="@this" >
+                                                            <f:setPropertyActionListener target="#{arCustomerDetailsController.currentCustomerSite}" value="#{null}" />
+                                                            <i class="md-icon material-icons md-color-light-blue-500">add</i>  
+                                                        </p:commandLink>                  
+                                                    </div>
+                                                    <h3 class="md-card-toolbar-heading-text">
+                                                        Customer Sites
+                                                    </h3>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+
+
+                                                        <p:dataTable id="linesTable" var="line" value="#{arCustomerDetailsController.currentCustomer.hzPartySitesList}" 
+                                                                     tableStyleClass="uk-table uk-table-condensed uk-table-striped">
+                                                            <p:column headerText="Site ID" styleClass="uk-text-left">
+                                                                <h:outputText id="siteId" value="#{line.partySiteId}" >
+                                                                </h:outputText>
+                                                            </p:column>
+                                                            <p:column headerText="Site Name" styleClass="uk-text-left">
+                                                                <h:outputText id="siteName" value="#{line.partySiteName}" >
+                                                                </h:outputText>
+                                                            </p:column>
+                                                            <p:column headerText="#" styleClass="uk-text-center">
+                                                                <p:commandLink  update="dialogContent" process="@this" oncomplete="modal.show();"  >
+                                                                    <f:setPropertyActionListener target="#{arCustomerDetailsController.currentCustomerSite}" 
+                                                                                                 value="#{line}" />
+                                                                    <i class="material-icons md-24">mode_edit</i>
+                                                                </p:commandLink>
+                                                            </p:column>
+                                                        </p:dataTable>
+
+                                                        <div class="uk-modal" id="dialog">
+
+                                                            <div class="uk-modal-dialog">
+                                                                <div class="uk-modal-header">
+                                                                    <h5 class="uk-modal-title">Customer Site</h5>
+                                                                </div>
+                                                                <h:panelGroup layout="block" id="dialogContent">
+                                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                                        <div class="uk-width-medium-4-6">
+                                                                            <p:outputLabel for="pSiteName" value="Site Name" />
+                                                                            <p:inputText class="md-input" id="pSiteName" value="#{arCustomerDetailsController.currentCustomerSite.partySiteName}" >
+                                                                                <f:validateRequired/>
+                                                                            </p:inputText>
+                                                                            <h:message for="pSiteName" style="color:red;"  />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="uk-grid" data-uk-grid-margin="true">
+
+                                                                    </div>
+                                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                                        
+                                                                    </div>
+                                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                                         
+                                                                               
+                                                                               
+                                                                               
+                                                                    </div>
+                                                                    <div class="uk-grid" data-uk-grid-margin="true">
+                                                                        
+                                                                    </div>
+                                                                </h:panelGroup>
+                                                                <div class="uk-modal-footer uk-text-right">
+                                                                    <button type="button" class="md-btn md-btn-flat uk-modal-close">Cancel</button>
+                                                                    <p:commandLink update="dialogContent linesTable" process="@this dialogContent" oncomplete="onDialogSubmit(xhr,status,args)"
+                                                                                   class="md-btn md-btn-flat md-btn-flat-primary"
+                                                                                   action="#{arCustomerDetailsController.addCustomerSite()}">OK</p:commandLink>
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                                                          
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="uk-grid">
+                                    
+                                    <div class="uk-width-1-1">
+                                        <div class="md-card">
+                                            <div class="md-card-toolbar">
+                                                
+                                            </div>
+                                            <div class="md-card-content"> 
+                                                <div class="uk-overflow-container">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md-fab-wrapper">
+            <p:commandLink class="md-fab md-fab-primary" ajax="false"  id="page_settings_submit" update="@form" process="@form" action="#{arCustomerDetailsController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+    </ui:define>
+    
+    <ui:define name="pageJs">
+        <script>
+
+            var modal = UIkit.modal('#dialog', {keyboard: false, bgclose: false});
+
+            function onDialogSubmit(xhr, status, args)
+            {
+                if (!args.validationFailed)
+                {
+                    modal.hide();
+                }
+
+            }
+        </script>
+    </ui:define>
+    
+</ui:composition>

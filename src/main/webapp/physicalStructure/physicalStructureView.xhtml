@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="physical" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('physical_location:read')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Physical Structure
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Structure Name" for="coan" />
+                        <h:inputText id="coan" class="md-input" value="#{physicalStructureController.structureName}"  />
+                    </div>
+
+                    <div class="uk-width-medium-2-6">
+                        <div class="uk-margin-small-top">
+
+                            <h:selectOneMenu id="stat" value="#{physicalStructureController.operatingUnit}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="OperatingUnit" />
+                                <f:selectItem itemLabel="Enabled" itemValue="1" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{physicalStructureController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="line" value="#{physicalStructureController.structureList}" 
+                                     paginator="#{not empty physicalStructureController.structureList}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Structure Name" styleClass="uk-width-3-10 uk-text-left">
+                                #{line.physicalStrName}
+                            </p:column>
+                            <p:column headerText="Business Group" styleClass="uk-width-2-10 uk-text-left">
+                                #{line.businessGroupId.orgUnitName}
+                            </p:column>
+                            <p:column headerText="Legal Entity" styleClass="uk-width-2-10 uk-text-left">
+                                #{line.legalEntityId.orgUnitName}
+                            </p:column>
+                            <p:column headerText="Operating Unit" styleClass="uk-width-2-10 uk-text-left">
+                                #{line.operatingUnitId.orgUnitName}
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="physicalStructureDetails?id=#{line.id}" 
+                                        rendered="#{currentUser.hasPermission('physical_location:create')}">
+                                    <i class="material-icons md-24">mode_edit</i>
+                                </h:link>
+                                <h:link outcome="physicalLocationView?id=#{line.operatingUnitId.orgUnitId}" 
+                                        rendered="#{currentUser.hasPermission('physical_location_details:view')}">
+                                    <i class="material-icons md-24">card_travel</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="physicalStructureDetails" 
+                    rendered="#{currentUser.hasPermission('physical_location:create')}">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

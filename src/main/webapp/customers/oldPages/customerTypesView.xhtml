@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="customerTypes" />
+    
+    <ui:define name="title">
+        Item Categories
+    </ui:define>
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="">
+                    <div class="uk-width-medium-1-6">
+                        <h:outputLabel value="Type ID" for="catid" />
+                        <h:inputText id="catid" class="md-input" value="#{hzPartiesTypesController.typeid}"  />
+                    </div>
+                    <div class="uk-width-medium-2-6">
+                        <h:outputLabel value="Type En Name" for="catn" />
+                        <h:inputText id="catn" class="md-input" value="#{hzPartiesTypesController.typename}"  />
+                    </div>
+
+                    <div class="uk-width-medium-1-6">
+                        <div class="uk-margin-small-top">
+                            <h:selectOneMenu id="stat" value="#{hzPartiesTypesController.enabledflag}" 
+                                             pt:data-md-selectize="true" pt:data-md-selectize-bottom="true">
+                                <f:selectItem noSelectionOption="true" itemLabel="Enabled" itemValue="#{null}" />
+                                <f:selectItem itemLabel="Enabled" itemValue="1" />
+                                <f:selectItem itemLabel="Disabled" itemValue="0" />
+                            </h:selectOneMenu>
+                        </div>
+                    </div>
+
+                    <div class="uk-width-medium-1-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table" action="#{hzPartiesTypesController.filter()}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+
+                        <p:dataTable id="table" var="typesList" value="#{hzPartiesTypesController.hzPartiesTypeslist}" 
+                                     paginator="#{not empty hzPartiesTypesController.hzPartiesTypeslist}" rows="20" paginatorPosition="bottom"
+                                     tableStyleClass="uk-table uk-table-hover" paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" >
+
+                            <p:column headerText="Type ID" styleClass="uk-width-1-10 uk-text-left">
+                              #{typesList.typeId}
+                            </p:column>
+                            <p:column headerText="Type En Name" styleClass="uk-width-2-10 uk-text-left">
+                                #{typesList.typeEnName}
+                            </p:column>
+                            <p:column headerText="Type Ar Name" styleClass="uk-width-4-10 uk-text-left">
+                                #{typesList.typeCode}
+                            </p:column>
+                            <p:column headerText="Enabled" styleClass="uk-width-1-10 uk-text-center">
+                                <span class="uk-badge  #{typesList.enabledFlagId ? 'uk-badge-success' : 'uk-badge-danger'}">
+                                    #{typesList.enabledFlagId ? 'Enabled' : 'Disabled'}
+                                </span>
+                            </p:column>
+                            <p:column headerText="#" styleClass="uk-width-1-10 uk-text-center">
+                                <h:link outcome="customerTypeDetails?id=#{typesList.typeId}">
+                                    
+                                    <i class="material-icons md-24">&#xE8F4;</i>
+                                </h:link>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <h:link class="md-fab md-fab-accent" outcome="customerTypeDetails">
+                <i class="material-icons">&#xE145;</i>
+            </h:link>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

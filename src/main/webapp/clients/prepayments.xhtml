@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="prepayment" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('clients:create')}" />
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Pre Payments View
+    </ui:define>
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <h:panelGroup layout="block" id="header"  class="uk-grid" pt:data-uk-grid-margin="">
+                    <div class="uk-width-medium-2-5">
+
+                        <p:outputLabel class="uk-form-label" for="org" value="Operating unit" /> 
+                        <p:autoComplete completeMethod="#{prePaymentController.completeOperatingUnit}" 
+                                        forceSelection="true" id="org"
+                                        converter="#{organizationUnitConverter}"
+                                        emptyMessage="No Records Found..!"
+                                        value="#{prePaymentController.currentOrg}"
+                                        inputStyleClass="md-input" placeholder="Search Operating Unit" var="s" 
+                                        itemLabel="#{s.orgUnitName}" itemValue="#{s}">
+
+                        </p:autoComplete>
+
+                    </div>
+                    <div class="uk-width-medium-2-5">
+                        <p:outputLabel class="uk-form-label" for="client" value="Client" /> 
+                        <p:autoComplete id="client" value="#{prePaymentController.currentClient}" 
+                                        completeMethod="#{prePaymentController.completeClient}"  
+                                        emptyMessage="No Records.."  converter="#{clientConverter}"
+                                        var="cl" itemLabel="#{cl.clientName}" itemValue="#{cl}"
+                                        placeholder="Search Supplier" inputStyleClass="md-input">
+
+                        </p:autoComplete>
+                    </div>
+
+                    <div class="uk-width-medium-1-5 uk-text-center">
+                        <p:commandLink value="Search" class="md-btn md-btn-primary uk-margin-small-top" 
+                                       process="header" 
+                                       update="table" action="#{prePaymentController.filter}"/>
+                    </div>
+                </h:panelGroup>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1 ">
+
+                        <p:dataTable id="table" var="pre" value="#{prePaymentController.prePaymentDTOs}" 
+                                     paginator="true"
+                                     paginatorAlwaysVisible="false"
+                                     paginatorPosition="bottom" 
+                                     tableStyleClass="uk-table">
+
+                            <p:column headerText="Operating unit" styleClass="uk-width-2-10 uk-text-center">
+                                #{pre.unitName}
+                            </p:column>
+                            <p:column headerText="Client" styleClass="uk-width-2-10 uk-text-center">
+                                #{pre.name}
+                            </p:column>
+                            <p:column headerText="Site" styleClass="uk-width-2-10 uk-text-center">
+                                #{pre.siteName}
+                            </p:column>
+                            <p:column headerText="Credit Prepayments" styleClass="uk-width-2-10 uk-text-center">
+                                #{pre.credit}
+                            </p:column>
+                            <p:column headerText="Debit Prepayments" styleClass="uk-width-2-10 uk-text-center">
+                                #{pre.debit}
+                            </p:column>
+                            <p:column headerText="Currency" styleClass="uk-width-1-10 uk-text-center">
+                                #{pre.currencyCode}
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </ui:define>
+</ui:composition>

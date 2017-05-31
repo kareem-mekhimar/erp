@@ -1,0 +1,101 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+
+    <ui:param name="active" value="sopick" />
+
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewAction action="#{salesOrderPickController.startConversation()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('so:pick')}" />
+
+        </f:metadata>
+    </ui:define>
+
+    <ui:define name="title">
+        Pick Sales Orders
+    </ui:define> 
+
+    <ui:define name="main">
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-medium-2-6">
+                        <p:outputLabel for="no" value="Order No" />
+                        <p:inputText class="md-input" id="no" value="#{salesOrderPickController.no}" />   
+                        <p:keyFilter for="no" mask="num"/>
+                    </div>
+
+                    <div class="uk-width-medium-2-6">
+                        <p:autoComplete value="#{salesOrderPickController.customerId}"
+                                        completeMethod="#{salesOrderPickController.completeCustomersByName}"
+                                        var="cl" inputStyleClass="md-input"
+                                        placeholder="Search Customer"
+                                        forceSelection="true"
+                                        itemLabel="#{cl.clientName}" itemValue="#{cl.clientId}" />
+                    </div>
+
+                    <div class="uk-width-medium-2-6 uk-text-center">
+                        <p:commandLink value="Search" id="filter" class="md-btn md-btn-primary uk-margin-small-top" process="@form" 
+                                       update="table btn" action="#{salesOrderPickController.filter}">
+                            <f:setPropertyActionListener target="#{salesOrderPickController.selectedOrder}" 
+                                                         value="#{null}" />
+                        </p:commandLink>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid" data-uk-grid-margin="true">
+                    <div class="uk-width-1-1">
+                        <p:dataTable id="table" var="order" value="#{salesOrderPickController.orders}"
+                                     selection="#{salesOrderPickController.selectedOrder}"
+                                     style="cursor: pointer;"
+                                     paginatorAlwaysVisible="false" rows="20" rowKey="#{order.headerId}" selectionMode="single"
+                                     paginatorPosition="bottom"  paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+                                     tableStyleClass="uk-table " 
+                                     sortBy="#{order.headerId}" 
+                                     >
+
+                            <p:ajax event="rowSelect" update=":btn" />
+                            <p:ajax event="rowUnselect" update=":btn" />
+
+                            <p:column headerText="Order No" styleClass="uk-width-1-5">
+                                #{order.headerId}
+                            </p:column>
+
+                            <p:column headerText="Customer" styleClass="uk-width-2-5">
+                                #{order.soldToCustomers.clientName}
+                            </p:column>
+                            <p:column headerText="Ship Site" styleClass="uk-width-1-5">
+                                #{order.shipToSite.siteName}
+                            </p:column>
+
+                            <p:column headerText="Invoice Site" styleClass="uk-width-1-5">
+                                #{order.invoiceToSite.siteName}
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md-fab-wrapper">
+            <p:commandLink id="btn" class="md-fab md-fab-success" ajax="false"
+                           actionListener="#{salesOrderPickController.loadWithLines}"
+                           action="pickOrder"
+                           disabled="#{salesOrderPickController.selectedOrder == null}">
+                <i class="material-icons">add_shopping_cart</i>
+            </p:commandLink>
+        </div>
+
+    </ui:define>
+
+</ui:composition>

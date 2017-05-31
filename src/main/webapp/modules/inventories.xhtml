@@ -1,0 +1,740 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                template="/WEB-INF/templates/maintemplate.xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+    <ui:param name="active" value="modules" />
+    <ui:define name="metadata">
+        <f:metadata>
+            <f:viewParam name="operating" value="#{invConfigController.orgUnitId}" />
+            <f:viewAction action="#{invConfigController.loadConfig()}" />
+            <f:event type="preRenderView" listener="#{permissionCheckerController.checkPermission('inventory_module:read')}" />
+
+        </f:metadata>
+    </ui:define>
+    <ui:define name="title">
+        Inventory Configuration
+    </ui:define>
+
+    <ui:define name="pageHeading">
+        <div id="page_heading">
+            <div class="uk-grid">
+                <div class="uk-width-medium-1-2">
+                    <h1>#{invConfigController.invConfig.operatingUnitId.orgUnitName}</h1>
+                    <span class="uk-text-muted uk-text-upper uk-text-small">
+                        Inventories
+                    </span>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+
+    <ui:define name="main">
+
+        <div class="md-card">
+            <div class="md-card-content">
+                <div class="uk-grid">
+                    <div class="uk-width-1-1">
+                        <ul id="user_edit_tabs" class="uk-tab" data-uk-tab="{connect:'#user_edit_tabs_content',animation: 'slide-horizontal'}">
+                            
+                            <li class="uk-active"><a href="#">Costing Information</a></li>
+                            <li><a href="#">Inventory Parameters</a></li>
+                            <li><a href="#">Revesion Lot</a></li>
+                            <li><a href="#">Item Sourcing</a></li>
+                            <li><a href="#">Inter-Org Information</a></li>
+                            <li><a href="#">Other Accounts</a></li>
+                        </ul> 
+
+                        <ul id="user_edit_tabs_content" class="uk-switcher uk-margin-small-top">
+
+
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab2">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-5">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="costMethod" value="#{invConfigController.invConfig.primaryCostMethod}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Primary Cost Method" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.costMethod}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="costMethod" style="color:red;"  />
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-5">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="transGl" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.transferToGlFlag}" />
+                                                                    <h:outputLabel value=" Transfer To Gl " for="transGl"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-5">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="Encumbrance" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.encumbranceReversalFlag}" />
+                                                                    <h:outputLabel value=" Reverse Encumbrance " for="Encumbrance"/>
+                                                                </div>
+                                                            </div>  
+                                                            <div class="uk-width-medium-1-5">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="Project" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.projectReferenceEnabled}" />
+                                                                    <h:outputLabel value=" Project Cost Collect " for="Project"/>
+                                                                </div>
+                                                            </div>  
+                                                            <div class="uk-width-medium-1-5">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="Defer" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.deferLogicalTransactions}" />
+                                                                    <h:outputLabel value=" Defer Logical Trans" for="Defer"/>
+                                                                </div>
+                                                            </div>  
+
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <p:autoComplete id="material" value="#{invConfigController.invConfig.materialAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Material Account" 
+                                                                                    forceSelection="true" required="true"  >                                                         
+                                                                    </p:autoComplete>                                                              
+                                                                    <h:message for="material" style="color:red;"  />
+
+                                                                </div>
+                                                            </div>                                                                                                                                                                                                                                               
+                                                            
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="apAccrualAccount" value="#{invConfigController.invConfig.apAccrualAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.." converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}" 
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="AP Accrual Account" 
+                                                                                    forceSelection="true" required="true"  >                                                         
+                                                                    </p:autoComplete>                                                              
+                                                                    <h:message for="apAccrualAccount" style="color:red;"  />
+                                                                </div>
+                                                            </div>  
+                                                            
+                                                            
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="outside" value="#{invConfigController.invConfig.outsideProcessingAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.." converter="#{accountConverter}" 
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Outside Processing Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="outside" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="matOver" value="#{invConfigController.invConfig.materialOverheadAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Material Overhead Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="matOver" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <ui:remove>
+                                                            <div class="uk-width-medium-2-6">
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="overhead" value="#{invConfigController.invConfig.overheadAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Overhead Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="overhead" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            </ui:remove>
+                                                            
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="resource" value="#{invConfigController.invConfig.resourceAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Resource Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="resource" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="expense" value="#{invConfigController.invConfig.expenseAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Expence Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="expense" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </li>
+
+                            <li>
+                                <div class="uk-grid">
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab1">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                       
+                                                    </div>                                            
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+
+
+                                                            <div class="uk-width-medium-4-10">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="loctype" value="#{invConfigController.invConfig.locatorControlType}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Locator Control Type" required="true" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.controlTypes}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="loctype" style="color:red;"  />
+                                                                </div>
+                                                            </div>    
+                                                            <div class="uk-width-medium-3-10">
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:outputLabel for="calen" value="Calender" />
+                                                                    <p:inputText class="md-input" id="calen"   value="#{invConfigController.invConfig.calendarCode}" >
+                                                                    </p:inputText>
+                                                                    <h:message for="calen" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-4">
+                                                                <p:outputLabel for="weight" value="Load Weight" />
+                                                                <p:inputText class="md-input" id="weight"   value="#{invConfigController.invConfig.orgMaxWeight}" >
+                                                                </p:inputText>
+                                                                <h:message for="weight" style="color:red;"  />
+                                                            </div>
+
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="weightUnit" value="#{invConfigController.invConfig.weightUnitMeasure}" 
+                                                                                    completeMethod="#{invConfigController.completeUom}" 
+                                                                                    emptyMessage="No Records.."  converter="#{uomConverter}" 
+                                                                                    var="item" itemLabel="#{item.uomName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Weight Unit" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="weightUnit" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-1-4">
+                                                                <p:outputLabel for="volume" value="Volume" />
+                                                                <p:inputText class="md-input" id="volume"   value="#{invConfigController.invConfig.orgMaxWeight}" >
+                                                                </p:inputText>
+                                                                <h:message for="volume" style="color:red;"  />
+                                                            </div>
+
+                                                            <div class="uk-width-medium-1-4">
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="volumeUnit" value="#{invConfigController.invConfig.volumeUnitMeasure}" 
+                                                                                    completeMethod="#{invConfigController.completeUom}" 
+                                                                                    emptyMessage="No Records.."  converter="#{uomConverter}" 
+                                                                                    var="item" itemLabel="#{item.uomName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Volume Unit" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="volumeUnit" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+
+                            </li>
+
+                            
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab3">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+
+
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="lotuniq" value="#{invConfigController.invConfig.lotNumberUniqueness}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Lot Number Uniqueness" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.lotUnique}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="lotuniq" style="color:red;"  />
+                                                                </div>
+                                                            </div>  
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="lotgen" value="#{invConfigController.invConfig.lotNumberGeneration}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Lot Number Generation" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.lotGeneration}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="lotgen" style="color:red;"  />
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:outputLabel value="Prefix" for="zeropad"/>
+                                                                    <h:inputText class="md-input" id="prefix" value="#{invConfigController.invConfig.autoLotAlphaPrefix}">
+
+                                                                    </h:inputText>
+                                                                    <h:message for="prefix"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:outputLabel value="Length" for="length"/>
+                                                                    <h:inputText class="md-input" id="length" value="#{invConfigController.invConfig.lotNumberLength}">
+
+                                                                    </h:inputText>
+                                                                    <h:message for="length"/>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="zeropad" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.lotNumberZeroPadding}" />
+                                                                    <h:outputLabel value=" Zero Pad Suffix " for="zeropad"/>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="seruniq" value="#{invConfigController.invConfig.serialNumberType}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Serial Number Uniqueness" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.serialUnique}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="seruniq" style="color:red;"  />
+                                                                </div>
+                                                            </div>  
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="sergen" value="#{invConfigController.invConfig.serialNumberGeneration}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Serial Number Generation" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.serialGeneration}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="sergen" style="color:red;"  />
+                                                                </div>
+                                                            </div> 
+
+                                                        </div>
+
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:outputLabel value="Serial Prefix" for="serialprefix"/>
+                                                                    <h:inputText class="md-input" id="serialprefix" value="#{invConfigController.invConfig.autoSerialAlphaPrefix}">
+
+                                                                    </h:inputText>
+                                                                    <h:message for="serialprefix"/>
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:outputLabel value="Start Serial" for="startserial"/>
+                                                                    <h:inputText class="md-input" id="startserial" value="#{invConfigController.invConfig.startAutoSerialNumber}">
+
+                                                                    </h:inputText>
+                                                                    <h:message for="startserial"/>
+                                                                </div>
+                                                            </div> 
+
+                                                            <div class="uk-width-medium-1-3">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="serialflag" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.allocateSerialFlag}" />
+                                                                    <h:outputLabel value=" Allocate Serial Flag " for="serialflag"/>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab4">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                        
+                                                    </div>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid uk-margin-bottom" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="sotype" value="#{invConfigController.invConfig.sourceType}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Source Type" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.sourceType}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="sotype" style="color:red;"  />
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+
+                                                                    <h:selectBooleanCheckbox id="distflag" class="icheckbox_md" 
+                                                                                             value="#{invConfigController.invConfig.distributedOrganizationFlag}" />
+                                                                    <h:outputLabel value=" Distribution Organization " for="distflag"/>
+                                                                </div>
+                                                            </div> 
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab5">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                       
+                                                    </div>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:selectOneMenu id="charge" value="#{invConfigController.invConfig.matlInterorgTransferCode}" 
+                                                                                     pt:data-md-selectize="true" pt:data-md-selectize-bottom="true"
+                                                                                     pt:data-placeholder="Transfer Charge Type" >
+                                                                        <f:selectItem  itemValue="#{null}" />
+                                                                        <f:selectItems value="#{invConfigController.chargeType}"
+                                                                                       var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                                                                    </h:selectOneMenu>
+                                                                    <h:message for="charge" style="color:red;"  />
+                                                                </div>
+                                                            </div> 
+                                                            <div class="uk-width-medium-1-2">
+                                                                <div class="uk-margin-small-top">
+                                                                    <h:outputLabel value="Charge Percent %" for="percent"/>
+                                                                    <h:inputText class="md-input" id="percent" value="#{invConfigController.invConfig.interorgTrnsfrChargePercent}">
+                                                                    </h:inputText>
+                                                                    <h:message for="percent"/>
+                                                                </div>
+                                                            </div> 
+                                                        </div>
+
+
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="transferCr" value="#{invConfigController.invConfig.interorgTransferCrAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Transfer Credit Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="transferCr" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="priceVar" value="#{invConfigController.invConfig.interorgPriceVarAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Price Var Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="priceVar" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="receivables" value="#{invConfigController.invConfig.interorgReceivablesAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Receivables Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="receivables" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="payables" value="#{invConfigController.invConfig.interorgPayablesAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Payables Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="payables" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="intransit" value="#{invConfigController.invConfig.intransitInvAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Intransit Inv Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="intransit" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </li>
+                            
+                            <li>
+                                <div class="uk-grid">
+
+                                    <div class="uk-width-1-1">
+                                        <h:panelGroup layout="block" id="tab6">
+                                            <div class="md-card">
+                                                <div class="md-card-toolbar">
+                                                    <div class="md-card-toolbar-actions">
+                                                        <i class="md-icon material-icons md-card-fullscreen-activate">&#xE5D0;</i>                     
+                                                    </div>
+                                                </div>
+                                                <div class="md-card-content"> 
+                                                    <div class="uk-overflow-container">
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="purchasePrice" value="#{invConfigController.invConfig.purchasePriceVarAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Purchase PriceVar Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="purchasePrice" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="invoicePrice" value="#{invConfigController.invConfig.invoicePriceVarAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Invoice PriceVar Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="invoicePrice" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="uk-grid" data-uk-grid-margin="true">
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="encumbrance" value="#{invConfigController.invConfig.encumbranceAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Encumbrance Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="encumbrance" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="uk-width-medium-2-6">
+
+                                                                <div class="uk-margin-small-top">
+                                                                    <p:autoComplete id="costOfSales" value="#{invConfigController.invConfig.costOfSalesAccount}" 
+                                                                                    completeMethod="#{invConfigController.completeAccounts}" 
+                                                                                    emptyMessage="No Records.."  converter="#{accountConverter}"
+                                                                                    var="item" itemLabel="#{item.codeCombinationShortName}" itemValue="#{item}"
+                                                                                    inputStyleClass="md-input" 
+                                                                                    placeholder="Cost Of Sales Account" 
+                                                                                    forceSelection="true" required="true"  >
+                                                                    </p:autoComplete>
+                                                                    <h:message for="costOfSales" style="color:red;"  />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h:messages/>
+        <div class="md-fab-wrapper">
+            <p:commandLink
+                rendered="#{currentUser.hasPermission('inventory_module:create')}"
+                class="md-fab md-fab-primary"  id="page_settings_submit" update="tab1 tab2 tab3 tab4 tab5 tab6" 
+                           process="@this tab1 tab2 tab3 tab4 tab5 tab6" action="#{invConfigController.save()}" >
+                <i class="material-icons">&#xE161;</i>
+            </p:commandLink>
+        </div>
+        <p:outputPanel  autoUpdate="true" layout="inline">
+            <h:outputScript>
+                $(".ui-state-error").addClass("md-input-danger") ;
+                $(".ui-state-default").removeClass("md-input-danger") ;
+                altair_forms.select_elements();
+                altair_md.inputs();
+            </h:outputScript>
+        </p:outputPanel>
+    </ui:define>
+</ui:composition>

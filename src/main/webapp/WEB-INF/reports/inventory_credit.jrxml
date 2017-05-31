@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="inventory_credit" pageWidth="595" pageHeight="842" whenNoDataType="NoDataSection" columnWidth="535" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="c0847615-a744-4db1-a703-be549e753594">
+	<property name="ireport.zoom" value="1.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="table">
+		<box>
+			<pen lineWidth="1.0" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TH" mode="Opaque" backcolor="#A0B1B2">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_CH" mode="Opaque" backcolor="#E6FFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<parameter name="operatingUnitId" class="java.lang.Integer">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="itemId" class="java.lang.Integer"/>
+	<parameter name="mainInvId" class="java.lang.Integer"/>
+	<parameter name="secInvId" class="java.lang.Integer"/>
+	<parameter name="itemIdStatus" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$P{itemId} == null ? "" : " AND q.inventory_item_id = "+$P{itemId}]]></defaultValueExpression>
+	</parameter>
+	<parameter name="mainInvIdStatus" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$P{mainInvId} == null ? "" : " AND q.main_inventory_id = "+$P{mainInvId}]]></defaultValueExpression>
+	</parameter>
+	<parameter name="secInvIdStatus" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA[$P{secInvId} == null ? "" : "AND q.secondary_inventory_id = " + $P{secInvId}]]></defaultValueExpression>
+	</parameter>
+	<parameter name="imagePath" class="java.io.InputStream"/>
+	<queryString>
+		<![CDATA[SELECT s.DESCRIPTION as item ,m.ORGANIZATION_NAME as "Main Inventory" ,sub.SECONDARY_INVENTORY_NAME as "Secondary Invenory", q.ITEM_QUANTITY as "Quantity"
+from MTL_INVENTORY_ITEMS_QUANTITY q
+RIGHT JOIN SYSTEM_ITEMS s ON s.INVENTORY_ITEM_ID = q.INVENTORY_ITEM_ID
+JOIN MTL_MAIN_INVENTORIES m ON q.MAIN_INVENTORY_ID = m.ORGANIZATION_ID
+JOIN MTL_SECONDARY_INVENTORIES sub ON sub.SECONDARY_INVENTORY_ID = q.SECONDARY_INVENTORY_ID
+WHERE q.OPERATING_UNIT_ID = $P{operatingUnitId}
+AND q.ITEM_QUANTITY > 0
+$P!{itemIdStatus}
+$P!{mainInvIdStatus}
+$P!{secInvIdStatus}]]>
+	</queryString>
+	<field name="Item" class="java.lang.String"/>
+	<field name="Main Inventory" class="java.lang.String"/>
+	<field name="Secondary Invenory" class="java.lang.String"/>
+	<field name="Quantity" class="java.math.BigDecimal"/>
+	<group name="Group1"/>
+	<group name="Group2"/>
+	<group name="Group3"/>
+	<group name="Group4"/>
+	<title>
+		<band height="77">
+			<image evaluationTime="Report">
+				<reportElement x="3" y="0" width="97" height="41" uuid="9f1f5850-9cf7-40e5-a798-b8a3e5e69a27"/>
+				<imageExpression><![CDATA[$P{imagePath}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement mode="Transparent" x="139" y="41" width="295" height="26" forecolor="#006699" backcolor="#E6E6E6" uuid="bdfd7ec3-4eab-4376-9bb0-3776a7d59c8f"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inventory Credit Report]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="31">
+			<staticText>
+				<reportElement mode="Opaque" x="0" y="11" width="138" height="20" backcolor="#CCCCCC" uuid="27e481ac-5096-45ad-acdb-d917eeb7d5e5"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Item]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="138" y="11" width="138" height="20" backcolor="#CCCCCC" uuid="0912bb9e-1987-47d4-ae60-cf32895853d2"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Main Inventory]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="276" y="11" width="138" height="20" backcolor="#CCCCCC" uuid="a2dc6825-a17e-4a06-a70f-3270cb62012c"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Secondary Inventory]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="414" y="11" width="138" height="20" backcolor="#CCCCCC" uuid="b4e061fe-aa12-41fa-a162-cba92e0ea0a9"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20">
+			<textField>
+				<reportElement x="0" y="0" width="138" height="20" uuid="e83b95a4-bb17-46c5-a85c-3478d5430d4c"/>
+				<box topPadding="3" leftPadding="7">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textFieldExpression><![CDATA[$F{Item}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="138" y="0" width="138" height="20" uuid="af64f7a5-3593-4d1b-bb0d-1f6eec3784ca"/>
+				<box topPadding="3" leftPadding="7">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textFieldExpression><![CDATA[$F{Main Inventory}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="276" y="0" width="138" height="20" uuid="6c254427-9731-45e9-bb86-ffb4e528cb17"/>
+				<box topPadding="3" leftPadding="7">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textFieldExpression><![CDATA[$F{Secondary Invenory}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="414" y="0" width="138" height="20" uuid="69e6746a-005a-4b3b-9792-57894b45147e"/>
+				<box topPadding="3" leftPadding="7">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textFieldExpression><![CDATA[$F{Quantity}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="24">
+			<textField>
+				<reportElement mode="Opaque" x="0" y="4" width="515" height="13" backcolor="#E6E6E6" uuid="bcff5001-3971-4a7f-b5a5-c2ddc78a13f2"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Opaque" x="515" y="4" width="40" height="13" backcolor="#E6E6E6" uuid="17e495ae-20dd-43b0-911c-436207a16666"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="0" y="4" width="100" height="13" uuid="d32b70da-9739-44fe-ab3e-19ff36790662"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band/>
+	</summary>
+	<noData>
+		<band height="802">
+			<staticText>
+				<reportElement mode="Opaque" x="139" y="91" width="138" height="20" backcolor="#CCCCCC" uuid="8f0d9cf6-c5bc-4df9-9878-41e32c79395d"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Main Inventory]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Transparent" x="149" y="51" width="295" height="26" forecolor="#006699" backcolor="#E6E6E6" uuid="3331a979-68ba-4c01-aa88-a3659237c592"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Inventory Credit Report]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="1" y="91" width="138" height="20" backcolor="#CCCCCC" uuid="ea4d9597-5a40-40f1-80d1-628df950de7b"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Item]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="415" y="91" width="138" height="20" backcolor="#CCCCCC" uuid="d04610a9-01fd-4db3-b5f6-30f9dd3f77ef"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Quantity]]></text>
+			</staticText>
+			<staticText>
+				<reportElement mode="Opaque" x="277" y="91" width="138" height="20" backcolor="#CCCCCC" uuid="e4c402b2-1c2b-4b78-bd1c-d2d1f4b8b7ce"/>
+				<box leftPadding="0">
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Secondary Inventory]]></text>
+			</staticText>
+			<image evaluationTime="Report">
+				<reportElement x="1" y="10" width="97" height="41" uuid="2733701b-9f63-4b7e-9145-eafc9d5e0d9f"/>
+				<imageExpression><![CDATA[$P{imagePath}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="1" y="111" width="552" height="28" uuid="bf8b0c46-516c-4878-b286-24e13dc3250c"/>
+				<box>
+					<pen lineWidth="0.75"/>
+					<topPen lineWidth="0.75"/>
+					<leftPen lineWidth="0.75"/>
+					<bottomPen lineWidth="0.75"/>
+					<rightPen lineWidth="0.75"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[No Records Found..]]></text>
+			</staticText>
+			<textField>
+				<reportElement mode="Opaque" x="3" y="789" width="515" height="13" backcolor="#E6E6E6" uuid="7a337b28-d756-4d78-8114-d0c18ef194f2"/>
+				<textElement textAlignment="Right"/>
+				<textFieldExpression><![CDATA["Page "+$V{PAGE_NUMBER}+" of"]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement mode="Opaque" x="518" y="789" width="40" height="13" backcolor="#E6E6E6" uuid="ff8b75fc-8c16-428b-a9e3-d25e0e37dc81"/>
+				<textFieldExpression><![CDATA[" " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField pattern="EEEEE dd MMMMM yyyy">
+				<reportElement x="3" y="789" width="100" height="13" uuid="c343bded-a576-4cd6-9164-2ce27996cc5b"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+		</band>
+	</noData>
+</jasperReport>
